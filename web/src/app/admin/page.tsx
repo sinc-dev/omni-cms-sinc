@@ -1,5 +1,6 @@
 'use client';
 
+export const runtime = 'edge';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Image, Users, Tags, Loader2 } from 'lucide-react';
