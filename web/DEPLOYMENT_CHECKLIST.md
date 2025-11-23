@@ -14,18 +14,27 @@
 
 **Build Configuration**:
 - **Root Directory**: `web`
-- **Build Command**: `pnpm run build`
+- **Build Command**: `pnpm run build:cf` ⚠️ **MUST use this exact command**
 - **Build Output Directory**: `.vercel/output/static`
+- **DO NOT use**: `pnpm run build` (causes recursive invocation error)
 
-**The `build` script is configured** in `web/package.json`:
+**The build scripts are configured** in `web/package.json`:
 ```json
-"build": "TURBOPACK=0 npx @cloudflare/next-on-pages@1"
+"build": "TURBOPACK=0 next build",
+"build:cf": "TURBOPACK=0 npx @cloudflare/next-on-pages@1"
 ```
+
+**Why two scripts?**
+- `@cloudflare/next-on-pages` internally runs `vercel build`
+- `vercel build` calls the `build` script in `package.json`
+- If `build` is set to `next-on-pages`, it creates a recursive loop
+- **Solution**: `build` must be `next build`, and Cloudflare Pages calls `build:cf`
 
 **Why this works**: 
 - Without Vercel config files, `vercel build` treats the current directory (`/opt/buildhome/repo/web`) as project root
 - `.next` is created at `/opt/buildhome/repo/web/.next` ✅
 - No double `web/web/.next` path issue ✅
+- No recursive invocation error ✅
 
 ### 3. Database Migration ✅
 Migration file: `drizzle/migrations/0001_oval_stranger.sql`

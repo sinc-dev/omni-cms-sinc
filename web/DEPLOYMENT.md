@@ -90,19 +90,28 @@ In Cloudflare Pages project settings → Environment Variables, set:
 
 **Cloudflare Pages Dashboard Settings:**
 - **Root Directory**: `web`
-- **Build Command**: `pnpm run build`
+- **Build Command**: `pnpm run build:cf` ⚠️ **MUST use this exact command**
 - **Build Output Directory**: `.vercel/output/static`
+- **DO NOT use**: `pnpm run build` (causes recursive invocation error)
 
-**The build script in `web/package.json`:**
+**The build scripts in `web/package.json`:**
 ```json
-"build": "TURBOPACK=0 npx @cloudflare/next-on-pages@1"
+"build": "TURBOPACK=0 next build",
+"build:cf": "TURBOPACK=0 npx @cloudflare/next-on-pages@1"
 ```
 
+**Why two scripts?**
+- `@cloudflare/next-on-pages` internally runs `vercel build`
+- `vercel build` calls the `build` script in `package.json`
+- If `build` is set to `next-on-pages`, it creates a recursive loop
+- **Solution**: `build` must be `next build`, and Cloudflare Pages calls `build:cf`
+
 **How it works**:
-1. `@cloudflare/next-on-pages` runs `vercel build` internally
-2. Without Vercel config files, `vercel build` treats the current directory as project root
-3. `.next` is created at `/opt/buildhome/repo/web/.next` ✅
-4. The adapter processes the output and generates `.vercel/output/static`
+1. Cloudflare Pages runs `pnpm run build:cf`
+2. `build:cf` runs `npx @cloudflare/next-on-pages@1`
+3. `next-on-pages` internally runs `vercel build`
+4. `vercel build` calls the `build` script (`next build`), creating `.next` at `/opt/buildhome/repo/web/.next` ✅
+5. The adapter processes the output and generates `.vercel/output/static`
 
 **Note**: `pages_build_output_dir = ".vercel/output/static"` in `wrangler.toml` does NOT mean you're deploying to Vercel. It just tells Cloudflare Pages where to find the built assets.
 
