@@ -2,6 +2,8 @@ import { withAuth } from '@/lib/api/auth-wrapper';
 import { successResponse, Errors } from '@/lib/api/response';
 import { PostStatus } from '@/lib/types/enums';
 
+export const runtime = 'edge';
+
 /**
  * GET /api/admin/v1/organizations/:orgId/schema/:objectType
  * 

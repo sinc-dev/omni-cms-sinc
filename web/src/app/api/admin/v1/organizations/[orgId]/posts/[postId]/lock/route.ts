@@ -6,6 +6,8 @@ import { posts } from '@/db/schema/posts';
 import { postEditLocks } from '@/db/schema/post-edit-locks';
 import { users } from '@/db/schema/users';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations/:orgId/posts/:postId/lock
 // Check lock status
 export const GET = withAuth(

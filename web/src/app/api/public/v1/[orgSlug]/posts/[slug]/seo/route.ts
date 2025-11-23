@@ -6,6 +6,8 @@ import { organizations } from '@/db/schema/organizations';
 import { users } from '@/db/schema/users';
 import { generateArticleStructuredData } from '@/lib/seo/structured-data';
 
+export const runtime = 'edge';
+
 // GET /api/public/v1/:orgSlug/posts/:slug/seo
 // Get SEO metadata for a post
 export const GET = withPublic(

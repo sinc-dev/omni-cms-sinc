@@ -6,6 +6,8 @@ import { z } from 'zod';
 import { posts, organizations, postShares } from '@/db/schema';
 import { nanoid } from 'nanoid';
 
+export const runtime = 'edge';
+
 const sharePostSchema = z.object({
   shareType: z.enum(['facebook', 'twitter', 'linkedin', 'email', 'link', 'other']),
   metadata: z.record(z.string(), z.unknown()).optional().nullable(),

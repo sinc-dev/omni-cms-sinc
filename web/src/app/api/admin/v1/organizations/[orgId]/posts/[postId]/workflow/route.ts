@@ -7,6 +7,8 @@ import { posts } from '@/db/schema/posts';
 import { workflowComments, workflowAssignments } from '@/db/schema/workflow';
 import { z } from 'zod';
 
+export const runtime = 'edge';
+
 const submitReviewSchema = z.object({
   reviewerId: z.string().optional(),
 });

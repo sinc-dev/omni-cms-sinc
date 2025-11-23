@@ -5,6 +5,8 @@ import { validateRequest } from '@/lib/api/validation';
 import { apiKeys } from '@/db/schema';
 import { z } from 'zod';
 
+export const runtime = 'edge';
+
 const updateApiKeySchema = z.object({
   name: z.string().min(1).optional(),
   rateLimit: z.number().int().positive().optional(),

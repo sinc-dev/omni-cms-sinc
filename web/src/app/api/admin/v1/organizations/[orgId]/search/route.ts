@@ -5,6 +5,8 @@ import { searchRequestSchema } from '@/lib/validations/search';
 import { SearchOrchestrator } from '@/lib/search/search-orchestrator';
 import type { SearchRequest } from '@/lib/validations/search';
 
+export const runtime = 'edge';
+
 // POST /api/admin/v1/organizations/:orgId/search
 // HubSpot-style advanced search with filter groups, property selection, and cursor pagination
 export const POST = withAuth(

@@ -5,6 +5,8 @@ import { successResponse, Errors } from '@/lib/api/response';
 import { posts } from '@/db/schema/posts';
 import { postVersions } from '@/db/schema/post-versions';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations/:orgId/posts/:postId/versions/:versionId
 // Get a specific version
 export const GET = withAuth(

@@ -6,6 +6,7 @@ import { OrganizationProvider } from '@/lib/context/organization-context';
 import { ToastProvider } from '@/components/ui/toast';
 import { ErrorBoundary } from '@/components/error-boundary';
 
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

@@ -5,6 +5,8 @@ import { posts, organizations } from '@/db/schema';
 import { invalidatePostCache } from '@/lib/cache/invalidation';
 import { dispatchWebhook } from '@/lib/webhooks/webhook-dispatcher';
 
+export const runtime = 'edge';
+
 // POST /api/admin/v1/organizations/:orgId/posts/:postId/publish
 export const POST = withAuth(
   async (request, { db, organizationId }, params) => {

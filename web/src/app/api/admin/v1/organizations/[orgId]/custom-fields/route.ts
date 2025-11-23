@@ -6,6 +6,8 @@ import { validateRequest, getPaginationParams, getOffset, buildSearchCondition, 
 import { createCustomFieldSchema } from '@/lib/validations/post-type';
 import { customFields } from '@/db/schema';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations/:orgId/custom-fields - List custom fields
 export const GET = withAuth(
   async (request, { db, organizationId }) => {

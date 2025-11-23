@@ -6,6 +6,8 @@ import { updateOrganizationSchema } from '@/lib/validations/organization';
 import { organizations } from '@/db/schema';
 import { isSuperAdmin } from '@/lib/auth/middleware';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations/:orgId
 export const GET = withAuth(
   async (request, { db, organizationId }) => {

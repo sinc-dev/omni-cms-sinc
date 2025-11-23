@@ -4,6 +4,8 @@ import { successResponse, Errors } from '@/lib/api/response';
 import { posts } from '@/db/schema/posts';
 import { postAnalytics, analyticsEvents } from '@/db/schema/analytics';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations/:orgId/analytics/overview
 // Get analytics overview
 export const GET = withAuth(

@@ -6,6 +6,8 @@ import { validateRequest, getPaginationParams, getOffset } from '@/lib/api/valid
 import { contentBlocks } from '@/db/schema/content-blocks';
 import { z } from 'zod';
 
+export const runtime = 'edge';
+
 const createContentBlockSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   slug: z.string().min(1, 'Slug is required'),

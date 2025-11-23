@@ -5,6 +5,8 @@ import { validateRequest } from '@/lib/api/validation';
 import { updateCustomFieldSchema } from '@/lib/validations/post-type';
 import { customFields } from '@/db/schema';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations/:orgId/custom-fields/:fieldId
 export const GET = withAuth(
   async (request, { db, organizationId }, params) => {

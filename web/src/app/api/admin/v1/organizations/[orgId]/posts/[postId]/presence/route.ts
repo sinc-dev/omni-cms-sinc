@@ -6,6 +6,8 @@ import { posts } from '@/db/schema/posts';
 import { presence } from '@/db/schema/presence';
 import { users } from '@/db/schema/users';
 
+export const runtime = 'edge';
+
 // POST /api/admin/v1/organizations/:orgId/posts/:postId/presence
 // Update user presence (heartbeat)
 export const POST = withAuth(

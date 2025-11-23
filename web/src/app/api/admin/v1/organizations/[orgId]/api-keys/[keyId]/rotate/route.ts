@@ -5,6 +5,8 @@ import { successResponse, Errors } from '@/lib/api/response';
 import { apiKeys } from '@/db/schema/api-keys';
 import { generateApiKey, hashApiKey, getKeyPrefix } from '@/lib/api/api-keys';
 
+export const runtime = 'edge';
+
 // POST /api/admin/v1/organizations/:orgId/api-keys/:keyId/rotate
 // Rotate an API key (create new, invalidate old immediately)
 export const POST = withAuth(

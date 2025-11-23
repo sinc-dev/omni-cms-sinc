@@ -7,6 +7,8 @@ import { media } from '@/db/schema';
 import { deleteFileFromR2 } from '@/lib/storage/upload';
 import { getMediaVariantUrls } from '@/lib/media/urls';
 
+export const runtime = 'edge';
+
 const updateMediaSchema = z.object({
   altText: z.string().optional(),
   caption: z.string().optional(),

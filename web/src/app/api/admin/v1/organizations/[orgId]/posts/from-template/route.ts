@@ -6,6 +6,8 @@ import { validateRequest } from '@/lib/api/validation';
 import { posts, postTemplates, postFieldValues, postTaxonomies } from '@/db/schema';
 import { z } from 'zod';
 
+export const runtime = 'edge';
+
 const createFromTemplateSchema = z.object({
   templateId: z.string().min(1, 'Template ID is required'),
   title: z.string().min(1, 'Title is required'),

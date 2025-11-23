@@ -5,6 +5,8 @@ import { validateRequest } from '@/lib/api/validation';
 import { updateTaxonomyTermSchema } from '@/lib/validations/taxonomy';
 import { taxonomyTerms, taxonomies } from '@/db/schema';
 
+export const runtime = 'edge';
+
 // PATCH /api/admin/v1/organizations/:orgId/taxonomies/:taxonomyId/terms/:termId
 export const PATCH = withAuth(
   async (request, { db, organizationId }, params) => {

@@ -6,6 +6,8 @@ import { validateRequest, getPaginationParams, getOffset, buildSearchCondition, 
 import { z } from 'zod';
 import { usersOrganizations, users, roles } from '@/db/schema';
 
+export const runtime = 'edge';
+
 const addUserSchema = z.object({
   email: z.string().email(),
   roleId: z.string().min(1),

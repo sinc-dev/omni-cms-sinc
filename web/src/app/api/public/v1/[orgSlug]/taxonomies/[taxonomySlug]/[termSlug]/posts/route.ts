@@ -14,6 +14,8 @@ import {
 } from '@/db/schema';
 import { getMediaVariantUrls } from '@/lib/media/urls';
 
+export const runtime = 'edge';
+
 interface PostTaxonomyData {
   postId: string;
 }

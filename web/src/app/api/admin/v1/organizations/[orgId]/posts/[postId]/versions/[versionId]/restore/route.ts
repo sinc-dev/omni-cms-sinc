@@ -7,6 +7,8 @@ import { postVersions } from '@/db/schema/post-versions';
 import { postFieldValues } from '@/db/schema/posts';
 import { sql } from 'drizzle-orm';
 
+export const runtime = 'edge';
+
 // POST /api/admin/v1/organizations/:orgId/posts/:postId/versions/:versionId/restore
 // Restore a version (creates a new version with restored content)
 export const POST = withAuth(

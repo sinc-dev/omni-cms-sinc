@@ -3,6 +3,8 @@ import { successResponse, Errors } from '@/lib/api/response';
 import { generateExportFile } from '@/lib/export/export-manager';
 import { z } from 'zod';
 
+export const runtime = 'edge';
+
 const exportOptionsSchema = z.object({
   includePosts: z.boolean().optional().default(true),
   includeMedia: z.boolean().optional().default(true),

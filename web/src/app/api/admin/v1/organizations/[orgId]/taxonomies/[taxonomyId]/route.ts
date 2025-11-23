@@ -6,6 +6,8 @@ import { updateTaxonomySchema } from '@/lib/validations/taxonomy';
 import { taxonomies, organizations } from '@/db/schema';
 import { invalidateTaxonomyCache } from '@/lib/cache/invalidation';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations/:orgId/taxonomies/:taxonomyId
 export const GET = withAuth(
   async (request, { db, organizationId }, params) => {

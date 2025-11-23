@@ -5,6 +5,8 @@ import { validateRequest } from '@/lib/api/validation';
 import { updatePostTypeSchema } from '@/lib/validations/post-type';
 import { postTypes } from '@/db/schema';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations/:orgId/post-types/:typeId
 export const GET = withAuth(
   async (request, { db, organizationId }, params) => {

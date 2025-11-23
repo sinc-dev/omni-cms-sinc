@@ -6,6 +6,8 @@ import { validateRequest } from '@/lib/api/validation';
 import { createTaxonomyTermSchema } from '@/lib/validations/taxonomy';
 import { taxonomyTerms, taxonomies } from '@/db/schema';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations/:orgId/taxonomies/:taxonomyId/terms
 export const GET = withAuth(
   async (request, { db, organizationId }, params) => {

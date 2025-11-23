@@ -6,6 +6,8 @@ import { validateRequest, getPaginationParams, getOffset } from '@/lib/api/valid
 import { createPostTypeSchema } from '@/lib/validations/post-type';
 import { postTypes } from '@/db/schema';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations/:orgId/post-types - List post types
 export const GET = withAuth(
   async (request, { db, organizationId }) => {

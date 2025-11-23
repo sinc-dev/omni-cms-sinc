@@ -6,6 +6,8 @@ import { validateRequest } from '@/lib/api/validation';
 import { organizations, posts } from '@/db/schema';
 import { analyticsEvents, postAnalytics } from '@/db/schema/analytics';
 import { z } from 'zod';
+export const runtime = 'edge';
+
 // Note: In Cloudflare Workers, use Web Crypto API
 async function hashString(input: string): Promise<string> {
   // Simplified - in production use Web Crypto API

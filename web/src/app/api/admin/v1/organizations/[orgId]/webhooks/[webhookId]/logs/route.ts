@@ -4,6 +4,8 @@ import { successResponse, paginatedResponse, Errors } from '@/lib/api/response';
 import { getPaginationParams, getOffset } from '@/lib/api/validation';
 import { webhooks, webhookLogs } from '@/db/schema/webhooks';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations/:orgId/webhooks/:webhookId/logs
 export const GET = withAuth(
   async (request, { db, organizationId }, params) => {

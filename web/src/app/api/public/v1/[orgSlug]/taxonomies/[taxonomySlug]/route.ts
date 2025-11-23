@@ -3,6 +3,8 @@ import { withPublic } from '@/lib/api/public-wrapper';
 import { successResponse, Errors } from '@/lib/api/response';
 import { organizations, taxonomies, taxonomyTerms } from '@/db/schema';
 
+export const runtime = 'edge';
+
 // GET /api/public/v1/:orgSlug/taxonomies/:taxonomySlug - Get taxonomy with terms
 export const GET = withPublic(
   async (request, { db }, params) => {

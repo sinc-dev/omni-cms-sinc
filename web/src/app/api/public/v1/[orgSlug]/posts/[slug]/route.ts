@@ -4,6 +4,8 @@ import { successResponse, Errors } from '@/lib/api/response';
 import { posts, organizations, postTypes, users, postTaxonomies, taxonomyTerms, postFieldValues, customFields, media, postRelationships } from '@/db/schema';
 import { getMediaVariantUrls } from '@/lib/media/urls';
 
+export const runtime = 'edge';
+
 // GET /api/public/v1/:orgSlug/posts/:slug - Get a single published post by slug
 export const GET = withPublic(
   async (request, context, params) => {

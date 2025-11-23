@@ -5,6 +5,8 @@ import { posts } from '@/db/schema/posts';
 import { postEditLocks } from '@/db/schema/post-edit-locks';
 import { nanoid } from 'nanoid';
 
+export const runtime = 'edge';
+
 // POST /api/admin/v1/organizations/:orgId/posts/:postId/lock/takeover
 // Force takeover of lock (requires posts:update permission)
 export const POST = withAuth(

@@ -7,6 +7,8 @@ import { resolvers, type GraphQLContext } from '@/lib/graphql/resolvers';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { graphql } from 'graphql';
 
+export const runtime = 'edge';
+
 const schema = makeExecutableSchema({
   typeDefs,
   resolvers,

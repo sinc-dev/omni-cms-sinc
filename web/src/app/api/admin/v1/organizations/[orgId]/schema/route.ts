@@ -3,6 +3,8 @@ import { withAuth } from '@/lib/api/auth-wrapper';
 import { successResponse, Errors } from '@/lib/api/response';
 import { postTypes, customFields, taxonomies, taxonomyTerms } from '@/db/schema';
 import {
+export const runtime = 'edge';
+
   PostStatus,
   CustomFieldType,
   FilterOperator,

@@ -5,6 +5,8 @@ import { getPaginationParams, getOffset } from '@/lib/api/validation';
 import { posts } from '@/db/schema/posts';
 import { postAnalytics } from '@/db/schema/analytics';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations/:orgId/analytics/posts
 // Get analytics for all posts
 export const GET = withAuth(

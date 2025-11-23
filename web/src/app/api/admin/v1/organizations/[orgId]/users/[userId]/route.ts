@@ -5,6 +5,8 @@ import { validateRequest } from '@/lib/api/validation';
 import { z } from 'zod';
 import { usersOrganizations } from '@/db/schema';
 
+export const runtime = 'edge';
+
 const updateUserRoleSchema = z.object({
   roleId: z.string().min(1),
 });

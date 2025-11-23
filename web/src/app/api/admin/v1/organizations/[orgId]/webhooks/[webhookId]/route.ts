@@ -5,6 +5,8 @@ import { validateRequest } from '@/lib/api/validation';
 import { webhooks } from '@/db/schema/webhooks';
 import { z } from 'zod';
 
+export const runtime = 'edge';
+
 const updateWebhookSchema = z.object({
   name: z.string().min(1).optional(),
   url: z.string().url().optional(),

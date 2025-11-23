@@ -7,6 +7,8 @@ import { createOrganizationSchema } from '@/lib/validations/organization';
 import { organizations } from '@/db/schema';
 import { isSuperAdmin } from '@/lib/auth/middleware';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations - List organizations (super admin only)
 export const GET = withAuth(async (request, { db, user }) => {
   // Only super admins can list all organizations

@@ -3,6 +3,8 @@ import { withAuth } from '@/lib/api/auth-wrapper';
 import { successResponse } from '@/lib/api/response';
 import { posts } from '@/db/schema';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations/:orgId/posts/pending-review
 export const GET = withAuth(
   async (request, { db, organizationId }) => {

@@ -8,6 +8,8 @@ import { posts, postFieldValues, postTaxonomies, postRelationships, organization
 import { invalidatePostCache } from '@/lib/cache/invalidation';
 import { dispatchWebhook } from '@/lib/webhooks/webhook-dispatcher';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations/:orgId/posts
 export const GET = withAuth(
   async (request, { db, organizationId }) => {

@@ -3,6 +3,8 @@ import { withPublic } from '@/lib/api/public-wrapper';
 import { Errors } from '@/lib/api/response';
 import { posts, organizations, postTypes } from '@/db/schema';
 
+export const runtime = 'edge';
+
 // GET /api/public/v1/:orgSlug/sitemap.xml - Generate XML sitemap for published posts
 export const GET = withPublic(
   async (request, { db }, params) => {

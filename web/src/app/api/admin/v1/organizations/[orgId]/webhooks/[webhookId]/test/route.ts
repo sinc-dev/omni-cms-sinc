@@ -3,6 +3,8 @@ import { nanoid } from 'nanoid';
 import { withAuth } from '@/lib/api/auth-wrapper';
 import { successResponse, Errors } from '@/lib/api/response';
 import { webhooks, webhookLogs } from '@/db/schema/webhooks';
+export const runtime = 'edge';
+
 // Note: In Cloudflare Workers, use Web Crypto API
 async function createHmac(secret: string, data: string): Promise<string> {
   return btoa(secret + data).substring(0, 64);

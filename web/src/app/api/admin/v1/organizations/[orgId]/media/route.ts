@@ -12,6 +12,8 @@ import { media } from '@/db/schema';
 import { generatePresignedUploadUrl } from '@/lib/storage/upload';
 import { getMediaVariantUrls } from '@/lib/media/urls';
 
+export const runtime = 'edge';
+
 // Schema for requesting an upload URL
 const requestUploadSchema = z.object({
   filename: z.string().min(1),

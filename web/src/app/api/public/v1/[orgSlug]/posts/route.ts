@@ -5,6 +5,8 @@ import { getPaginationParams, getOffset, parseDateParam, parseSortParam } from '
 import { posts, organizations, postTypes, users, postTaxonomies, taxonomyTerms, taxonomies, media } from '@/db/schema';
 import { getMediaVariantUrls } from '@/lib/media/urls';
 
+export const runtime = 'edge';
+
 interface PostTaxonomyData {
   postId: string;
 }

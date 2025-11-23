@@ -5,6 +5,8 @@ import { validateRequest } from '@/lib/api/validation';
 import { postTemplates } from '@/db/schema/post-templates';
 import { z } from 'zod';
 
+export const runtime = 'edge';
+
 const updateTemplateSchema = z.object({
   name: z.string().min(1).optional(),
   slug: z.string().min(1).optional(),

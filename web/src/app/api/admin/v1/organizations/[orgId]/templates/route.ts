@@ -6,6 +6,8 @@ import { validateRequest, getPaginationParams, getOffset } from '@/lib/api/valid
 import { postTemplates } from '@/db/schema/post-templates';
 import { z } from 'zod';
 
+export const runtime = 'edge';
+
 const createTemplateSchema = z.object({
   postTypeId: z.string().min(1, 'Post type is required'),
   name: z.string().min(1, 'Name is required'),

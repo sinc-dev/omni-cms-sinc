@@ -10,6 +10,8 @@ import { z } from 'zod';
 import { sql } from 'drizzle-orm';
 import type { ApiKey } from '@/db/schema/api-keys';
 
+export const runtime = 'edge';
+
 const createApiKeySchema = z.object({
   name: z.string().min(1, 'Name is required'),
   scopes: z.array(z.string()).optional().default([]),

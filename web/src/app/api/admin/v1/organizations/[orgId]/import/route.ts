@@ -4,6 +4,8 @@ import { validateRequest } from '@/lib/api/validation';
 import { importOrganizationData } from '@/lib/import/import-manager';
 import { z } from 'zod';
 
+export const runtime = 'edge';
+
 const importSchema = z.object({
   data: z.record(z.string(), z.unknown()), // JSON import data
   options: z.object({

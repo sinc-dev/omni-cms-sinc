@@ -9,6 +9,8 @@ import { invalidatePostCache, invalidateTaxonomyCache } from '@/lib/cache/invali
 import { createPostVersion, cleanupOldVersions } from '@/lib/versioning/version-manager';
 import { dispatchWebhook } from '@/lib/webhooks/webhook-dispatcher';
 
+export const runtime = 'edge';
+
 // GET /api/admin/v1/organizations/:orgId/posts/:postId
 export const GET = withAuth(
   async (request, { db, organizationId }, params) => {

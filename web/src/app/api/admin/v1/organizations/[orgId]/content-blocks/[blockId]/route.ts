@@ -5,6 +5,8 @@ import { validateRequest } from '@/lib/api/validation';
 import { contentBlocks } from '@/db/schema/content-blocks';
 import { z } from 'zod';
 
+export const runtime = 'edge';
+
 const updateContentBlockSchema = z.object({
   name: z.string().min(1).optional(),
   slug: z.string().min(1).optional(),

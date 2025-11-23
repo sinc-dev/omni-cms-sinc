@@ -22,6 +22,8 @@ import {
 } from '@/lib/ai/ai-service';
 import { z } from 'zod';
 
+export const runtime = 'edge';
+
 const suggestSchema = z.object({
   content: z.string().optional(),
   title: z.string().optional(),

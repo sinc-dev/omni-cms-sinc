@@ -7,6 +7,8 @@ import { webhooks } from '@/db/schema/webhooks';
 import { z } from 'zod';
 import { randomBytes } from 'crypto';
 
+export const runtime = 'edge';
+
 const createWebhookSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   url: z.string().url('Valid URL is required'),
