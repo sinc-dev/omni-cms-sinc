@@ -8,13 +8,17 @@
  * required for @cloudflare/next-on-pages compatibility.
  */
 // Set TURBOPACK=0 in the environment so it's available to all child processes
+// This MUST be set before any other operations to ensure it's inherited
 process.env.TURBOPACK = '0';
 
-const { execSync } = require('child_process');
-const path = require('path');
-const fs = require('fs');
+import { execSync } from 'child_process';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
-// Get the directory where this script is located
+// Get the directory where this script is located (ES module equivalent of __dirname)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const scriptDir = __dirname;
 const projectRoot = path.resolve(scriptDir, '..');
 
@@ -22,7 +26,13 @@ const projectRoot = path.resolve(scriptDir, '..');
 process.chdir(projectRoot);
 
 // Create environment object with TURBOPACK=0 set
-const buildEnv = { ...process.env, TURBOPACK: '0' };
+// Ensure it's explicitly set and cannot be overridden
+const buildEnv = { 
+  ...process.env, 
+  TURBOPACK: '0',
+  // Also set NEXT_TURBOPACK=0 as some Next.js versions check this
+  NEXT_TURBOPACK: '0'
+};
 
 try {
   console.log('Building with TURBOPACK=0 (using webpack instead of Turbopack)...');
@@ -40,12 +50,17 @@ try {
   
   if (!isInsideAdapter) {
     console.log('Running @cloudflare/next-on-pages adapter...');
+    // Ensure TURBOPACK=0 is set in the environment before running adapter
+    // The adapter will call pnpm run build, which will call this script again
     execSync('npx @cloudflare/next-on-pages', {
       stdio: 'inherit',
       env: buildEnv,
+      // Ensure the environment is passed through
+      shell: true,
     });
   } else {
     console.log('Inside adapter - skipping adapter step to avoid loop');
+    console.log('TURBOPACK env var:', process.env.TURBOPACK);
   }
 
   console.log('Build completed successfully!');
