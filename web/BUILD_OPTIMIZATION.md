@@ -35,7 +35,7 @@ Cloudflare Pages has a **20-minute build timeout**. The build was timing out due
 
 ### 2. Environment Variables
 
-#### Required Environment Variable
+#### Required Environment Variable (CRITICAL)
 - **Variable name**: `TURBOPACK`
 - **Value**: `0`
 - **Environment**: Production (and Preview if needed)
@@ -43,6 +43,8 @@ Cloudflare Pages has a **20-minute build timeout**. The build was timing out due
 
 #### Location
 Cloudflare Dashboard → Pages → Your Project → Settings → Environment Variables
+
+**⚠️ IMPORTANT**: This environment variable **MUST** be set in the Cloudflare Pages dashboard. Setting it only in the build script (`TURBOPACK=0 node scripts/build.mjs`) is **not sufficient** because when `@cloudflare/next-on-pages` adapter spawns new processes, it doesn't inherit command-level environment variables. The dashboard setting ensures it's available to all build processes.
 
 ### 3. Build Script Optimization
 
@@ -77,12 +79,21 @@ The `.npmrc` file includes optimizations:
 Next.js 16's Turbopack has root detection issues in monorepo setups. The configuration includes:
 
 ```typescript
-turbopack: {
-  root: path.join(__dirname, ".."), // Points to monorepo root
-}
+const root = path.join(__dirname, ".."); // Monorepo root (where pnpm-lock.yaml lives)
+
+const nextConfig: NextConfig = {
+  // Both must point to the SAME root (monorepo root)
+  outputFileTracingRoot: root,
+  turbopack: {
+    root,
+  },
+  // ... rest of config
+};
 ```
 
-This fixes the "workspace root" error that occurs when Turbopack can't find `next/package.json` in the correct location.
+**Critical**: Both `outputFileTracingRoot` and `turbopack.root` **must have the same value**. If they differ, Next.js will ignore `turbopack.root` and use `outputFileTracingRoot`, causing the "workspace root" error.
+
+This fixes the error: "We couldn't find the Next.js package (next/package.json) from the project directory" that occurs when Turbopack infers the wrong workspace root.
 
 **Note**: Even with `TURBOPACK=0` set, this configuration ensures proper root detection if Turbopack is accidentally used.
 
@@ -127,11 +138,12 @@ After optimization:
 
 ### Build Fails with Turbopack Error
 
-- Ensure `TURBOPACK=0` is set in Cloudflare Pages environment variables
-- Verify the build script sets `TURBOPACK=0` in the environment and command
+- **CRITICAL**: Ensure `TURBOPACK=0` is set in Cloudflare Pages dashboard environment variables (not just in build script)
+- Verify the build script sets `TURBOPACK=0` in the environment and command (backup measure)
 - Check build logs for "Next.js 16.0.3 (Turbopack)" - should show without "(Turbopack)"
-- Verify `turbopack.root` is configured in `next.config.ts` (fixes root detection errors)
-- If you see "We couldn't find the Next.js package" error, ensure `turbopack.root` points to monorepo root
+- Verify both `outputFileTracingRoot` and `turbopack.root` are configured in `next.config.ts` and point to the **same** monorepo root
+- If you see "Both `outputFileTracingRoot` and `turbopack.root` are set, but they must have the same value" warning, ensure both point to the same directory (monorepo root)
+- If you see "We couldn't find the Next.js package" error, ensure both roots point to monorepo root (where `pnpm-lock.yaml` lives)
 
 ### Monorepo Installing All Workspaces
 

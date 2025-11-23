@@ -1,11 +1,15 @@
 import type { NextConfig } from "next";
 import path from "node:path";
 
+// Monorepo root (one level up from /web) - where pnpm-lock.yaml lives
+const root = path.join(__dirname, "..");
+
 const nextConfig: NextConfig = {
-  // Turbopack root configuration for monorepo support
-  // Points to monorepo root (one level above /web) to fix root detection
+  // Set both outputFileTracingRoot and turbopack.root to the same monorepo root
+  // This ensures Next.js can find next/package.json and the lockfile
+  outputFileTracingRoot: root,
   turbopack: {
-    root: path.join(__dirname, ".."),
+    root,
   },
   // Headers for security and caching
   async headers() {

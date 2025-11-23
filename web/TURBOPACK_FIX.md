@@ -22,19 +22,28 @@ The build script is now called from `package.json`:
 
 ### 2. Next.js Configuration (`next.config.ts`)
 
-Added `turbopack.root` configuration to fix root detection issues in monorepo setups:
+Added both `outputFileTracingRoot` and `turbopack.root` configuration to fix root detection issues in monorepo setups:
 
 ```typescript
-turbopack: {
-  root: path.join(__dirname, ".."), // Points to monorepo root
-}
+const root = path.join(__dirname, ".."); // Monorepo root (where pnpm-lock.yaml lives)
+
+const nextConfig: NextConfig = {
+  // Both must point to the SAME root (monorepo root)
+  outputFileTracingRoot: root,
+  turbopack: {
+    root,
+  },
+  // ... rest of config
+};
 ```
+
+**Critical**: Both `outputFileTracingRoot` and `turbopack.root` **must have the same value**. If they differ, Next.js will ignore `turbopack.root` and use `outputFileTracingRoot`, causing the "workspace root" error.
 
 This fixes the error: "We couldn't find the Next.js package (next/package.json) from the project directory" that occurs when Turbopack infers the wrong workspace root.
 
-## Alternative Solution: Cloudflare Pages Dashboard
+## Required: Cloudflare Pages Dashboard Environment Variable
 
-You can also set `TURBOPACK=0` as an environment variable in the Cloudflare Pages dashboard:
+**⚠️ CRITICAL**: You **MUST** set `TURBOPACK=0` as an environment variable in the Cloudflare Pages dashboard. Setting it only in the build script is **not sufficient**.
 
 1. Go to **Cloudflare Dashboard → Pages → omni-cms-sinc → Settings → Environment Variables**
 2. Add a new environment variable:
@@ -43,7 +52,7 @@ You can also set `TURBOPACK=0` as an environment variable in the Cloudflare Page
    - **Environment**: Production (and Preview if needed)
 3. Save the changes
 
-This ensures the variable is available to all build processes, including the one inside `@cloudflare/next-on-pages`.
+**Why this is required**: When `@cloudflare/next-on-pages` adapter spawns new processes (like when it calls `pnpm run build`), it doesn't inherit command-level environment variables. The dashboard setting ensures the variable is available to all build processes, including nested ones inside the adapter.
 
 ## Why This Is Needed
 
