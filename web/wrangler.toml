@@ -9,3 +9,18 @@ database_id = "12aad490-4c2d-4cdb-b07f-0f536e20e994"
 [[r2_buckets]]
 binding = "R2_BUCKET"
 bucket_name = "omni-cms-media"
+
+[observability]
+enabled = false
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+persist = true
+invocation_logs = true
+
+[observability.traces]
+enabled = false
+persist = true
+head_sampling_rate = 1
