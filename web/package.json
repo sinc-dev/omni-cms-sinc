@@ -15,7 +15,7 @@
     "db:migrate:prod": "wrangler d1 migrations apply omni-cms",
     "db:seed": "tsx src/lib/db/seed.ts",
     "db:studio": "drizzle-kit studio",
-    "build:cf": "TURBOPACK=0 next build && TURBOPACK=0 npx vercel build --yes && npx @cloudflare/next-on-pages@1 --skip-build"
+    "build:cf": "TURBOPACK=0 npx @cloudflare/next-on-pages@1"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.937.0",
