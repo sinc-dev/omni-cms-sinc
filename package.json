@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "pnpm --filter web dev",
     "build": "pnpm --filter web run build:cf",
+    "build:cf": "TURBOPACK=0 npx @cloudflare/next-on-pages@1 --project-dir=web",
     "start": "pnpm --filter web start",
     "lint": "pnpm --filter web lint"
   }
