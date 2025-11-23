@@ -6,6 +6,19 @@ The project uses `@cloudflare/next-on-pages` adapter to deploy Next.js to Cloudf
 
 ## Cloudflare Pages Dashboard Settings
 
+### Option 1: Root Directory = `/` (Repo Root) - Recommended
+
+**Root Directory**: `/` (leave blank or set to `/`)
+
+**Build Command**: 
+```bash
+pnpm run build:cf
+```
+
+This uses the root `build:cf` script which changes to the `web` directory before running the adapter.
+
+### Option 2: Root Directory = `web`
+
 **Root Directory**: `web`
 
 **Build Command**: 
@@ -13,10 +26,7 @@ The project uses `@cloudflare/next-on-pages` adapter to deploy Next.js to Cloudf
 npx @cloudflare/next-on-pages@1
 ```
 
-**OR use the root script**:
-```bash
-pnpm run build:cf
-```
+**Note**: This may still encounter the `web/web/.next` path issue. If so, use Option 1 instead.
 
 **Build Output Directory**: Leave empty (auto-detected from `wrangler.toml`)
 
@@ -27,6 +37,26 @@ pnpm run build:cf
 - `wrangler.toml` is found because it's in the same directory where the adapter runs
 
 **Note**: The `--project-dir` flag is **not supported** by `@cloudflare/next-on-pages@1.13.16`. The adapter automatically detects the Next.js project in the current working directory.
+
+## Known Issue: Monorepo Path Problem
+
+If you encounter the error:
+```
+Error: ENOENT: no such file or directory, lstat '/opt/buildhome/repo/web/web/.next/routes-manifest.json'
+```
+
+This is a known issue with `@cloudflare/next-on-pages@1.13.16` in monorepo setups. The adapter incorrectly appends the package name "web" to the path, resulting in `web/web/.next` instead of `web/.next`.
+
+### Potential Solutions
+
+1. **Migrate to OpenNext** (Recommended): The `@cloudflare/next-on-pages` adapter is deprecated. Consider migrating to `@opennextjs/cloudflare` which has better monorepo support. See `web/OPENNEXT_MIGRATION.md` for details.
+
+2. **Workaround**: If you must use the current adapter, you may need to:
+   - Ensure the root directory in Cloudflare Pages is set to `/` (repo root) instead of `web`
+   - Use a custom build script that changes directory before running the adapter
+   - Or temporarily rename the package in `package.json` during build (not recommended)
+
+3. **Check Cloudflare Pages Settings**: Verify that the root directory is correctly set to `web` in the Cloudflare Pages dashboard. Sometimes the setting doesn't take effect immediately.
 
 ## Required Environment Variables
 
