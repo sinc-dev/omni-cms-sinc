@@ -17,17 +17,22 @@ const nextConfig: NextConfig = {
   // output: 'export',    // <--- DO NOT USE THIS
   
   // 👇 CRITICAL: Disable source maps to drastically reduce bundle size (50-70% reduction)
-  // This is the biggest size reduction - typically reduces bundle from 60MB to ~15MB
+  // 1. Disable Client Source Maps
   productionBrowserSourceMaps: false,
   
-  // Bundle size optimizations for Cloudflare Pages
+  // 2. Disable Server Source Maps (Crucial for Cloudflare)
+  // This is the key fix - server source maps are what's causing the 64MB bundle
   experimental: {
+    serverSourceMaps: false,
     // Reduce bundle size by optimizing server components
     optimizePackageImports: ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
   },
   
-  // Webpack optimizations
+  // 3. Force Webpack to drop source maps entirely (brute force approach)
   webpack: (config, { isServer }) => {
+    // Disable all source maps
+    config.devtool = false;
+    
     if (isServer) {
       // Optimize server bundle
       config.optimization = {
