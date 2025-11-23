@@ -10,7 +10,7 @@ interface BreadcrumbItem {
 
 interface BreadcrumbProps {
   items: BreadcrumbItem[];
-  className?: string;
+  className?: string; 
 }
 
 const breadcrumbSeparator = (
