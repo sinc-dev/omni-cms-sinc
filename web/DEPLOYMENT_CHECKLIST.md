@@ -10,19 +10,25 @@
 ### 2. Next.js Cloudflare Compatibility ✅
 **Status**: Next.js 16.0.3 is used with `@cloudflare/next-on-pages` adapter.
 
-**Root Cause Fix**: Ensure `.vercel` folder is NOT in the repository (it's already in `.gitignore`). This was causing the `web/web/.next` path error.
+**⚠️ CRITICAL: Must Use `pnpm run build:cf`**
+
+The `web/web/.next` path error occurs because the adapter internally runs `vercel build`. We must skip that step.
 
 **Build Configuration**:
 - **Root Directory**: `web`
-- **Build Command**: `npx @cloudflare/next-on-pages@1` (or `pnpm run build:cf`)
+- **Build Command**: `pnpm run build:cf` ⚠️ **MUST use this exact command**
 - **Build Output Directory**: `.vercel/output/static`
+- **DO NOT use**: `npx @cloudflare/next-on-pages@1` directly (causes `web/web/.next` error)
 
 **The `build:cf` script is already configured** in `web/package.json`:
 ```json
-"build:cf": "TURBOPACK=0 next build && TURBOPACK=0 npx @cloudflare/next-on-pages@1"
+"build:cf": "TURBOPACK=0 next build && npx @cloudflare/next-on-pages@1 --skip-build"
 ```
 
-**Why this works**: Without `.vercel` folder in repo, `vercel build` treats the current directory (`/opt/buildhome/repo/web`) as project root, avoiding the double path issue.
+**Why this works**: 
+- We run `next build` first in the correct location (`/opt/buildhome/repo/web/.next`)
+- The `--skip-build` flag prevents the adapter from running `vercel build` internally
+- This avoids the double `web/web/.next` path issue
 
 ### 3. Database Migration ✅
 Migration file: `drizzle/migrations/0001_oval_stranger.sql`

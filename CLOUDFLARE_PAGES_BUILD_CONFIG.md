@@ -1,20 +1,20 @@
 # Cloudflare Pages Build Configuration
 
-## Root Cause Fix
+## Root Cause
 
-The `web/web/.next` path error was caused by a `.vercel` folder in the repo containing `rootDirectory: "web"`. When `vercel build` (run by `@cloudflare/next-on-pages`) sees this config, it appends `web/` to the already-set working directory (`/opt/buildhome/repo/web`), resulting in `/opt/buildhome/repo/web/web/.next`.
+The `web/web/.next` path error occurs because `@cloudflare/next-on-pages` internally runs `npx vercel build`, which has its own understanding of the project's `rootDirectory`. Even without a `.vercel` folder in the repo, `vercel build` still thinks the root directory is `web`, and when Cloudflare Pages already sets the working directory to `/opt/buildhome/repo/web`, it results in `/opt/buildhome/repo/web/web/.next`.
 
-**Solution**: Ensure `.vercel` folder is **not in the repository**. It's already in `.gitignore`, so it won't be committed.
+**Solution**: **Stop using `vercel build` entirely**. Run `next build` manually, then use the adapter with `--skip-build` to process the output without running `vercel build`.
 
 ## Cloudflare Pages Dashboard Settings
 
-### Required Configuration
+### ⚠️ CRITICAL: Must Use `pnpm run build:cf`
 
 **Root Directory**: `web`
 
 **Build Command**: 
 ```bash
-npx @cloudflare/next-on-pages@1
+pnpm run build:cf
 ```
 
 **Build Output Directory**: 
@@ -22,26 +22,25 @@ npx @cloudflare/next-on-pages@1
 .vercel/output/static
 ```
 
-**Why this works**:
-- With root directory = `web`, Cloudflare runs commands from `/opt/buildhome/repo/web`
-- Without `.vercel` folder, `vercel build` treats the current directory as project root
-- `next build` creates `.next` at `/opt/buildhome/repo/web/.next` ✅
-- No double `web/web/.next` path issue ✅
+**DO NOT use**: `npx @cloudflare/next-on-pages@1` directly (it will run `vercel build` internally and cause the `web/web/.next` error)
 
-### Alternative: Using build:cf Script
+### How `build:cf` Works
 
-If you prefer to use a script, you can use:
+The `build:cf` script in `web/package.json`:
 
-**Build Command**: 
-```bash
-pnpm run build:cf
+```json
+"build:cf": "TURBOPACK=0 next build && npx @cloudflare/next-on-pages@1 --skip-build"
 ```
 
-This runs:
-1. `TURBOPACK=0 next build` - Creates `.next` directory
-2. `TURBOPACK=0 npx @cloudflare/next-on-pages@1` - Processes the output
+**Step-by-step**:
+1. `TURBOPACK=0 next build` - Runs Next.js build in the current directory (`/opt/buildhome/repo/web`), creating `.next` at `/opt/buildhome/repo/web/.next` ✅
+2. `npx @cloudflare/next-on-pages@1 --skip-build` - Processes the existing `.next` output without running `vercel build`
+3. The `--skip-build` flag prevents the adapter from running `vercel build`, which would incorrectly look for `web/web/.next`
 
-**Note**: The `build:cf` script is optional. You can use `npx @cloudflare/next-on-pages@1` directly since it will run `next build` internally.
+**Why this works**:
+- We run `next build` ourselves in the correct location
+- The adapter skips its internal `vercel build` step
+- No double `web/web/.next` path issue ✅
 
 ## Required Environment Variables
 
@@ -69,29 +68,29 @@ pages_build_output_dir = ".vercel/output/static"
 
 If you still see this error:
 
-1. **Verify `.vercel` is not in the repo**:
-   ```bash
-   git ls-files | grep .vercel
-   ```
-   Should return nothing. If it shows files, remove them:
-   ```bash
-   git rm -r .vercel
-   git commit -m "Remove .vercel config for Cloudflare build"
-   git push
-   ```
+1. **Verify you're using `pnpm run build:cf`** (not `npx @cloudflare/next-on-pages@1` directly)
+   - Go to Cloudflare Dashboard → Pages → Your Project → Settings → Builds & deployments
+   - Ensure **Build Command** is exactly: `pnpm run build:cf`
 
-2. **Verify `.vercel` is in `.gitignore`**:
-   ```gitignore
-   .vercel
-   .vercel/output
+2. **Verify the `build:cf` script has `--skip-build`**:
+   ```json
+   "build:cf": "TURBOPACK=0 next build && npx @cloudflare/next-on-pages@1 --skip-build"
    ```
 
 3. **Check Cloudflare Pages Settings**:
    - Root Directory: `web`
-   - Build Command: `npx @cloudflare/next-on-pages@1` (or `pnpm run build:cf`)
+   - Build Command: `pnpm run build:cf` ⚠️ **MUST use this**
    - Build Output Directory: `.vercel/output/static`
 
 4. **Verify TURBOPACK=0** is set in environment variables
+
+5. **Check build logs** - You should see:
+   ```
+   Executing user command: pnpm run build:cf
+   > TURBOPACK=0 next build && npx @cloudflare/next-on-pages@1 --skip-build
+   ...
+   Skipping Next.js build as requested with --skip-build
+   ```
 
 ## Local Testing
 
@@ -103,22 +102,20 @@ cd web
 pnpm run build:cf
 ```
 
-Or use the adapter directly:
-
-```bash
-cd web
-TURBOPACK=0 npx @cloudflare/next-on-pages@1
-```
+This runs the same script that Cloudflare Pages uses:
+1. `TURBOPACK=0 next build` - Creates `.next` directory
+2. `npx @cloudflare/next-on-pages@1 --skip-build` - Processes output without running `vercel build`
 
 ## Verification Checklist
 
 After configuring Cloudflare Pages:
 
 - [ ] **Root Directory** is set to: `web`
-- [ ] **Build Command** is set to: `npx @cloudflare/next-on-pages@1` (or `pnpm run build:cf`)
+- [ ] **Build Command** is set to: `pnpm run build:cf` ⚠️ **MUST use this exact command**
 - [ ] **Build Output Directory** is set to: `.vercel/output/static`
 - [ ] **TURBOPACK=0** environment variable is set in Production (and Preview)
-- [ ] `.vercel` folder is NOT in the repository (check with `git ls-files | grep .vercel`)
-- [ ] `.vercel` is in `.gitignore`
+- [ ] `build:cf` script in `web/package.json` includes `--skip-build` flag
+- [ ] Build logs show `pnpm run build:cf` being executed
+- [ ] Build logs show "Skipping Next.js build as requested with --skip-build"
 - [ ] Build completes without `web/web/.next` path error
 - [ ] `.vercel/output/static` directory is generated correctly
