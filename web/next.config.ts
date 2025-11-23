@@ -1,11 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    turbopack: {
-      root: process.cwd(), // Use current working directory (web/)
-    },
-  },
   // Headers for security and caching
   async headers() {
     return [
