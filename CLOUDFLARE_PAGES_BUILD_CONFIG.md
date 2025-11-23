@@ -17,16 +17,18 @@ pnpm run build:cf
 
 This uses the root `build:cf` script which changes to the `web` directory before running the adapter.
 
-### Option 2: Root Directory = `web`
+### Option 2: Root Directory = `web` (Current - Has Known Issue)
 
 **Root Directory**: `web`
 
 **Build Command**: 
 ```bash
-npx @cloudflare/next-on-pages@1
+pnpm run build:cf
 ```
 
-**Note**: This may still encounter the `web/web/.next` path issue. If so, use Option 1 instead.
+**Note**: This uses `--skip-build` to work around the `web/web/.next` path issue. The build script runs `next build` first, then the adapter processes the output without running `vercel build` internally.
+
+**Known Limitation**: The `@cloudflare/next-on-pages@1.13.16` adapter has a bug where `vercel build` (used internally) incorrectly constructs paths in monorepo setups, looking for `web/web/.next` instead of `web/.next`. Using `--skip-build` avoids this by not running `vercel build`.
 
 **Build Output Directory**: Leave empty (auto-detected from `wrangler.toml`)
 
