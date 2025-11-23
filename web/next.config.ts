@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 const nextConfig: NextConfig = {
+  // Turbopack root configuration for monorepo support
+  // Points to monorepo root (one level above /web) to fix root detection
+  turbopack: {
+    root: path.join(__dirname, ".."),
+  },
   // Headers for security and caching
   async headers() {
     return [

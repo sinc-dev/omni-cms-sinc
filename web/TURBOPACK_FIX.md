@@ -6,16 +6,31 @@ The build was failing because `@cloudflare/next-on-pages` runs `pnpm run build` 
 
 ## Solution Implemented
 
-A Node.js build script (`scripts/build.js`) has been created that:
+### 1. Build Script (`scripts/build.mjs`)
+
+A Node.js build script has been created that:
 
 1. **Sets `TURBOPACK=0` in the environment** - This ensures all child processes (including the nested build) inherit the variable
-2. **Runs `next build`** with the environment variable set
-3. **Runs `@cloudflare/next-on-pages` adapter** - Only if not already inside the adapter
+2. **Explicitly sets `TURBOPACK=0` in the command** - `TURBOPACK=0 next build` ensures it's available at shell level
+3. **Runs `next build`** with the environment variable set
+4. **Runs `@cloudflare/next-on-pages` adapter** - Only if not already inside the adapter
 
 The build script is now called from `package.json`:
 ```json
-"build": "node scripts/build.js"
+"build": "TURBOPACK=0 node scripts/build.mjs"
 ```
+
+### 2. Next.js Configuration (`next.config.ts`)
+
+Added `turbopack.root` configuration to fix root detection issues in monorepo setups:
+
+```typescript
+turbopack: {
+  root: path.join(__dirname, ".."), // Points to monorepo root
+}
+```
+
+This fixes the error: "We couldn't find the Next.js package (next/package.json) from the project directory" that occurs when Turbopack infers the wrong workspace root.
 
 ## Alternative Solution: Cloudflare Pages Dashboard
 
@@ -36,6 +51,12 @@ This ensures the variable is available to all build processes, including the one
 - `@cloudflare/next-on-pages` requires webpack (not Turbopack)
 - The nested build process inside `@cloudflare/next-on-pages` doesn't inherit inline environment variables
 - Setting it in the environment (via script or dashboard) ensures it's available to all processes
+- Next.js 16's Turbopack has root detection issues in pnpm monorepo setups
+- The `turbopack.root` config ensures proper root detection even if Turbopack is accidentally used
+
+## Deprecated Adapter Notice
+
+**Important**: `@cloudflare/next-on-pages` is deprecated. Cloudflare recommends migrating to the OpenNext adapter (`@opennextjs/cloudflare`). See `OPENNEXT_MIGRATION.md` for migration planning.
 
 ## Expected Result
 

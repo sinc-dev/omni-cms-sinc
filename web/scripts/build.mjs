@@ -44,10 +44,12 @@ try {
   
   if (isInsideAdapter) {
     // We're inside the adapter - just run next build (adapter handles the rest)
+    // Explicitly set TURBOPACK=0 in the command to ensure it's available at shell level
     console.log('Inside adapter - running Next.js build with TURBOPACK=0 (using webpack)...');
-    execSync('next build', {
+    execSync('TURBOPACK=0 next build', {
       stdio: 'inherit',
       env: buildEnv,
+      shell: true,
     });
     console.log('Next.js build completed successfully!');
   } else {

@@ -70,6 +70,31 @@ The `.npmrc` file includes optimizations:
 - `side-effects-cache=true` - Caches side-effect results
 - `node-linker=hoisted` - Faster hoisted linker
 
+### 6. Next.js Turbopack Root Configuration
+
+**File**: `web/next.config.ts`
+
+Next.js 16's Turbopack has root detection issues in monorepo setups. The configuration includes:
+
+```typescript
+turbopack: {
+  root: path.join(__dirname, ".."), // Points to monorepo root
+}
+```
+
+This fixes the "workspace root" error that occurs when Turbopack can't find `next/package.json` in the correct location.
+
+**Note**: Even with `TURBOPACK=0` set, this configuration ensures proper root detection if Turbopack is accidentally used.
+
+### 7. Deprecated Adapter Notice
+
+**Important**: `@cloudflare/next-on-pages` is deprecated. Cloudflare recommends migrating to the OpenNext adapter:
+
+- Current: `@cloudflare/next-on-pages` (deprecated)
+- Recommended: `@opennextjs/cloudflare` (OpenNext adapter)
+
+See `OPENNEXT_MIGRATION.md` for migration planning. The current setup will continue to work, but migration should be planned for future maintenance.
+
 ## Verification Checklist
 
 Before deploying, verify:
@@ -103,8 +128,10 @@ After optimization:
 ### Build Fails with Turbopack Error
 
 - Ensure `TURBOPACK=0` is set in Cloudflare Pages environment variables
-- Verify the build script sets `TURBOPACK=0` in the environment
+- Verify the build script sets `TURBOPACK=0` in the environment and command
 - Check build logs for "Next.js 16.0.3 (Turbopack)" - should show without "(Turbopack)"
+- Verify `turbopack.root` is configured in `next.config.ts` (fixes root detection errors)
+- If you see "We couldn't find the Next.js package" error, ensure `turbopack.root` points to monorepo root
 
 ### Monorepo Installing All Workspaces
 
