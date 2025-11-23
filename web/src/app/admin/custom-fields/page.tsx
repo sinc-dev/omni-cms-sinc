@@ -1,0 +1,464 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  MoreVertical,
+  Hash,
+  Type,
+  FileText,
+  Calendar,
+  Image as ImageIcon,
+  Link as LinkIcon,
+  CheckSquare,
+  List,
+  Code,
+} from 'lucide-react';
+import { useOrganization } from '@/lib/context/organization-context';
+import { useApiClient } from '@/lib/hooks/use-api-client';
+import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { useSchema } from '@/lib/hooks/use-schema';
+import { Textarea } from '@/components/ui/textarea';
+
+interface CustomField {
+  id: string;
+  name: string;
+  slug: string;
+  fieldType: string;
+  settings?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+type FieldType =
+  | 'text'
+  | 'textarea'
+  | 'rich_text'
+  | 'number'
+  | 'boolean'
+  | 'date'
+  | 'datetime'
+  | 'media'
+  | 'relation'
+  | 'select'
+  | 'multi_select'
+  | 'json';
+
+interface FieldTypeInfo {
+  type: FieldType;
+  label: string;
+  icon: React.ReactNode;
+  description: string;
+}
+
+const fieldTypes: FieldTypeInfo[] = [
+  { type: 'text', label: 'Text', icon: <Type className="h-4 w-4" />, description: 'Single line text input' },
+  { type: 'textarea', label: 'Textarea', icon: <FileText className="h-4 w-4" />, description: 'Multi-line text input' },
+  { type: 'rich_text', label: 'Rich Text', icon: <FileText className="h-4 w-4" />, description: 'Rich text editor' },
+  { type: 'number', label: 'Number', icon: <Hash className="h-4 w-4" />, description: 'Numeric input' },
+  { type: 'boolean', label: 'Boolean', icon: <CheckSquare className="h-4 w-4" />, description: 'True/false checkbox' },
+  { type: 'date', label: 'Date', icon: <Calendar className="h-4 w-4" />, description: 'Date picker' },
+  { type: 'datetime', label: 'Date & Time', icon: <Calendar className="h-4 w-4" />, description: 'Date and time picker' },
+  { type: 'media', label: 'Media', icon: <ImageIcon className="h-4 w-4" />, description: 'Media picker' },
+  { type: 'relation', label: 'Relation', icon: <LinkIcon className="h-4 w-4" />, description: 'Link to another post' },
+  { type: 'select', label: 'Select', icon: <List className="h-4 w-4" />, description: 'Single selection dropdown' },
+  { type: 'multi_select', label: 'Multi Select', icon: <List className="h-4 w-4" />, description: 'Multiple selection dropdown' },
+  { type: 'json', label: 'JSON', icon: <Code className="h-4 w-4" />, description: 'JSON data structure' },
+];
+
+const getFieldTypeInfo = (type: FieldType): FieldTypeInfo | undefined => {
+  return fieldTypes.find((ft) => ft.type === type);
+};
+
+interface PaginatedResponse {
+  success: boolean;
+  data: CustomField[];
+  meta: {
+    page: number;
+    perPage: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export default function CustomFieldsPage() {
+  const { organization, isLoading: orgLoading } = useOrganization();
+  const api = useApiClient();
+
+  const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
+  const { schema: customFieldsSchema } = useSchema('custom-fields');
+  const [customFields, setCustomFields] = useState<CustomField[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingField, setEditingField] = useState<CustomField | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [filterType, setFilterType] = useState<string>('all');
+
+  // Form state
+  const [name, setName] = useState('');
+  const [slug, setSlug] = useState('');
+  const [fieldType, setFieldType] = useState<FieldType>('text');
+  const [settings, setSettings] = useState('{}');
+
+  // Generate slug from name
+  const generateSlug = (nameValue: string) => {
+    return nameValue
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s_]/g, '')
+      .replace(/[\s_-]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+  };
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Get field types from schema or fallback to hardcoded
+  const availableFieldTypes = customFieldsSchema?.enums?.customFieldType?.values 
+    ? customFieldsSchema.enums.customFieldType.values.map((type: string) => {
+        const info = fieldTypes.find(ft => ft.type === type);
+        return info || { type, label: type, icon: <Code className="h-4 w-4" />, description: type };
+      })
+    : fieldTypes;
+
+  // Fetch custom fields
+  useEffect(() => {
+    if (!organization || orgLoading) {
+      return;
+    }
+
+    const fetchCustomFields = withErrorHandling(async () => {
+      setLoading(true);
+      clearError();
+
+      const params: Record<string, string> = {};
+      if (debouncedSearch) {
+        params.search = debouncedSearch;
+      }
+      if (filterType !== 'all') {
+        params.field_type = filterType;
+      }
+
+      const response = (await api.getCustomFields()) as PaginatedResponse;
+
+      if (response.success) {
+        setCustomFields(response.data);
+      } else {
+        handleError('Failed to load custom fields', { title: 'Failed to Load Custom Fields' });
+      }
+      setLoading(false);
+    }, { title: 'Failed to Load Custom Fields' });
+
+    fetchCustomFields();
+  }, [organization, api, debouncedSearch, filterType, orgLoading, withErrorHandling, clearError, handleError]);
+
+  const handleSave = withErrorHandling(async () => {
+    if (!api || !name || !slug) return;
+
+    setSaving(true);
+    clearError();
+
+    let parsedSettings: Record<string, unknown> | undefined;
+    try {
+      parsedSettings = settings.trim() ? JSON.parse(settings) : undefined;
+    } catch {
+      handleError('Invalid JSON in settings field', { title: 'Validation Error' });
+      setSaving(false);
+      return;
+    }
+
+    const data = {
+      name,
+      slug,
+      fieldType,
+      settings: parsedSettings,
+    };
+
+    if (editingField) {
+      await api.updateCustomField(editingField.id, data);
+    } else {
+      await api.createCustomField(data);
+    }
+
+    // Reset form and close dialog
+    closeDialog();
+
+    // Refresh custom fields list
+    setCustomFields([]);
+    setSaving(false);
+  }, { title: 'Failed to Save Custom Field' });
+
+  const handleDelete = withErrorHandling(async (field: CustomField) => {
+    if (!api || !confirm(`Are you sure you want to delete "${field.name}"? This will remove this field from all posts.`)) {
+      return;
+    }
+
+    await api.deleteCustomField(field.id);
+    // Refresh custom fields list
+    setCustomFields([]);
+  }, { title: 'Failed to Delete Custom Field' });
+
+  const openEditDialog = (field: CustomField) => {
+    setEditingField(field);
+    setName(field.name);
+    setSlug(field.slug);
+    setFieldType(field.fieldType as FieldType);
+    setSettings(field.settings || '{}');
+    setDialogOpen(true);
+  };
+
+  const closeDialog = () => {
+    setDialogOpen(false);
+    setEditingField(null);
+    setName('');
+    setSlug('');
+    setFieldType('text');
+    setSettings('{}');
+    clearError();
+  };
+
+  const filteredFields = customFields.filter((field) => {
+    if (filterType !== 'all' && field.fieldType !== filterType) {
+      return false;
+    }
+    return true;
+  });
+
+  if (orgLoading || !organization) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">
+              {orgLoading ? 'Loading...' : 'Please select an organization to view custom fields.'}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Custom Fields</h1>
+          <p className="text-muted-foreground">Create reusable content fields</p>
+        </div>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => closeDialog()}>
+              <Plus className="mr-2 h-4 w-4" />
+              New Field
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingField ? 'Edit Custom Field' : 'Create Custom Field'}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="e.g., Author Bio, Product Price"
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    if (!slug && !editingField) {
+                      setSlug(generateSlug(e.target.value));
+                    }
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="slug">Slug *</Label>
+                <Input
+                  id="slug"
+                  placeholder="author_bio"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Used in code. Lowercase letters, numbers, and underscores only.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fieldType">Field Type *</Label>
+                <select
+                  id="fieldType"
+                  aria-label="Field Type"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={fieldType}
+                  onChange={(e) => setFieldType(e.target.value as FieldType)}
+                >
+                  {availableFieldTypes.map((ft) => (
+                    <option key={ft.type} value={ft.type}>
+                      {ft.label} - {ft.description}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="settings">Settings (JSON, optional)</Label>
+                <Textarea
+                  id="settings"
+                  placeholder='{"placeholder": "Enter text...", "maxLength": 100}'
+                  value={settings}
+                  onChange={(e) => setSettings(e.target.value)}
+                  rows={4}
+                  className="font-mono text-sm"
+                />
+                <p className="text-xs text-muted-foreground">
+                  JSON object for field-specific settings (e.g., placeholder, validation rules)
+                </p>
+              </div>
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={closeDialog}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  disabled={saving || !name || !slug}
+                >
+                  {saving ? 'Saving...' : editingField ? 'Update' : 'Create'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            {/* Search */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search custom fields..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+
+            {/* Type Filter */}
+            <select
+              aria-label="Filter by Type"
+              className="w-[180px] rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <option value="all">All Types</option>
+              {fieldTypes.map((ft) => (
+                <option key={ft.type} value={ft.type}>
+                  {ft.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loading && (
+            <div className="text-center py-12">
+              <p className="text-sm text-muted-foreground">Loading custom fields...</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="text-center py-12">
+              <p className="text-sm text-destructive">{error}</p>
+            </div>
+          )}
+
+          {!loading && !error && filteredFields.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-sm text-muted-foreground">
+                {debouncedSearch || filterType !== 'all'
+                  ? 'No custom fields match your search.'
+                  : 'No custom fields yet. Create your first field to extend content types.'}
+              </p>
+            </div>
+          )}
+
+          {!loading && !error && filteredFields.length > 0 && (
+            <div className="space-y-2">
+              {filteredFields.map((field) => {
+                const typeInfo = getFieldTypeInfo(field.fieldType as FieldType);
+                return (
+                  <div
+                    key={field.id}
+                    className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                        {typeInfo?.icon || <Hash className="h-5 w-5 text-muted-foreground" />}
+                      </div>
+                      <div>
+                        <div className="font-medium">{field.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {field.slug} • {typeInfo?.label || field.fieldType}
+                        </div>
+                      </div>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => openEditDialog(field)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDelete(field)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
