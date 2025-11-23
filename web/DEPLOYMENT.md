@@ -86,17 +86,23 @@ In Cloudflare Pages project settings → Environment Variables, set:
 
 ### 5. Build Configuration
 
-The project uses Next.js 16.0.3. Cloudflare Pages should automatically detect and configure Next.js.
+**⚠️ CRITICAL: Build Command Must Be `pnpm run build:cf`**
 
-**Note**: If you encounter issues, you may need to install `@cloudflare/next-on-pages` adapter:
+The project uses `@cloudflare/next-on-pages` adapter with a custom build script to avoid monorepo path issues.
 
-```bash
-pnpm add -D @cloudflare/next-on-pages
-```
+**Cloudflare Pages Dashboard Settings:**
+- **Root Directory**: `web`
+- **Build Command**: `pnpm run build:cf` ⚠️ **DO NOT use `npx @cloudflare/next-on-pages@1` directly**
+- **Build Output Directory**: Leave empty (auto-detected from `wrangler.toml`)
 
-Then update `package.json` build script:
+**Why `pnpm run build:cf`?**
+- The `build:cf` script in `web/package.json` runs `next build` first, creating `.next` in the correct location
+- Then it runs the adapter with `--skip-build` to process the output without running `vercel build` internally
+- This avoids the `web/web/.next` path construction error that occurs when using the adapter directly
+
+**The build script is already configured in `web/package.json`:**
 ```json
-"build": "next build && npx @cloudflare/next-on-pages"
+"build:cf": "TURBOPACK=0 next build && TURBOPACK=0 npx @cloudflare/next-on-pages --skip-build"
 ```
 
 ## Deployment

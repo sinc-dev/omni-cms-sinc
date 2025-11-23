@@ -4,20 +4,17 @@
 
 The project uses `@cloudflare/next-on-pages` adapter to deploy Next.js to Cloudflare Pages.
 
+## ⚠️ CRITICAL: Build Command Configuration
+
+### **MUST USE: `pnpm run build:cf`**
+
+**DO NOT use**: `npx @cloudflare/next-on-pages@1` or `npx @cloudflare/next-on-pages` directly.
+
+**Why**: Using the direct adapter command bypasses the `build:cf` script that uses `--skip-build` to avoid the `web/web/.next` path issue. The adapter still runs `vercel build` internally, causing the same path construction error.
+
 ## Cloudflare Pages Dashboard Settings
 
-### Option 1: Root Directory = `/` (Repo Root) - Recommended
-
-**Root Directory**: `/` (leave blank or set to `/`)
-
-**Build Command**: 
-```bash
-pnpm run build:cf
-```
-
-This uses the root `build:cf` script which changes to the `web` directory before running the adapter.
-
-### Option 2: Root Directory = `web` (Current - Has Known Issue)
+### Root Directory = `web` (Current Configuration)
 
 **Root Directory**: `web`
 
@@ -26,16 +23,20 @@ This uses the root `build:cf` script which changes to the `web` directory before
 pnpm run build:cf
 ```
 
-**Note**: This uses `--skip-build` to work around the `web/web/.next` path issue. The build script runs `next build` first, then the adapter processes the output without running `vercel build` internally.
+**⚠️ IMPORTANT**: This is the **ONLY** correct build command. Do not use `npx @cloudflare/next-on-pages@1` directly.
 
-**Known Limitation**: The `@cloudflare/next-on-pages@1.13.16` adapter has a bug where `vercel build` (used internally) incorrectly constructs paths in monorepo setups, looking for `web/web/.next` instead of `web/.next`. Using `--skip-build` avoids this by not running `vercel build`.
+**How it works**:
+1. The `build:cf` script runs `TURBOPACK=0 next build` first, creating `.next` in the correct location (`/opt/buildhome/repo/web/.next`)
+2. Then it runs `TURBOPACK=0 npx @cloudflare/next-on-pages --skip-build` to process the existing `.next` output
+3. The `--skip-build` flag prevents the adapter from running `vercel build` internally, which would incorrectly construct the `web/web/.next` path
 
 **Build Output Directory**: Leave empty (auto-detected from `wrangler.toml`)
 
-**Why**: 
+**Why this configuration works**:
 - When root directory is `web`, Cloudflare Pages runs commands from `/opt/buildhome/repo/web`
+- The `build:cf` script runs `next build` first, creating `.next` in the correct location
+- Then the adapter processes the output with `--skip-build`, avoiding the problematic `vercel build` step
 - The adapter automatically detects `package.json`, `next.config.ts`, and `wrangler.toml` in the current directory
-- No flags needed - the adapter works from the current working directory
 - `wrangler.toml` is found because it's in the same directory where the adapter runs
 
 **Note**: The `--project-dir` flag is **not supported** by `@cloudflare/next-on-pages@1.13.16`. The adapter automatically detects the Next.js project in the current working directory.
@@ -47,18 +48,28 @@ If you encounter the error:
 Error: ENOENT: no such file or directory, lstat '/opt/buildhome/repo/web/web/.next/routes-manifest.json'
 ```
 
-This is a known issue with `@cloudflare/next-on-pages@1.13.16` in monorepo setups. The adapter incorrectly appends the package name "web" to the path, resulting in `web/web/.next` instead of `web/.next`.
+This error occurs when using `npx @cloudflare/next-on-pages@1` directly instead of `pnpm run build:cf`. The adapter's internal `vercel build` step incorrectly constructs paths in monorepo setups, looking for `web/web/.next` instead of `web/.next`.
 
-### Potential Solutions
+### Solution
 
-1. **Migrate to OpenNext** (Recommended): The `@cloudflare/next-on-pages` adapter is deprecated. Consider migrating to `@opennextjs/cloudflare` which has better monorepo support. See `web/OPENNEXT_MIGRATION.md` for details.
+**Use `pnpm run build:cf` as the build command** (already configured correctly). This script:
+- Runs `next build` first, creating `.next` in the correct location
+- Then runs the adapter with `--skip-build` to process the output without running `vercel build`
 
-2. **Workaround**: If you must use the current adapter, you may need to:
-   - Ensure the root directory in Cloudflare Pages is set to `/` (repo root) instead of `web`
-   - Use a custom build script that changes directory before running the adapter
-   - Or temporarily rename the package in `package.json` during build (not recommended)
+### If the Error Persists
 
-3. **Check Cloudflare Pages Settings**: Verify that the root directory is correctly set to `web` in the Cloudflare Pages dashboard. Sometimes the setting doesn't take effect immediately.
+1. **Verify Cloudflare Pages Settings**: 
+   - Go to Cloudflare Dashboard → Pages → Your Project → Settings → Builds & deployments
+   - Ensure **Build Command** is exactly: `pnpm run build:cf`
+   - Ensure **Root Directory** is set to: `web`
+   - Ensure **TURBOPACK=0** environment variable is set
+
+2. **Check Build Logs**: 
+   - Verify the build command being used is `pnpm run build:cf`
+   - Confirm `next build` runs first
+   - Confirm the adapter runs with `--skip-build` flag
+
+3. **Future Migration**: Consider migrating to `@opennextjs/cloudflare` which has better monorepo support. See `web/OPENNEXT_MIGRATION.md` for details.
 
 ## Required Environment Variables
 
@@ -83,9 +94,25 @@ pages_build_output_dir = ".vercel/output/static"
 To test the build locally:
 
 ```bash
-# From repo root
+# From the web directory
+cd web
 pnpm run build:cf
 ```
 
-This runs the adapter with the correct project directory configuration.
+This runs the same script that Cloudflare Pages uses:
+1. `TURBOPACK=0 next build` - Creates `.next` directory
+2. `TURBOPACK=0 npx @cloudflare/next-on-pages --skip-build` - Processes output without running `vercel build`
+
+## Verification Checklist
+
+After updating Cloudflare Pages dashboard settings:
+
+- [ ] **Build Command** is set to: `pnpm run build:cf`
+- [ ] **Root Directory** is set to: `web`
+- [ ] **TURBOPACK=0** environment variable is set in Production (and Preview)
+- [ ] Build logs show `pnpm run build:cf` being executed
+- [ ] Build logs show `next build` running first
+- [ ] Build logs show adapter running with `--skip-build` flag
+- [ ] Build completes without `web/web/.next` path error
+- [ ] `.vercel/output/static` directory is generated correctly
 

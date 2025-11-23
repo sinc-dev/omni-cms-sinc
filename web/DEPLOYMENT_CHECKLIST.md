@@ -7,13 +7,20 @@
 - [x] No TypeScript errors
 - [x] All pages compile correctly
 
-### 2. Next.js Cloudflare Compatibility
-**Status**: Next.js 16.0.3 is used. Cloudflare Pages has native support for Next.js, but for optimal compatibility, you may need `@cloudflare/next-on-pages` adapter if you encounter issues.
+### 2. Next.js Cloudflare Compatibility ✅
+**Status**: Next.js 16.0.3 is used with `@cloudflare/next-on-pages` adapter.
 
-**Action**: 
-- Try deploying without adapter first
-- If build fails or runtime errors occur, install: `pnpm add -D @cloudflare/next-on-pages`
-- Update build script: `"build": "next build && npx @cloudflare/next-on-pages"`
+**Build Configuration**:
+- **Root Directory**: `web`
+- **Build Command**: `pnpm run build:cf` ⚠️ **MUST use this exact command**
+- **DO NOT use**: `npx @cloudflare/next-on-pages@1` directly (causes `web/web/.next` path error)
+
+**The `build:cf` script is already configured** in `web/package.json`:
+```json
+"build:cf": "TURBOPACK=0 next build && TURBOPACK=0 npx @cloudflare/next-on-pages --skip-build"
+```
+
+This script runs `next build` first, then uses the adapter with `--skip-build` to avoid the path issue.
 
 ### 3. Database Migration ✅
 Migration file: `drizzle/migrations/0001_oval_stranger.sql`
