@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev", 
+    "dev": "next dev",
     "build": "TURBOPACK=0 next build",
-    "build:cf": "TURBOPACK=0 npx @cloudflare/next-on-pages@1",
+    "build:cf": "TURBOPACK=0 npx @cloudflare/next-on-pages@1 .",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",

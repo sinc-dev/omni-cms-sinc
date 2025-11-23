@@ -13,10 +13,10 @@
 **Root Cause Fix**: Vercel configuration files (`.vercel` folder and `vercel.json`) have been removed from the repository. This was causing the `web/web/.next` path error.
 
 **Build Configuration**:
-- **Root Directory**: `web`
-- **Build Command**: `pnpm run build:cf` ⚠️ **MUST use this exact command**
-- **Build Output Directory**: `.vercel/output/static`
-- **DO NOT use**: `pnpm run build` (causes recursive invocation error)
+- **Root Directory**: `/` (repo root, leave blank or set to `/`) ⚠️ **CRITICAL**
+- **Build Command**: `pnpm --filter web run build:cf` ⚠️ **MUST use this exact command**
+- **Build Output Directory**: `web/.vercel/output/static` ⚠️ **MUST include `web/` prefix**
+- **DO NOT use**: Root Directory = `web` (causes `web/web/.next` path error)
 
 **The build scripts are configured** in `web/package.json`:
 ```json
