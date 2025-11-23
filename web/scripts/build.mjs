@@ -35,35 +35,34 @@ const buildEnv = {
 };
 
 try {
-  console.log('Building with TURBOPACK=0 (using webpack instead of Turbopack)...');
-  execSync('next build', {
-    stdio: 'inherit',
-    env: buildEnv,
-  });
-
-  // Only run the adapter if we're not already inside it
-  // @cloudflare/next-on-pages will call this script again internally
-  // Check for Vercel CLI environment or if adapter output already exists
+  // Detect if we're being called from within @cloudflare/next-on-pages adapter
+  // The adapter runs pnpm run build, which calls this script
   const isInsideAdapter = process.env.VERCEL_CLI_VERSION !== undefined ||
                           process.env.VERCEL === '1' ||
+                          process.env.CF_PAGES === '1' ||
                           fs.existsSync(path.join(projectRoot, '.vercel', 'output', 'static'));
   
-  if (!isInsideAdapter) {
-    console.log('Running @cloudflare/next-on-pages adapter...');
-    // Ensure TURBOPACK=0 is set in the environment before running adapter
+  if (isInsideAdapter) {
+    // We're inside the adapter - just run next build (adapter handles the rest)
+    console.log('Inside adapter - running Next.js build with TURBOPACK=0 (using webpack)...');
+    execSync('next build', {
+      stdio: 'inherit',
+      env: buildEnv,
+    });
+    console.log('Next.js build completed successfully!');
+  } else {
+    // We're called directly (from Cloudflare Pages) - run the adapter
     // The adapter will call pnpm run build, which will call this script again
+    // This ensures next build runs exactly once (inside the adapter)
+    console.log('Running @cloudflare/next-on-pages adapter...');
+    console.log('The adapter will run the build internally with TURBOPACK=0');
     execSync('npx @cloudflare/next-on-pages', {
       stdio: 'inherit',
       env: buildEnv,
-      // Ensure the environment is passed through
       shell: true,
     });
-  } else {
-    console.log('Inside adapter - skipping adapter step to avoid loop');
-    console.log('TURBOPACK env var:', process.env.TURBOPACK);
+    console.log('Build completed successfully!');
   }
-
-  console.log('Build completed successfully!');
 } catch (error) {
   console.error('Build failed:', error.message);
   process.exit(1);
