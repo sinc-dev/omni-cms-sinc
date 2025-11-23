@@ -86,25 +86,25 @@ In Cloudflare Pages project settings → Environment Variables, set:
 
 ### 5. Build Configuration
 
-**⚠️ CRITICAL: Must Use `pnpm run build:cf`**
-
-The `web/web/.next` path error occurs because `@cloudflare/next-on-pages` internally runs `vercel build`, which incorrectly constructs paths. The solution is to skip `vercel build` entirely.
+**Root Cause Fix**: The `web/web/.next` path error was caused by Vercel configuration files (`.vercel` folder or `vercel.json`) in the repository. These have been removed.
 
 **Cloudflare Pages Dashboard Settings:**
 - **Root Directory**: `web`
-- **Build Command**: `pnpm run build:cf` ⚠️ **MUST use this exact command**
+- **Build Command**: `pnpm run build`
 - **Build Output Directory**: `.vercel/output/static`
-- **DO NOT use**: `npx @cloudflare/next-on-pages@1` directly (causes `web/web/.next` error)
 
 **The build script in `web/package.json`:**
 ```json
-"build:cf": "TURBOPACK=0 next build && npx @cloudflare/next-on-pages@1 --skip-build"
+"build": "TURBOPACK=0 npx @cloudflare/next-on-pages@1"
 ```
 
 **How it works**:
-1. `TURBOPACK=0 next build` - Runs Next.js build, creating `.next` at `/opt/buildhome/repo/web/.next` ✅
-2. `npx @cloudflare/next-on-pages@1 --skip-build` - Processes the output without running `vercel build`
-3. The `--skip-build` flag prevents the adapter from running `vercel build`, avoiding the path issue
+1. `@cloudflare/next-on-pages` runs `vercel build` internally
+2. Without Vercel config files, `vercel build` treats the current directory as project root
+3. `.next` is created at `/opt/buildhome/repo/web/.next` ✅
+4. The adapter processes the output and generates `.vercel/output/static`
+
+**Note**: `pages_build_output_dir = ".vercel/output/static"` in `wrangler.toml` does NOT mean you're deploying to Vercel. It just tells Cloudflare Pages where to find the built assets.
 
 ## Deployment
 
