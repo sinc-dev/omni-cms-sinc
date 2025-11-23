@@ -11,6 +11,22 @@ const nextConfig: NextConfig = {
   turbopack: {
     root,
   },
+  // Ensure 'output' is NOT set to 'export' or 'standalone'
+  // @cloudflare/next-on-pages expects the standard default output to process
+  // output: 'standalone', // <--- DO NOT USE THIS
+  // output: 'export',    // <--- DO NOT USE THIS
+  
+  // Image optimization for Cloudflare
+  images: {
+    unoptimized: true, // Recommended for Cloudflare unless using a paid image loader
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
+  
   // Headers for security and caching
   async headers() {
     return [

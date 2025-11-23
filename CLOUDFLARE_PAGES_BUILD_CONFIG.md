@@ -1,50 +1,105 @@
-# Cloudflare Pages Build Configuration
+# Cloudflare Pages Build Configuration - Final Solution
 
-## Root Cause Fix
+## Root Cause
 
-The `web/web/.next` path error was caused by Vercel configuration files (`.vercel` folder or `vercel.json`) in the repository that specified `rootDirectory: "web"`. When `@cloudflare/next-on-pages` runs `vercel build` internally, it sees this config and appends `web/` to the already-set working directory (`/opt/buildhome/repo/web`), resulting in `/opt/buildhome/repo/web/web/.next`.
+The `web/web/.next` path error occurs because:
+1. Cloudflare Pages Root Directory is set to `web`
+2. But the root `package.json` has `"build:cf": "cd web && pnpm run build:cf"` which causes a double directory change
+3. Vercel CLI (called by `@cloudflare/next-on-pages`) auto-detects the monorepo structure and infers `rootDirectory: "web"`
+4. This results in looking for `/opt/buildhome/repo/web/web/.next` instead of `/opt/buildhome/repo/web/.next`
 
-**Solution**: Remove all Vercel configuration files from the repository. With no local Vercel config, `vercel build` treats the current directory (`/opt/buildhome/repo/web`) as the project root, creating `.next` at the correct location.
+## Final Solution
 
-## Cloudflare Pages Dashboard Settings
+### 1. Root `package.json` Configuration
 
-### ⚠️ CRITICAL: Must Use `pnpm run build:cf`
-
-**Root Directory**: `web`
-
-**Build Command**: 
-```bash
-pnpm run build:cf
-```
-
-**Build Output Directory**: 
-```txt
-.vercel/output/static
-```
-
-**DO NOT use**: `pnpm run build` (causes recursive invocation error)
-
-### Why Two Build Scripts?
-
-The `build` and `build:cf` scripts in `web/package.json`:
+**Remove** the `build:cf` script from root `package.json`. It should only have:
 
 ```json
-"build": "TURBOPACK=0 next build",
-"build:cf": "TURBOPACK=0 npx @cloudflare/next-on-pages@1"
+{
+  "name": "omni-cms",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web run build",
+    "start": "pnpm --filter web start",
+    "lint": "pnpm --filter web lint"
+  }
+}
 ```
 
-**Why this separation is necessary**:
-1. `@cloudflare/next-on-pages` internally runs `vercel build`
-2. `vercel build` looks for the `build` script in `package.json` and calls it
-3. If `build` is set to `next-on-pages`, it creates a recursive loop: `next-on-pages` → `vercel build` → `next-on-pages` → ...
-4. **Solution**: `build` must be `next build` (what `vercel build` expects), and `build:cf` is what Cloudflare Pages calls
+**DO NOT** include `"build:cf": "cd web && pnpm run build:cf"` in the root package.json.
 
-**How it works**:
-1. Cloudflare Pages runs `pnpm run build:cf`
-2. `build:cf` runs `npx @cloudflare/next-on-pages@1`
-3. `next-on-pages` internally runs `vercel build`
-4. `vercel build` calls the `build` script (`next build`), creating `.next` at `/opt/buildhome/repo/web/.next` ✅
-5. The adapter processes the output and generates `.vercel/output/static`
+### 2. `web/package.json` Configuration
+
+Keep these scripts:
+
+```json
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "TURBOPACK=0 next build",
+    "build:cf": "TURBOPACK=0 npx @cloudflare/next-on-pages@1",
+    "start": "next start",
+    // ... other scripts
+  }
+}
+```
+
+### 3. Cloudflare Pages Dashboard Settings
+
+**CRITICAL**: These settings must be exact:
+
+- **Root Directory**: `web` ⚠️ **MUST be set to `web`**
+- **Build Command**: `pnpm run build:cf` ⚠️ **MUST use this exact command**
+- **Build Output Directory**: `.vercel/output/static`
+
+**Why this works**:
+- With Root Directory = `web`, Cloudflare runs commands from `/opt/buildhome/repo/web`
+- Build Command `pnpm run build:cf` runs the script in `web/package.json`
+- No `cd web &&` in the root package.json means no double directory change
+- Vercel CLI treats `/opt/buildhome/repo/web` as the project root
+- `.next` is created at `/opt/buildhome/repo/web/.next` ✅
+- No double `web/web/.next` path issue ✅
+
+### 4. Ensure No Vercel Config Files
+
+**Verify these are NOT in the repository**:
+- `.vercel` folder (should be in `.gitignore`)
+- `vercel.json` file
+- `web/.vercel` folder
+- `web/vercel.json` file
+
+Check with:
+```bash
+git ls-files | grep -E '(\.vercel|vercel\.json)'
+```
+
+Should return nothing.
+
+### 5. `wrangler.toml` Location
+
+The `wrangler.toml` file should be in the `web/` directory (not repo root):
+
+```
+web/wrangler.toml
+```
+
+With content:
+```toml
+name = "omni-cms-sinc"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = ".vercel/output/static"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "omni-cms"
+database_id = "12aad490-4c2d-4cdb-b07f-0f536e20e994"
+
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "omni-cms-media"
+```
 
 ## Required Environment Variables
 
@@ -54,94 +109,51 @@ The `build` and `build:cf` scripts in `web/package.json`:
 
 **Location**: Cloudflare Dashboard → Pages → Your Project → Settings → Environment Variables
 
-This disables Turbopack (incompatible with the adapter) and forces webpack usage.
+## Build Flow (Correct)
 
-## Build Output
-
-The adapter generates output in `.vercel/output/static`, which is configured in `web/wrangler.toml`:
-
-```toml
-pages_build_output_dir = ".vercel/output/static"
-```
-
-**Note**: 
-- `pages_build_output_dir = ".vercel/output/static"` does NOT mean you're deploying to Vercel
-- It tells Cloudflare Pages where to find the built assets that follow Vercel's Build Output spec
-- `wrangler.toml` is kept because it contains D1 database and R2 bucket bindings needed for runtime
+1. Cloudflare Pages sets Root Directory to `web`
+2. Cloudflare runs `pnpm run build:cf` from `/opt/buildhome/repo/web`
+3. `build:cf` script runs `TURBOPACK=0 npx @cloudflare/next-on-pages@1`
+4. `next-on-pages` internally runs `vercel build`
+5. `vercel build` calls the `build` script (`TURBOPACK=0 next build`)
+6. Next.js creates `.next` at `/opt/buildhome/repo/web/.next` ✅
+7. Adapter processes output and generates `.vercel/output/static` ✅
+8. Cloudflare Pages finds output at `web/.vercel/output/static` ✅
 
 ## Troubleshooting
 
 ### Error: `web/web/.next` path not found
 
-If you still see this error:
+**Check**:
+1. Root `package.json` does NOT have `"build:cf": "cd web && ..."`
+2. Cloudflare Pages Root Directory is set to `web`
+3. Cloudflare Pages Build Command is `pnpm run build:cf` (not `pnpm run build` or anything with `cd web`)
+4. No `.vercel` folder or `vercel.json` file in the repository
+5. `wrangler.toml` is in `web/` directory
 
-1. **Verify Vercel config files are removed from the repo**:
-   ```bash
-   git ls-files | grep -E '(\.vercel|vercel\.json)'
-   ```
-   Should return nothing. If it shows files, remove them:
-   ```bash
-   git rm -r .vercel web/vercel.json 2>/dev/null || true
-   git commit -m "chore: remove local Vercel config for Cloudflare Pages"
-   git push
-   ```
+### Error: "No wrangler.toml file found"
 
-2. **Verify `.vercel` is in `.gitignore`**:
-   ```gitignore
-   .vercel
-   .vercel/output
-   ```
+**Check**:
+1. `wrangler.toml` exists in `web/` directory
+2. Cloudflare Pages Root Directory is set to `web` (so it looks in the right place)
 
-3. **Check Cloudflare Pages Settings**:
-   - Root Directory: `web`
-   - Build Command: `pnpm run build:cf` ⚠️ **MUST use this**
-   - Build Output Directory: `.vercel/output/static`
+### Error: "vercel build must not recursively invoke itself"
 
-4. **Verify TURBOPACK=0** is set in environment variables
-
-5. **Check build logs** - You should see:
-   ```
-   Executing user command: pnpm run build:cf
-   > TURBOPACK=0 npx @cloudflare/next-on-pages@1
-   ...
-   ```
-   And you should **NOT** see:
-   - Any path like `/web/web/.next/...`
-   - Error: "vercel build must not recursively invoke itself"
-
-## Local Testing
-
-To test the build locally:
-
-```bash
-# From the web directory
-cd web
-pnpm run build:cf
-```
-
-This runs the same script that Cloudflare Pages uses:
-- `TURBOPACK=0 npx @cloudflare/next-on-pages@1` - Runs the adapter which handles the build
-
-For local development without the adapter:
-
-```bash
-cd web
-pnpm run build
-```
+**Check**:
+1. `web/package.json` has `"build": "TURBOPACK=0 next build"` (NOT `next-on-pages`)
+2. `web/package.json` has `"build:cf": "TURBOPACK=0 npx @cloudflare/next-on-pages@1"` (separate script)
 
 ## Verification Checklist
 
-After configuring Cloudflare Pages:
+After configuring:
 
-- [ ] **Root Directory** is set to: `web`
-- [ ] **Build Command** is set to: `pnpm run build:cf` ⚠️ **MUST use this**
-- [ ] **Build Output Directory** is set to: `.vercel/output/static`
-- [ ] `build` script in `web/package.json` is `TURBOPACK=0 next build` (NOT `next-on-pages`)
-- [ ] `build:cf` script in `web/package.json` is `TURBOPACK=0 npx @cloudflare/next-on-pages@1`
-- [ ] **TURBOPACK=0** environment variable is set in Production (and Preview)
-- [ ] No `.vercel` folder or `vercel.json` file in the repository
-- [ ] `.vercel` is in `.gitignore`
-- [ ] Build logs show `pnpm run build` being executed
+- [ ] Root `package.json` does NOT have `build:cf` script with `cd web &&`
+- [ ] `web/package.json` has `build` = `TURBOPACK=0 next build`
+- [ ] `web/package.json` has `build:cf` = `TURBOPACK=0 npx @cloudflare/next-on-pages@1`
+- [ ] Cloudflare Pages Root Directory = `web`
+- [ ] Cloudflare Pages Build Command = `pnpm run build:cf`
+- [ ] Cloudflare Pages Build Output Directory = `.vercel/output/static`
+- [ ] `TURBOPACK=0` environment variable is set
+- [ ] No `.vercel` folder or `vercel.json` file in repository
+- [ ] `wrangler.toml` is in `web/` directory
 - [ ] Build logs show paths like `/opt/buildhome/repo/web/.next` (NOT `/web/web/.next`)
-- [ ] Build completes without `web/web/.next` path error
-- [ ] `.vercel/output/static` directory is generated correctly
