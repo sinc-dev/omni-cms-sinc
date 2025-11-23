@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "pnpm --filter web dev",
-    "build": "cd web && TURBOPACK=0 npx @cloudflare/next-on-pages",
+    "build": "cd web && TURBOPACK=0 next build && npx @cloudflare/next-on-pages --skip-build",
     "start": "pnpm --filter web start",
     "lint": "pnpm --filter web lint"
   }
