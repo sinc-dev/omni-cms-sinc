@@ -8,13 +8,13 @@ The `web/web/.next` path error was caused by Vercel configuration files (`.verce
 
 ## Cloudflare Pages Dashboard Settings
 
-### Required Configuration
+### ⚠️ CRITICAL: Must Use `pnpm run build:cf`
 
 **Root Directory**: `web`
 
 **Build Command**: 
 ```bash
-pnpm run build
+pnpm run build:cf
 ```
 
 **Build Output Directory**: 
@@ -22,26 +22,29 @@ pnpm run build
 .vercel/output/static
 ```
 
-**Why this works**:
-- With root directory = `web`, Cloudflare runs commands from `/opt/buildhome/repo/web`
-- Without Vercel config files, `vercel build` treats the current directory as project root
-- `.next` is created at `/opt/buildhome/repo/web/.next` ✅
-- No double `web/web/.next` path issue ✅
+**DO NOT use**: `pnpm run build` (causes recursive invocation error)
 
-### Build Script
+### Why Two Build Scripts?
 
-The `build` script in `web/package.json`:
+The `build` and `build:cf` scripts in `web/package.json`:
 
 ```json
-"build": "TURBOPACK=0 npx @cloudflare/next-on-pages@1"
+"build": "TURBOPACK=0 next build",
+"build:cf": "TURBOPACK=0 npx @cloudflare/next-on-pages@1"
 ```
 
-**How it works**:
-1. `@cloudflare/next-on-pages` runs `vercel build` internally
-2. `vercel build` runs `next build`, creating `.next` at `/opt/buildhome/repo/web/.next` ✅
-3. The adapter processes the output and generates `.vercel/output/static`
+**Why this separation is necessary**:
+1. `@cloudflare/next-on-pages` internally runs `vercel build`
+2. `vercel build` looks for the `build` script in `package.json` and calls it
+3. If `build` is set to `next-on-pages`, it creates a recursive loop: `next-on-pages` → `vercel build` → `next-on-pages` → ...
+4. **Solution**: `build` must be `next build` (what `vercel build` expects), and `build:cf` is what Cloudflare Pages calls
 
-**Note**: There's also a `build:local` script for local development that just runs `next build` without the adapter.
+**How it works**:
+1. Cloudflare Pages runs `pnpm run build:cf`
+2. `build:cf` runs `npx @cloudflare/next-on-pages@1`
+3. `next-on-pages` internally runs `vercel build`
+4. `vercel build` calls the `build` script (`next build`), creating `.next` at `/opt/buildhome/repo/web/.next` ✅
+5. The adapter processes the output and generates `.vercel/output/static`
 
 ## Required Environment Variables
 
@@ -91,18 +94,20 @@ If you still see this error:
 
 3. **Check Cloudflare Pages Settings**:
    - Root Directory: `web`
-   - Build Command: `pnpm run build`
+   - Build Command: `pnpm run build:cf` ⚠️ **MUST use this**
    - Build Output Directory: `.vercel/output/static`
 
 4. **Verify TURBOPACK=0** is set in environment variables
 
 5. **Check build logs** - You should see:
    ```
-   Executing user command: pnpm run build
+   Executing user command: pnpm run build:cf
    > TURBOPACK=0 npx @cloudflare/next-on-pages@1
    ...
    ```
-   And you should **NOT** see any path like `/web/web/.next/...`
+   And you should **NOT** see:
+   - Any path like `/web/web/.next/...`
+   - Error: "vercel build must not recursively invoke itself"
 
 ## Local Testing
 
@@ -111,7 +116,7 @@ To test the build locally:
 ```bash
 # From the web directory
 cd web
-pnpm run build
+pnpm run build:cf
 ```
 
 This runs the same script that Cloudflare Pages uses:
@@ -121,7 +126,7 @@ For local development without the adapter:
 
 ```bash
 cd web
-pnpm run build:local
+pnpm run build
 ```
 
 ## Verification Checklist
@@ -129,8 +134,10 @@ pnpm run build:local
 After configuring Cloudflare Pages:
 
 - [ ] **Root Directory** is set to: `web`
-- [ ] **Build Command** is set to: `pnpm run build`
+- [ ] **Build Command** is set to: `pnpm run build:cf` ⚠️ **MUST use this**
 - [ ] **Build Output Directory** is set to: `.vercel/output/static`
+- [ ] `build` script in `web/package.json` is `TURBOPACK=0 next build` (NOT `next-on-pages`)
+- [ ] `build:cf` script in `web/package.json` is `TURBOPACK=0 npx @cloudflare/next-on-pages@1`
 - [ ] **TURBOPACK=0** environment variable is set in Production (and Preview)
 - [ ] No `.vercel` folder or `vercel.json` file in the repository
 - [ ] `.vercel` is in `.gitignore`
