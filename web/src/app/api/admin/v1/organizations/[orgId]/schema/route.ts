@@ -3,8 +3,6 @@ import { withAuth } from '@/lib/api/auth-wrapper';
 import { successResponse, Errors } from '@/lib/api/response';
 import { postTypes, customFields, taxonomies, taxonomyTerms } from '@/db/schema';
 import {
-export const runtime = 'edge';
-
   PostStatus,
   CustomFieldType,
   FilterOperator,
@@ -12,6 +10,8 @@ export const runtime = 'edge';
   SortDirection,
   EntityType,
 } from '@/lib/types/enums';
+
+export const runtime = 'edge';
 
 /**
  * GET /api/admin/v1/organizations/:orgId/schema

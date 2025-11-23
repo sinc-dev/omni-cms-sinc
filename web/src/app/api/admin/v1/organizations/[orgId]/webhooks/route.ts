@@ -5,9 +5,17 @@ import { successResponse, paginatedResponse, Errors } from '@/lib/api/response';
 import { validateRequest, getPaginationParams, getOffset } from '@/lib/api/validation';
 import { webhooks } from '@/db/schema/webhooks';
 import { z } from 'zod';
-import { randomBytes } from 'crypto';
 
 export const runtime = 'edge';
+
+// Web Crypto compatible replacement for randomBytes(size).toString('hex')
+function generateSecret(size: number = 32) {
+  const array = new Uint8Array(size);
+  crypto.getRandomValues(array);
+  return Array.from(array)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 const createWebhookSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -56,7 +64,7 @@ export const POST = withAuth(
     if (!validation.success) return validation.response;
 
     // Generate secret for HMAC signing (32 bytes = 64 hex characters)
-    const secret = randomBytes(32).toString('hex');
+    const secret = generateSecret(32);
 
     const newWebhook = await db
       .insert(webhooks)
