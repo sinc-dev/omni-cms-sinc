@@ -4,7 +4,7 @@
 
 The `web/web/.next` path error occurs because `@cloudflare/next-on-pages` internally runs `npx vercel build`, which has its own understanding of the project's `rootDirectory`. Even without a `.vercel` folder in the repo, `vercel build` still thinks the root directory is `web`, and when Cloudflare Pages already sets the working directory to `/opt/buildhome/repo/web`, it results in `/opt/buildhome/repo/web/web/.next`.
 
-**Solution**: **Stop using `vercel build` entirely**. Run `next build` manually, then use the adapter with `--skip-build` to process the output without running `vercel build`.
+**Solution**: Run `vercel build` explicitly in the correct context (current directory), then use the adapter with `--skip-build` to process the output. This ensures `.vercel/output` is created correctly without the path issue.
 
 ## Cloudflare Pages Dashboard Settings
 
@@ -29,18 +29,20 @@ pnpm run build:cf
 The `build:cf` script in `web/package.json`:
 
 ```json
-"build:cf": "TURBOPACK=0 next build && npx @cloudflare/next-on-pages@1 --skip-build"
+"build:cf": "TURBOPACK=0 next build && TURBOPACK=0 npx vercel build --yes && npx @cloudflare/next-on-pages@1 --skip-build"
 ```
 
 **Step-by-step**:
 1. `TURBOPACK=0 next build` - Runs Next.js build in the current directory (`/opt/buildhome/repo/web`), creating `.next` at `/opt/buildhome/repo/web/.next` ✅
-2. `npx @cloudflare/next-on-pages@1 --skip-build` - Processes the existing `.next` output without running `vercel build`
-3. The `--skip-build` flag prevents the adapter from running `vercel build`, which would incorrectly look for `web/web/.next`
+2. `TURBOPACK=0 npx vercel build --yes` - Runs `vercel build` explicitly in the current directory context, creating `.vercel/output` structure correctly ✅
+3. `npx @cloudflare/next-on-pages@1 --skip-build` - Processes the existing `.vercel/output` without running `vercel build` again
+4. The `--skip-build` flag prevents the adapter from running `vercel build` again, avoiding duplicate builds
 
 **Why this works**:
 - We run `next build` ourselves in the correct location
-- The adapter skips its internal `vercel build` step
-- No double `web/web/.next` path issue ✅
+- We run `vercel build` explicitly in the current directory (not from a nested context)
+- Since we're already in `/opt/buildhome/repo/web` and there's no `.vercel` folder saying `rootDirectory: "web"`, `vercel build` treats the current directory as root ✅
+- The adapter then processes the output without running `vercel build` again
 
 ## Required Environment Variables
 
