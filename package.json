@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "pnpm --filter web dev",
-    "build": "pnpm --filter web run build:cf",
-    "build:cf": "cd web && pnpm run build:cf",
+    "build": "pnpm --filter web run build",
     "start": "pnpm --filter web start",
     "lint": "pnpm --filter web lint"
   }
