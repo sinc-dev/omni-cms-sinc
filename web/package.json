@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev", 
-    "build": "TURBOPACK=0 npx @cloudflare/next-on-pages",
+    "build": "TURBOPACK=0 next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
