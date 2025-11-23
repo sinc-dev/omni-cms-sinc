@@ -58,8 +58,9 @@ try {
     // This ensures next build runs exactly once (inside the adapter)
     console.log('Running @cloudflare/next-on-pages adapter...');
     console.log('The adapter will run the build internally with TURBOPACK=0');
-    // Explicitly set projectDir to current directory to prevent adapter from looking in web/web/.next
-    execSync('npx @cloudflare/next-on-pages --projectDir .', {
+    // Note: --projectDir flag is not supported in this version of @cloudflare/next-on-pages
+    // The adapter will use the current working directory (which is already /opt/buildhome/repo/web)
+    execSync('npx @cloudflare/next-on-pages', {
       stdio: 'inherit',
       env: buildEnv,
       shell: true,
