@@ -62,8 +62,5 @@
     "typescript": "^5",
     "vitest": "^4.0.13",
     "wrangler": "^3.22.1"
-  },
-  "next-on-pages": {
-    "projectDir": "."
   }
 }
