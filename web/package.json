@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && npx @cloudflare/next-on-pages",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
@@ -44,6 +44,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.16",
     "@cloudflare/workers-types": "^4.20231218.0",
     "@miniflare/d1": "^2.14.4",
     "@tailwindcss/postcss": "^4",
