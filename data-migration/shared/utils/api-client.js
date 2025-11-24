@@ -53,7 +53,9 @@ export async function apiRequest(url, options = {}) {
       } catch {
         errorData = { message: errorText };
       }
-      throw new Error(`API Error ${response.status}: ${errorData.message || response.statusText}`);
+      // Extract error message from nested error object if present
+      const errorMessage = errorData.error?.message || errorData.message || response.statusText;
+      throw new Error(`API Error ${response.status}: ${errorMessage}`);
     }
 
     const data = await response.json();
@@ -169,20 +171,47 @@ export async function createCustomField(baseUrl, orgId, fieldData) {
 }
 
 /**
- * Create post
+ * Get existing posts for a post type
  */
-export async function createPost(baseUrl, orgId, postData) {
-  const url = `${baseUrl}/api/admin/v1/organizations/${orgId}/posts`;
-  const data = await apiRequest(url, {
-    method: 'POST',
-    body: postData,
-  });
+export async function getExistingPosts(baseUrl, orgId, postTypeId, apiKey = null) {
+  const url = `${baseUrl}/api/admin/v1/organizations/${orgId}/posts?postTypeId=${postTypeId}`;
+  const data = await apiRequest(url, { apiKey });
   
-  if (!data.success) {
-    throw new Error(`Failed to create post: ${data.message || 'Unknown error'}`);
+  if (!data.success || !data.data) {
+    return [];
   }
 
-  return data.data;
+  return Array.isArray(data.data) ? data.data : [data.data];
+}
+
+/**
+ * Create post
+ */
+export async function createPost(baseUrl, orgId, postData, apiKey = null) {
+  const url = `${baseUrl}/api/admin/v1/organizations/${orgId}/posts`;
+  
+  try {
+    const data = await apiRequest(url, {
+      method: 'POST',
+      body: postData,
+      apiKey,
+    });
+    
+    if (!data.success) {
+      const errorMsg = data.error?.message || data.message || 'Unknown error';
+      const errorDetails = data.error ? JSON.stringify(data.error) : '';
+      throw new Error(`Failed to create post: ${errorMsg}${errorDetails ? ` (${errorDetails})` : ''}`);
+    }
+
+    return data.data;
+  } catch (error) {
+    // If it's already our formatted error, re-throw it
+    if (error.message && error.message.includes('Failed to create post')) {
+      throw error;
+    }
+    // Otherwise, wrap it
+    throw new Error(`API Error ${error.status || 500}: ${error.message || 'Internal Server Error'}`);
+  }
 }
 
 /**
@@ -204,33 +233,75 @@ export async function createPostRelationship(baseUrl, orgId, postId, relationshi
 
 /**
  * Upload media file
+ * Uses two-step process: request upload URL, then upload file
  */
 export async function uploadMedia(baseUrl, orgId, file, metadata = {}) {
+  // Step 1: Request upload URL with metadata
   const url = `${baseUrl}/api/admin/v1/organizations/${orgId}/media`;
   
-  const formData = new FormData();
-  formData.append('file', file);
-  if (metadata.alt_text) formData.append('alt_text', metadata.alt_text);
-  if (metadata.caption) formData.append('caption', metadata.caption);
-
   const apiKey = getApiKey();
-  const headers = {};
+  const headers = {
+    'Content-Type': 'application/json',
+  };
   if (apiKey) {
     headers['Authorization'] = `Bearer ${apiKey}`;
   }
 
-  const response = await fetch(url, {
+  // Request upload URL
+  const requestBody = {
+    filename: file.name,
+    mimeType: file.type || 'application/octet-stream',
+    fileSize: file.size,
+  };
+
+  const requestResponse = await fetch(url, {
     method: 'POST',
     headers,
-    body: formData,
+    body: JSON.stringify(requestBody),
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Failed to upload media: ${errorText}`);
+  if (!requestResponse.ok) {
+    const errorText = await requestResponse.text();
+    throw new Error(`Failed to request upload URL: ${errorText}`);
   }
 
-  const data = await response.json();
-  return data.data;
+  const requestData = await requestResponse.json();
+  if (!requestData.success) {
+    throw new Error(`Failed to request upload URL: ${requestData.error?.message || 'Unknown error'}`);
+  }
+
+  const { uploadUrl, media: mediaRecord } = requestData.data;
+
+  // Step 2: Upload file to presigned URL
+  const uploadResponse = await fetch(uploadUrl, {
+    method: 'PUT',
+    body: file,
+    headers: {
+      'Content-Type': file.type || 'application/octet-stream',
+    },
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`Failed to upload file: ${uploadResponse.statusText}`);
+  }
+
+  // Step 3: Update media record with metadata (alt_text, caption)
+  if (metadata.alt_text || metadata.caption) {
+    const updateUrl = `${baseUrl}/api/admin/v1/organizations/${orgId}/media/${mediaRecord.id}`;
+    const updateResponse = await fetch(updateUrl, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({
+        altText: metadata.alt_text || null,
+        caption: metadata.caption || null,
+      }),
+    });
+
+    if (!updateResponse.ok) {
+      console.warn(`Failed to update media metadata: ${updateResponse.statusText}`);
+    }
+  }
+
+  return mediaRecord;
 }
 

@@ -13,6 +13,28 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
+ * Sanitize slug to match validation requirements (lowercase letters, numbers, and hyphens only)
+ * Handles Unicode characters, special characters, and converts them to URL-safe format
+ */
+function sanitizeSlug(originalSlug) {
+  if (!originalSlug) return '';
+  
+  return originalSlug
+    .toLowerCase()
+    .trim()
+    // Replace spaces and underscores with hyphens
+    .replace(/[\s_]+/g, '-')
+    // Replace special characters (including slashes, Cyrillic, etc.) with hyphens
+    .replace(/[^a-z0-9-]/g, '-')
+    // Replace multiple consecutive hyphens with single hyphen
+    .replace(/-+/g, '-')
+    // Remove leading and trailing hyphens
+    .replace(/^-+|-+$/g, '')
+    // Ensure it's not empty (fallback to 'term' if empty after sanitization)
+    || 'term';
+}
+
+/**
  * Import taxonomy terms for an organization
  */
 export async function importTaxonomyTerms(baseUrl, orgId, orgSlug, taxonomyMap) {
@@ -123,11 +145,16 @@ async function importTermsForTaxonomy(baseUrl, orgId, taxonomyId, taxonomySlug, 
   for (const term of sortedTerms) {
     const key = `${taxonomySlug}-${term.id}`;
     
-    // Skip if already exists
-    if (existingSlugs.has(term.slug)) {
-      const existingTerm = existingTerms.find(t => t.slug === term.slug);
-      termMap.set(key, existingTerm.id);
-      continue;
+    // Sanitize slug for comparison
+    const sanitizedSlug = sanitizeSlug(term.slug || term.name);
+    
+    // Skip if already exists (check by sanitized slug)
+    if (existingSlugs.has(sanitizedSlug)) {
+      const existingTerm = existingTerms.find(t => t.slug === sanitizedSlug);
+      if (existingTerm) {
+        termMap.set(key, existingTerm.id);
+        continue;
+      }
     }
 
     // Map parent ID if it exists
@@ -143,11 +170,15 @@ async function importTermsForTaxonomy(baseUrl, orgId, taxonomyId, taxonomySlug, 
     try {
       const created = await createTaxonomyTerm(baseUrl, orgId, taxonomyId, {
         name: term.name,
-        slug: term.slug,
+        slug: sanitizedSlug,
         description: term.description || '',
         parent_id: parentId || null,
       });
       termMap.set(key, created.id);
+      // Log if slug was changed
+      if (sanitizedSlug !== term.slug) {
+        console.log(`   ✓ Created term "${term.name}" (slug: ${term.slug} → ${sanitizedSlug})`);
+      }
     } catch (error) {
       console.error(`   ✗ Failed to create term "${term.name}":`, error.message);
       // Continue with other terms

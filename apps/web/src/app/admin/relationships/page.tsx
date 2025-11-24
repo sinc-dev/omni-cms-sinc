@@ -10,6 +10,8 @@ import { useOrganization } from '@/lib/context/organization-context';
 import { useSchema } from '@/lib/context/schema-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { FilterBar } from '@/components/admin/filters/filter-bar';
+import { useFilterParams } from '@/lib/hooks/use-filter-params';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RelationshipGraph } from '@/components/admin/relationships/relationship-graph';
@@ -41,13 +43,16 @@ export default function RelationshipsPage() {
   const api = useApiClient();
   const { error, clearError, withErrorHandling } = useErrorHandler();
   const { getRelationshipTypes, getRelationshipTypeColor } = useSchema();
+  const { getFilter, updateFilters } = useFilterParams();
   const [posts, setPosts] = useState<Post[]>([]);
   const [relationships, setRelationships] = useState<Relationship[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [selectedPostType, setSelectedPostType] = useState<string>('all');
-  const [selectedRelationshipType, setSelectedRelationshipType] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'list' | 'graph'>('list');
+  
+  // Get filter values from URL
+  const selectedPostType = getFilter('post_type') || 'all';
+  const selectedRelationshipType = getFilter('relationship_type') || 'all';
 
   useEffect(() => {
     if (!organization || !api || orgLoading) {
@@ -169,55 +174,49 @@ export default function RelationshipsPage() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <FilterBar
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search posts..."
+            quickFilters={[
+              {
+                key: 'post_type',
+                label: 'Post Type',
+                value: selectedPostType,
+                options: [
+                  { value: 'all', label: 'All Types' },
+                  ...postTypes.map((pt) => ({
+                    value: pt.id,
+                    label: pt.name,
+                  })),
+                ],
+                onChange: (value) =>
+                  updateFilters({ post_type: value === 'all' ? undefined : value }),
+              },
+              {
+                key: 'relationship_type',
+                label: 'Relationship Type',
+                value: selectedRelationshipType,
+                options: [
+                  { value: 'all', label: 'All Types' },
+                  ...relationshipTypes.map((type) => ({
+                    value: type,
+                    label: type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, ' '),
+                  })),
+                ],
+                onChange: (value) =>
+                  updateFilters({ relationship_type: value === 'all' ? undefined : value }),
+              },
+            ]}
+            onClearAll={() => {
+              setSearch('');
+              updateFilters({
+                post_type: undefined,
+                relationship_type: undefined,
+              });
+            }}
+          />
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search posts..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">Post Type</label>
-              <select
-                aria-label="Select post type"
-                title="Select post type"
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={selectedPostType}
-                onChange={(e) => setSelectedPostType(e.target.value)}
-              >
-                <option value="all">All Types</option>
-                {postTypes.map((pt) => (
-                  <option key={pt.id} value={pt.id}>
-                    {pt.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">Relationship Type</label>
-              <select
-                aria-label="Select relationship type"
-                title="Select relationship type"
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={selectedRelationshipType}
-                onChange={(e) => setSelectedRelationshipType(e.target.value)}
-              >
-                <option value="all">All Types</option>
-                {relationshipTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, ' ')}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </CardContent>
       </Card>
 
       {/* Relationships View */}

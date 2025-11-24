@@ -49,8 +49,8 @@ export async function importTaxonomies(baseUrl, orgId, orgSlug) {
     const customTaxonomiesData = await fs.readFile(customTaxonomiesPath, 'utf-8');
     const customTaxonomies = JSON.parse(customTaxonomiesData);
     customTaxonomySlugs = Object.keys(customTaxonomies).map(slug => ({
-      name: slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-      slug: slug,
+      name: slug.split(/[-_]/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+      slug: slug.replace(/_/g, '-'), // Convert underscores to hyphens for valid slug
       isHierarchical: false, // Most custom taxonomies are flat, but could be enhanced
     }));
   } catch (error) {

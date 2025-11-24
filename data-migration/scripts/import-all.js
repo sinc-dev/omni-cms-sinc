@@ -90,7 +90,7 @@ async function importOrganization(orgSlug, baseUrl, apiKey) {
     // Step 6: Import Posts
     console.log('7. Importing posts...');
     const testLimit = TEST_MODE ? TEST_LIMIT : null;
-    const postMap = await importPosts(baseUrl, orgId, orgSlug, postTypeMap, termMap, customFieldMap, mediaMap, testLimit);
+    const postMap = await importPosts(baseUrl, orgId, orgSlug, postTypeMap, termMap, customFieldMap, mediaMap, testLimit, apiKey);
     console.log(`   ✓ Imported posts\n`);
 
     // Step 7: Import Relationships

@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { eq, and, sql, desc, gte, lte, like } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import type { CloudflareBindings } from '../../types';
-import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-middleware';
+import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-admin-middleware';
 import { successResponse, paginatedResponse, Errors } from '../../lib/api/hono-response';
 import { getPaginationParams, getOffset } from '../../lib/api/validation';
 import { z } from 'zod';
@@ -112,7 +112,8 @@ app.post(
   orgAccessMiddleware,
   permissionMiddleware('media:upload'),
   async (c) => {
-    const { db, user, organizationId } = getAuthContext(c);
+    const context = getAuthContext(c);
+    const { db, user, organizationId, apiKey } = context;
     
     try {
       const body = await c.req.json();
@@ -126,13 +127,27 @@ app.post(
         c.env
       );
 
+      // Ensure organizationId is defined
+      if (!organizationId) {
+        return c.json(Errors.badRequest('Organization ID required'), 400);
+      }
+
+      // For API key auth, use system user ID
+      // For Cloudflare Access, use the authenticated user ID
+      const uploaderId = apiKey 
+        ? 'system-user-api' // System user for API operations
+        : user?.id;
+
+      if (!uploaderId) {
+        return c.json(Errors.badRequest('User authentication required for media upload'), 401);
+      }
+
       // Create media record with 'uploading' status
       const newMedia = await db
         .insert(media)
         .values({
-          id: nanoid(),
-          organizationId: organizationId!,
-          uploaderId: user.id,
+          organizationId,
+          uploaderId,
           filename,
           fileKey,
           mimeType,

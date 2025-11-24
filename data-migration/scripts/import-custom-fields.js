@@ -93,10 +93,17 @@ async function analyzeCustomFields(orgSlug) {
               .map(word => word.charAt(0).toUpperCase() + word.slice(1))
               .join(' ');
 
+            // Convert slug to valid format (lowercase, underscores only)
+            const validSlug = fieldSlug
+              .toLowerCase()
+              .replace(/[^a-z0-9_]/g, '_') // Replace invalid chars with underscore
+              .replace(/_+/g, '_') // Replace multiple underscores with single
+              .replace(/^_|_$/g, ''); // Remove leading/trailing underscores
+
             fieldDefinitions.set(fieldSlug, {
               name: fieldName,
-              slug: fieldSlug,
-              field_type: fieldType,
+              slug: validSlug,
+              fieldType: fieldType, // Use camelCase for API
               settings: {},
             });
           }
@@ -137,16 +144,24 @@ export async function importCustomFields(baseUrl, orgId, orgSlug) {
 
   // Get existing custom fields
   const existing = await getExistingCustomFields(baseUrl, orgId);
-  const existingSlugs = new Set(existing.map(f => f.slug));
+  const existingSlugs = new Set(existing.map(f => f.slug.toLowerCase())); // Use lowercase for comparison
+  
+  // Debug: Log first few existing slugs if we have many fields to import
+  if (fieldDefinitions.size > 0 && existing.length > 0) {
+    console.log(`   Found ${existing.length} existing custom fields in database`);
+  }
 
   // Create custom fields
   for (const [fieldSlug, definition] of fieldDefinitions) {
-    // Skip if already exists
-    if (existingSlugs.has(fieldSlug)) {
-      const existingField = existing.find(f => f.slug === fieldSlug);
-      customFieldMap.set(fieldSlug, existingField.id);
-      console.log(`   ⏭️  Custom field "${definition.name}" already exists (${existingField.id})`);
-      continue;
+    // Skip if already exists (check by slug, case-insensitive)
+    const normalizedSlug = definition.slug.toLowerCase();
+    if (existingSlugs.has(normalizedSlug)) {
+      const existingField = existing.find(f => f.slug.toLowerCase() === normalizedSlug);
+      if (existingField) {
+        customFieldMap.set(fieldSlug, existingField.id);
+        console.log(`   ⏭️  Custom field "${definition.name}" already exists (${existingField.id})`);
+        continue;
+      }
     }
 
     try {
@@ -154,7 +169,37 @@ export async function importCustomFields(baseUrl, orgId, orgSlug) {
       customFieldMap.set(fieldSlug, created.id);
       console.log(`   ✓ Created custom field "${definition.name}" (${created.id})`);
     } catch (error) {
-      console.error(`   ✗ Failed to create custom field "${definition.name}":`, error.message);
+      // If field already exists, fetch it and map it
+      if (error.message && error.message.includes('already exists')) {
+        // Re-fetch existing fields to get the one that matches
+        const updatedExisting = await getExistingCustomFields(baseUrl, orgId);
+        const normalizedSlug = definition.slug.toLowerCase();
+        // Try to find by slug (case-insensitive)
+        let matchingField = updatedExisting.find(f => 
+          f.slug.toLowerCase() === normalizedSlug
+        );
+        // If not found, try to find by name (case-insensitive)
+        if (!matchingField) {
+          matchingField = updatedExisting.find(f => 
+            f.name.toLowerCase() === definition.name.toLowerCase()
+          );
+        }
+        // Last resort: try to find by original fieldSlug (case-insensitive)
+        if (!matchingField && fieldSlug) {
+          matchingField = updatedExisting.find(f => 
+            f.slug.toLowerCase() === fieldSlug.toLowerCase()
+          );
+        }
+        if (matchingField) {
+          customFieldMap.set(fieldSlug, matchingField.id);
+          console.log(`   ⏭️  Custom field "${definition.name}" already exists (${matchingField.id})`);
+        } else {
+          // Last resort: log warning but continue
+          console.warn(`   ⚠ Custom field "${definition.name}" (slug: ${definition.slug}) already exists but could not be mapped`);
+        }
+      } else {
+        console.error(`   ✗ Failed to create custom field "${definition.name}":`, error.message);
+      }
       // Continue with other fields
     }
   }

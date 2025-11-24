@@ -187,6 +187,9 @@ export function useApiClient() {
       getOrganization: (orgId: string) => apiClient.getOrganization(orgId),
       createOrganization: (data: unknown) => apiClient.createOrganization(data),
       updateOrganization: (orgId: string, data: unknown) => apiClient.updateOrganization(orgId, data),
+      // Profile (doesn't require organization)
+      getCurrentUser: () => apiClient.getCurrentUser(),
+      updateProfile: (data: { name?: string; avatarUrl?: string | null }) => apiClient.updateProfile(data),
     };
   }, [organization]);
 }

@@ -127,10 +127,11 @@ app.post(
       const body = await c.req.json();
       const postData = createPostSchema.parse(body);
 
-      // For API key auth, use a system user ID or the API key ID as author
-      // In practice, you might want to create a system user for API operations
-      const authorId = authMethod === 'api-key' 
-        ? apiKey?.id || 'system' // Use API key ID or 'system' as fallback
+      // For API key auth, use system user ID
+      // For Cloudflare Access, use the authenticated user ID
+      // Check for API key first (even if authMethod says cloudflare-access)
+      const authorId = apiKey 
+        ? 'system-user-api' // System user for API operations
         : user?.id;
 
       if (!authorId) {
@@ -138,6 +139,18 @@ app.post(
       }
 
       const postId = nanoid();
+      
+      // Handle dates - convert Unix timestamps (seconds) to Date objects if provided
+      const createdAt = (postData.createdAt && typeof postData.createdAt === 'number')
+        ? new Date(postData.createdAt * 1000) 
+        : new Date();
+      const updatedAt = (postData.updatedAt && typeof postData.updatedAt === 'number')
+        ? new Date(postData.updatedAt * 1000) 
+        : new Date();
+      const publishedAt = (postData.publishedAt && typeof postData.publishedAt === 'number')
+        ? new Date(postData.publishedAt * 1000)
+        : (postData.status === 'published' ? new Date() : null);
+      
       const newPost = await db.insert(posts).values({
         id: postId,
         organizationId: organizationId!,
@@ -148,10 +161,15 @@ app.post(
         excerpt: postData.excerpt || null,
         content: postData.content || null,
         status: postData.status || 'draft',
-        publishedAt: postData.status === 'published' ? new Date() : null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        publishedAt: publishedAt,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
       }).returning();
+
+      const newPostArray = Array.isArray(newPost) ? newPost : [newPost];
+      if (newPostArray.length === 0) {
+        throw new Error('Failed to create post: No post returned from database');
+      }
 
       // Handle custom fields if provided
       if (postData.customFields && Object.keys(postData.customFields).length > 0) {
@@ -195,28 +213,39 @@ app.post(
         }
       }
 
-      // Invalidate cache
-      await invalidatePostCache(organizationId!, postId, db as any);
+      // Invalidate cache (non-blocking)
+      try {
+        await invalidatePostCache(organizationId!, postId, db as any);
+      } catch (error) {
+        console.warn('Failed to invalidate cache:', error);
+      }
 
-      // Dispatch webhook
-      await dispatchWebhook(db, organizationId!, {
-        event: 'post.created',
-        data: {
-          postId,
-          post: newPost[0],
-        },
-        timestamp: new Date().toISOString(),
-      });
+      // Dispatch webhook (non-blocking)
+      try {
+        await dispatchWebhook(db, organizationId!, {
+          event: 'post.created',
+          data: {
+            postId,
+            post: newPostArray[0],
+          },
+          timestamp: new Date().toISOString(),
+        });
+      } catch (error) {
+        console.warn('Failed to dispatch webhook:', error);
+      }
 
-      return c.json(successResponse(newPost[0]));
+      return c.json(successResponse(newPostArray[0]));
     } catch (error) {
       if (error && typeof error === 'object' && 'issues' in error) {
         return c.json(Errors.validationError((error as any).issues), 400);
       }
-      console.error('Error creating post:', error);
-      return c.json(Errors.serverError(
-        error instanceof Error ? error.message : 'Failed to create post'
-      ), 500);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      console.error('Error creating post:', errorMessage);
+      if (errorStack) {
+        console.error('Stack trace:', errorStack);
+      }
+      return c.json(Errors.serverError(errorMessage), 500);
     }
   }
 );

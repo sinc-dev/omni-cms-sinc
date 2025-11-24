@@ -749,6 +749,18 @@ class ApiClient {
   async getDatabaseSchema(orgId: string) {
     return this.request(`/api/admin/v1/organizations/${orgId}/schema/database`);
   }
+
+  // Profile
+  async getCurrentUser() {
+    return this.request('/api/admin/v1/profile');
+  }
+
+  async updateProfile(data: { name?: string; avatarUrl?: string | null }) {
+    return this.request('/api/admin/v1/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 export const apiClient = new ApiClient();

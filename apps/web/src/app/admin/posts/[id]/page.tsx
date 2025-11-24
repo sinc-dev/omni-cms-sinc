@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Eye, ExternalLink } from 'lucide-react';
 import { TipTapEditor } from '@/components/admin/editor/tiptap-editor';
 import { CustomFieldRenderer } from '@/components/admin/editor/custom-field-renderer';
 import { MediaPicker } from '@/components/admin/editor/media-picker';
@@ -404,6 +404,20 @@ export default function EditPostPage() {
             lastSavedAt={autoSave.lastSavedAt}
           />
           <div className="flex items-center gap-2">
+            {status === 'published' && organization && slug && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+                  const previewUrl = `${baseUrl}/api/public/v1/${organization.slug}/posts/${slug}`;
+                  window.open(previewUrl, '_blank');
+                }}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Preview
+                <ExternalLink className="ml-2 h-3 w-3" />
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={() => handleSubmit(true)}

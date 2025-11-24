@@ -40,6 +40,8 @@ import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { useSchema } from '@/lib/hooks/use-schema';
 import { Textarea } from '@/components/ui/textarea';
+import { FilterBar } from '@/components/admin/filters/filter-bar';
+import { useFilterParams } from '@/lib/hooks/use-filter-params';
 
 interface CustomField {
   id: string;
@@ -108,6 +110,7 @@ export default function CustomFieldsPage() {
 
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
   const { schema: customFieldsSchema } = useSchema('custom-fields');
+  const { getFilter, updateFilters } = useFilterParams();
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -115,7 +118,9 @@ export default function CustomFieldsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingField, setEditingField] = useState<CustomField | null>(null);
   const [saving, setSaving] = useState(false);
-  const [filterType, setFilterType] = useState<string>('all');
+  
+  // Get filter values from URL
+  const filterType = getFilter('field_type') || 'all';
 
   // Form state
   const [name, setName] = useState('');
@@ -362,33 +367,31 @@ export default function CustomFieldsPage() {
 
       <Card>
         <CardHeader>
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            {/* Search */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search custom fields..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-
-            {/* Type Filter */}
-            <select
-              aria-label="Filter by Type"
-              className="w-[180px] rounded-md border border-input bg-background px-3 py-2 text-sm"
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-            >
-              <option value="all">All Types</option>
-              {fieldTypes.map((ft) => (
-                <option key={ft.type} value={ft.type}>
-                  {ft.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <FilterBar
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search custom fields..."
+            quickFilters={[
+              {
+                key: 'field_type',
+                label: 'Field Type',
+                value: filterType,
+                options: [
+                  { value: 'all', label: 'All Types' },
+                  ...fieldTypes.map((ft) => ({
+                    value: ft.type,
+                    label: ft.label,
+                  })),
+                ],
+                onChange: (value) =>
+                  updateFilters({ field_type: value === 'all' ? undefined : value }),
+              },
+            ]}
+            onClearAll={() => {
+              setSearch('');
+              updateFilters({ field_type: undefined });
+            }}
+          />
         </CardHeader>
         <CardContent>
           {loading && (

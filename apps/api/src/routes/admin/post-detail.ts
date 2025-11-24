@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { eq, and } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import type { CloudflareBindings } from '../../types';
-import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-middleware';
+import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-admin-middleware';
 import { successResponse, Errors } from '../../lib/api/hono-response';
 import { updatePostSchema } from '../../lib/validations/post';
 import { posts, postFieldValues, postTaxonomies } from '../../db/schema';
@@ -104,17 +104,20 @@ app.patch(
       }
 
       // Create version before update (unless auto-save)
+      // Only create version if user is authenticated (not API key)
       if (!autoSave) {
         const { user } = getAuthContext(c);
-        await createPostVersion(db, {
-          postId,
-          userId: user.id,
-          title: existingPost.title,
-          slug: existingPost.slug,
-          content: existingPost.content,
-          excerpt: existingPost.excerpt,
-          customFields: customFields,
-        });
+        if (user?.id) {
+          await createPostVersion(db, {
+            postId,
+            userId: user.id,
+            title: existingPost.title,
+            slug: existingPost.slug,
+            content: existingPost.content,
+            excerpt: existingPost.excerpt,
+            customFields: customFields,
+          });
+        }
       }
 
       // Update post

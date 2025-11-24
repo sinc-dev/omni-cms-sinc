@@ -36,6 +36,9 @@ import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { MediaUploader } from '@/components/admin/media/media-uploader';
+import { FilterBar } from '@/components/admin/filters/filter-bar';
+import { useFilterParams } from '@/lib/hooks/use-filter-params';
+import type { SortOption } from '@/components/admin/filters/sort-selector';
 
 interface MediaItem {
   id: string;
@@ -88,10 +91,75 @@ export default function MediaPage() {
   const [page, setPage] = useState(1);
   const [perPage] = useState(20);
   const [total, setTotal] = useState(0);
+  const { getFilter, updateFilters } = useFilterParams();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [users, setUsers] = useState<Array<{ id: string; name: string; email: string }>>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  
+  // Get filter values from URL
+  const typeFilter = getFilter('type') || 'all';
+  const uploaderFilter = getFilter('uploader_id') || 'all';
+  const createdFrom = getFilter('created_from');
+  const createdTo = getFilter('created_to');
+  const sortValue = getFilter('sort') || 'createdAt_desc';
+
+  // Date range state
+  const [createdDateRange, setCreatedDateRange] = useState<{
+    from: Date | undefined;
+    to: Date | undefined;
+  }>({
+    from: createdFrom ? new Date(createdFrom) : undefined,
+    to: createdTo ? new Date(createdTo) : undefined,
+  });
+
+  // Sync date range with URL params
+  useEffect(() => {
+    if (createdFrom || createdTo) {
+      setCreatedDateRange({
+        from: createdFrom ? new Date(createdFrom) : undefined,
+        to: createdTo ? new Date(createdTo) : undefined,
+      });
+    }
+  }, [createdFrom, createdTo]);
+
+  // Handle date range changes
+  const handleCreatedDateRangeChange = (range: {
+    from: Date | undefined;
+    to: Date | undefined;
+  }) => {
+    setCreatedDateRange(range);
+    updateFilters({
+      created_from: range.from?.toISOString().split('T')[0],
+      created_to: range.to?.toISOString().split('T')[0],
+    });
+  };
+
+  // Sort options
+  const sortOptions: SortOption[] = [
+    { value: 'createdAt_desc', label: 'Created: Newest', field: 'createdAt', order: 'desc' },
+    { value: 'createdAt_asc', label: 'Created: Oldest', field: 'createdAt', order: 'asc' },
+    { value: 'filename_asc', label: 'Filename: A-Z', field: 'filename', order: 'asc' },
+    { value: 'filename_desc', label: 'Filename: Z-A', field: 'filename', order: 'desc' },
+  ];
+
+  // Fetch users for filter
+  useEffect(() => {
+    if (!organization || !api) return;
+
+    const fetchUsers = async () => {
+      try {
+        const response = (await api.getUsers()) as { success: boolean; data: Array<{ id: string; name: string; email: string }> };
+        if (response.success) {
+          setUsers(response.data);
+        }
+      } catch (err) {
+        console.error('Failed to load users:', err);
+      }
+    };
+
+    fetchUsers();
+  }, [organization, api]);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -129,6 +197,22 @@ export default function MediaPage() {
         params.type = typeFilter;
       }
 
+      if (uploaderFilter !== 'all') {
+        params.uploader_id = uploaderFilter;
+      }
+
+      if (createdFrom) {
+        params.created_from = createdFrom;
+      }
+
+      if (createdTo) {
+        params.created_to = createdTo;
+      }
+
+      if (sortValue) {
+        params.sort = sortValue;
+      }
+
       const response = (await api.getMedia(params)) as PaginatedResponse;
 
       if (response.success) {
@@ -141,7 +225,7 @@ export default function MediaPage() {
     }, { title: 'Failed to Load Media' });
 
     fetchMedia();
-  }, [organization, api, page, debouncedSearch, typeFilter, perPage, orgLoading]);
+  }, [organization, api, page, debouncedSearch, typeFilter, uploaderFilter, createdFrom, createdTo, sortValue, perPage, orgLoading]);
 
   const handleDelete = useCallback(
     async (mediaId: string) => {
@@ -229,42 +313,59 @@ export default function MediaPage() {
 
       <Card>
         <CardHeader>
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            {/* Search */}
-            <div className="flex-1 relative max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search media by filename..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-
-            {/* Filters and View Mode */}
-            <div className="flex gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline">
-                    Type: {typeFilter === 'all' ? 'All' : typeFilter}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setTypeFilter('all')}>
-                    All
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTypeFilter('image')}>
-                    Images
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTypeFilter('video')}>
-                    Videos
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTypeFilter('other')}>
-                    Other
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
+          <div className="space-y-4">
+            <FilterBar
+              searchValue={search}
+              onSearchChange={setSearch}
+              searchPlaceholder="Search media by filename..."
+              quickFilters={[
+                {
+                  key: 'type',
+                  label: 'Type',
+                  value: typeFilter,
+                  options: [
+                    { value: 'all', label: 'All' },
+                    { value: 'image', label: 'Images' },
+                    { value: 'video', label: 'Videos' },
+                    { value: 'other', label: 'Other' },
+                  ],
+                  onChange: (value) => updateFilters({ type: value === 'all' ? undefined : value }),
+                },
+                {
+                  key: 'uploader_id',
+                  label: 'Uploader',
+                  value: uploaderFilter,
+                  options: [
+                    { value: 'all', label: 'All' },
+                    ...users.map((u) => ({ value: u.id, label: u.name })),
+                  ],
+                  onChange: (value) => updateFilters({ uploader_id: value === 'all' ? undefined : value }),
+                },
+              ]}
+              dateRangeFilters={[
+                {
+                  key: 'created',
+                  label: 'Created Date',
+                  value: createdDateRange,
+                  onChange: handleCreatedDateRangeChange,
+                },
+              ]}
+              sortOptions={sortOptions}
+              sortValue={sortValue}
+              onSortChange={(value) => updateFilters({ sort: value })}
+              onClearAll={() => {
+                setSearch('');
+                setCreatedDateRange({ from: undefined, to: undefined });
+                updateFilters({
+                  type: undefined,
+                  uploader_id: undefined,
+                  created_from: undefined,
+                  created_to: undefined,
+                  sort: undefined,
+                });
+              }}
+            />
+            <div className="flex justify-end">
               <div className="flex border rounded-md">
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}

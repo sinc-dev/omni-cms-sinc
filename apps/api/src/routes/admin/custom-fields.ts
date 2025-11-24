@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { eq, and, sql, like, desc } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import type { CloudflareBindings } from '../../types';
-import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-middleware';
+import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-admin-middleware';
 import { successResponse, paginatedResponse, Errors } from '../../lib/api/hono-response';
 import { getPaginationParams, getOffset, parseSortParam } from '../../lib/api/validation';
 import { createCustomFieldSchema } from '../../lib/validations/post-type';

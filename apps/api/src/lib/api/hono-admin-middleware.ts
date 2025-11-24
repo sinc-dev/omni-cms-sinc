@@ -138,12 +138,12 @@ export async function orgAccessMiddleware(
   }
 
   const db = c.get('db');
-  const authMethod = ((c.var as any).authMethod as 'cloudflare-access' | 'api-key') || 'cloudflare-access';
   
-  if (authMethod === 'api-key') {
+  // Check for API key first (even if authMethod says cloudflare-access)
+  const apiKey = c.get('apiKey');
+  if (apiKey) {
     // For API keys, verify the key belongs to the organization
-    const apiKey = c.get('apiKey');
-    if (!apiKey || apiKey.organizationId !== orgId) {
+    if (apiKey.organizationId !== orgId) {
       return c.json(Errors.forbidden(), 403);
     }
     c.set('organizationId', orgId);

@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { eq, and } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import type { CloudflareBindings } from '../../types';
-import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-middleware';
+import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-admin-middleware';
 import { successResponse, Errors } from '../../lib/api/hono-response';
 import { createTaxonomyTermSchema } from '../../lib/validations/taxonomy';
 import { taxonomyTerms, taxonomies } from '../../db/schema';

@@ -7,7 +7,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createPost } from '../shared/utils/api-client.js';
+import { createPost, getExistingPosts } from '../shared/utils/api-client.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -98,15 +98,27 @@ function mapCustomFields(customFields, customFieldMap, mediaMap) {
     // Map media IDs in custom fields
     if (typeof value === 'string' && value.startsWith('wp-media-')) {
       const wpMediaId = parseInt(value.replace('wp-media-', ''));
-      mapped[fieldId] = mediaMap.get(wpMediaId) || value;
+      const mappedMediaId = mediaMap.get(wpMediaId);
+      // Only set if media was successfully mapped, otherwise skip (don't set invalid placeholder)
+      if (mappedMediaId) {
+        mapped[fieldId] = mappedMediaId;
+      }
+      // If media not found, skip this field (don't set invalid "wp-media-123" value)
     } else if (Array.isArray(value)) {
-      mapped[fieldId] = value.map(item => {
-        if (typeof item === 'string' && item.startsWith('wp-media-')) {
-          const wpMediaId = parseInt(item.replace('wp-media-', ''));
-          return mediaMap.get(wpMediaId) || item;
-        }
-        return item;
-      });
+      const mappedArray = value
+        .map(item => {
+          if (typeof item === 'string' && item.startsWith('wp-media-')) {
+            const wpMediaId = parseInt(item.replace('wp-media-', ''));
+            return mediaMap.get(wpMediaId); // Returns undefined if not found
+          }
+          return item;
+        })
+        .filter(item => item !== undefined); // Remove undefined values
+      
+      // Only set if array has valid items
+      if (mappedArray.length > 0) {
+        mapped[fieldId] = mappedArray;
+      }
     } else {
       mapped[fieldId] = value;
     }
@@ -118,7 +130,7 @@ function mapCustomFields(customFields, customFieldMap, mediaMap) {
 /**
  * Import posts for a content type
  */
-async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings, testLimit = null) {
+async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings, testLimit = null, apiKey = null) {
   const { postTypeMap, termMap, customFieldMap, mediaMap } = mappings;
   const postMap = new Map();
 
@@ -150,8 +162,13 @@ async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings,
 
   console.log(`   Importing ${posts.length} ${contentType}...`);
 
+  // Get existing posts for this post type to avoid duplicates
+  const existingPosts = await getExistingPosts(baseUrl, orgId, postTypeId, apiKey);
+  const existingSlugs = new Set(existingPosts.map(p => p.slug));
+
   const BATCH_SIZE = 20;
   let imported = 0;
+  let skipped = 0;
   let failed = 0;
 
   for (let i = 0; i < posts.length; i += BATCH_SIZE) {
@@ -159,6 +176,15 @@ async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings,
 
     await Promise.all(batch.map(async (post) => {
       try {
+        // Skip if post already exists
+        if (existingSlugs.has(post.slug)) {
+          const existingPost = existingPosts.find(p => p.slug === post.slug);
+          if (existingPost) {
+            postMap.set(post.metadata.wordpressId, existingPost.id);
+            skipped++;
+            return;
+          }
+        }
         // Map featured image
         let featuredImageId = null;
         if (post.featuredImageId) {
@@ -191,18 +217,28 @@ async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings,
           featuredImageId: featuredImageId || undefined,
           taxonomies: Object.keys(taxonomies).length > 0 ? taxonomies : undefined,
           customFields: Object.keys(customFields).length > 0 ? customFields : undefined,
+          createdAt: post.createdAt, // Unix timestamp from WordPress
+          updatedAt: post.updatedAt, // Unix timestamp from WordPress
+          publishedAt: post.publishedAt, // Unix timestamp from WordPress
         };
 
-        const created = await createPost(baseUrl, orgId, postData);
+        const created = await createPost(baseUrl, orgId, postData, apiKey);
         postMap.set(post.metadata.wordpressId, created.id);
+        existingSlugs.add(post.slug); // Add to set to avoid duplicates in same batch
         imported++;
 
         if (imported % 50 === 0) {
           console.log(`     Progress: ${imported}/${posts.length} imported`);
         }
       } catch (error) {
-        console.error(`     ✗ Failed to import post "${post.title}`, error.message);
-        failed++;
+        // Check if it's a duplicate error
+        if (error.message && error.message.includes('UNIQUE constraint')) {
+          console.warn(`     ⏭️  Post "${post.title}" already exists, skipping`);
+          skipped++;
+        } else {
+          console.error(`     ✗ Failed to import post "${post.title}":`, error.message);
+          failed++;
+        }
       }
     }));
 
@@ -212,14 +248,14 @@ async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings,
     }
   }
 
-  console.log(`   ✓ Imported ${imported} ${contentType} (${failed} failed)`);
+  console.log(`   ✓ Imported ${imported} ${contentType} (${skipped} skipped, ${failed} failed)`);
   return postMap;
 }
 
 /**
  * Import posts for an organization
  */
-export async function importPosts(baseUrl, orgId, orgSlug, postTypeMap, termMap, customFieldMap, mediaMap, testLimit = null) {
+export async function importPosts(baseUrl, orgId, orgSlug, postTypeMap, termMap, customFieldMap, mediaMap, testLimit = null, apiKey = null) {
   const allPostMap = new Map(); // Maps WordPress post ID -> Omni-CMS post ID
 
   // Load all mappings
@@ -235,7 +271,7 @@ export async function importPosts(baseUrl, orgId, orgSlug, postTypeMap, termMap,
   const contentTypes = ['blogs', 'programs', 'universities', 'team-members', 'reviews', 'video-testimonials', 'dormitories', 'academic-staff', 'instructors'];
 
   for (const contentType of contentTypes) {
-    const contentTypeMap = await importContentType(baseUrl, orgId, orgSlug, contentType, mappings, testLimit);
+    const contentTypeMap = await importContentType(baseUrl, orgId, orgSlug, contentType, mappings, testLimit, apiKey);
     for (const [wpId, omniId] of contentTypeMap) {
       allPostMap.set(wpId, omniId);
     }

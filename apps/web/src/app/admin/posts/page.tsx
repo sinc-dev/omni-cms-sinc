@@ -12,12 +12,9 @@ import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { useSchema } from '@/lib/hooks/use-schema';
 import { Spinner } from '@/components/ui/spinner';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { FilterBar } from '@/components/admin/filters/filter-bar';
+import { useFilterParams } from '@/lib/hooks/use-filter-params';
+import type { SortOption } from '@/components/admin/filters/sort-selector';
 
 interface Post {
   id: string;
@@ -49,21 +46,44 @@ interface PaginatedResponse {
   };
 }
 
+interface PostType {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export default function PostsPage() {
   const { organization } = useOrganization();
   const api = useApiClient();
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
   const { schema: postsSchema } = useSchema('posts');
+  const { getFilter, updateFilters } = useFilterParams();
   
   const [posts, setPosts] = useState<Post[]>([]);
+  const [postTypes, setPostTypes] = useState<PostType[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [perPage] = useState(20);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [postTypeFilter, setPostTypeFilter] = useState<string>('all');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  
+  // Get filter values from URL
+  const statusFilter = getFilter('status') || 'all';
+  const postTypeFilter = getFilter('post_type') || 'all';
+  const authorFilter = getFilter('author_id') || 'all';
+  const createdFrom = getFilter('created_from');
+  const createdTo = getFilter('created_to');
+  const publishedFrom = getFilter('published_from');
+  const publishedTo = getFilter('published_to');
+  const sortValue = getFilter('sort') || 'createdAt_desc';
 
   // Get status enum values from schema
   const statusEnum = postsSchema?.enums?.status?.values || ['draft', 'published', 'archived'];
@@ -73,6 +93,43 @@ export default function PostsPage() {
     { value: 'published', label: 'Published' },
     { value: 'archived', label: 'Archived' },
   ];
+
+  // Sort options
+  const sortOptions: SortOption[] = [
+    { value: 'createdAt_desc', label: 'Created: Newest', field: 'createdAt', order: 'desc' },
+    { value: 'createdAt_asc', label: 'Created: Oldest', field: 'createdAt', order: 'asc' },
+    { value: 'updatedAt_desc', label: 'Updated: Newest', field: 'updatedAt', order: 'desc' },
+    { value: 'updatedAt_asc', label: 'Updated: Oldest', field: 'updatedAt', order: 'asc' },
+    { value: 'publishedAt_desc', label: 'Published: Newest', field: 'publishedAt', order: 'desc' },
+    { value: 'publishedAt_asc', label: 'Published: Oldest', field: 'publishedAt', order: 'asc' },
+    { value: 'title_asc', label: 'Title: A-Z', field: 'title', order: 'asc' },
+    { value: 'title_desc', label: 'Title: Z-A', field: 'title', order: 'desc' },
+  ];
+
+  // Fetch post types and users for filters
+  useEffect(() => {
+    if (!organization) return;
+
+    const fetchFilterData = async () => {
+      try {
+        const [postTypesResponse, usersResponse] = await Promise.all([
+          api.getPostTypes() as Promise<{ success: boolean; data: PostType[] }>,
+          api.getUsers() as Promise<{ success: boolean; data: User[] }>,
+        ]);
+
+        if (postTypesResponse.success) {
+          setPostTypes(postTypesResponse.data);
+        }
+        if (usersResponse.success) {
+          setUsers(usersResponse.data);
+        }
+      } catch (err) {
+        console.error('Failed to load filter data:', err);
+      }
+    };
+
+    fetchFilterData();
+  }, [organization, api]);
 
   // Debounce search input
   useEffect(() => {
@@ -112,6 +169,30 @@ export default function PostsPage() {
         params.post_type = postTypeFilter;
       }
 
+      if (authorFilter !== 'all') {
+        params.author_id = authorFilter;
+      }
+
+      if (createdFrom) {
+        params.created_from = createdFrom;
+      }
+
+      if (createdTo) {
+        params.created_to = createdTo;
+      }
+
+      if (publishedFrom) {
+        params.published_from = publishedFrom;
+      }
+
+      if (publishedTo) {
+        params.published_to = publishedTo;
+      }
+
+      if (sortValue) {
+        params.sort = sortValue;
+      }
+
       const response = (await api.getPosts(params)) as PaginatedResponse;
       
       if (response.success) {
@@ -125,7 +206,7 @@ export default function PostsPage() {
 
     fetchPosts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [organization, page, debouncedSearch, statusFilter, postTypeFilter, api, perPage]);
+  }, [organization, page, debouncedSearch, statusFilter, postTypeFilter, authorFilter, createdFrom, createdTo, publishedFrom, publishedTo, sortValue, api, perPage]);
 
   if (!organization) {
     return (
@@ -163,53 +244,75 @@ export default function PostsPage() {
 
       <Card>
         <CardHeader>
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search posts by title..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-                aria-label="Search posts"
-                type="search"
-              />
-            </div>
-
-            {/* Filters */}
-            <div className="flex gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline">
-                    Status: {statusFilter === 'all' ? 'All' : statusFilter}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setStatusFilter('all')}>
-                    All
-                  </DropdownMenuItem>
-                  {statusOptions.map((option) => (
-                    <DropdownMenuItem
-                      key={option.value}
-                      onClick={() => setStatusFilter(option.value)}
-                    >
-                      {option.label}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {postTypeFilter !== 'all' && (
-                <Button
-                  variant="outline"
-                  onClick={() => setPostTypeFilter('all')}
-                >
-                  Clear Type Filter
-                </Button>
-              )}
-            </div>
-          </div>
+          <FilterBar
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search posts by title..."
+            quickFilters={[
+              {
+                key: 'status',
+                label: 'Status',
+                value: statusFilter,
+                options: [
+                  { value: 'all', label: 'All' },
+                  ...statusOptions,
+                ],
+                onChange: (value) => updateFilters({ status: value === 'all' ? undefined : value }),
+              },
+              {
+                key: 'post_type',
+                label: 'Post Type',
+                value: postTypeFilter,
+                options: [
+                  { value: 'all', label: 'All' },
+                  ...postTypes.map((pt) => ({ value: pt.id, label: pt.name })),
+                ],
+                onChange: (value) => updateFilters({ post_type: value === 'all' ? undefined : value }),
+              },
+              {
+                key: 'author_id',
+                label: 'Author',
+                value: authorFilter,
+                options: [
+                  { value: 'all', label: 'All' },
+                  ...users.map((u) => ({ value: u.id, label: u.name })),
+                ],
+                onChange: (value) => updateFilters({ author_id: value === 'all' ? undefined : value }),
+              },
+            ]}
+            dateRangeFilters={[
+              {
+                key: 'created',
+                label: 'Created Date',
+                value: createdDateRange,
+                onChange: handleCreatedDateRangeChange,
+              },
+              {
+                key: 'published',
+                label: 'Published Date',
+                value: publishedDateRange,
+                onChange: handlePublishedDateRangeChange,
+              },
+            ]}
+            sortOptions={sortOptions}
+            sortValue={sortValue}
+            onSortChange={(value) => updateFilters({ sort: value })}
+            onClearAll={() => {
+              setSearch('');
+              setCreatedDateRange({ from: undefined, to: undefined });
+              setPublishedDateRange({ from: undefined, to: undefined });
+              updateFilters({
+                status: undefined,
+                post_type: undefined,
+                author_id: undefined,
+                created_from: undefined,
+                created_to: undefined,
+                published_from: undefined,
+                published_to: undefined,
+                sort: undefined,
+              });
+            }}
+          />
         </CardHeader>
 
         <CardContent>

@@ -33,6 +33,8 @@ import {
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { FilterBar } from '@/components/admin/filters/filter-bar';
+import { useFilterParams } from '@/lib/hooks/use-filter-params';
 
 interface UserMember {
   id: string;
@@ -85,6 +87,7 @@ export default function UsersPage() {
   }
 
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
+  const { getFilter, updateFilters } = useFilterParams();
   const [users, setUsers] = useState<UserMember[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
@@ -93,7 +96,9 @@ export default function UsersPage() {
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState<string>('all');
+  
+  // Get filter values from URL
+  const roleFilter = getFilter('role_id') || 'all';
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -347,40 +352,31 @@ export default function UsersPage() {
 
       <Card>
         <CardHeader>
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            {/* Search */}
-            <div className="flex-1 relative max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search users by name or email..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-
-            {/* Role Filter */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  Role: {roleFilter === 'all' ? 'All' : roles.find((r) => r.id === roleFilter)?.name || 'All'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => setRoleFilter('all')}>
-                  All Roles
-                </DropdownMenuItem>
-                {roles.map((role) => (
-                  <DropdownMenuItem
-                    key={role.id}
-                    onClick={() => setRoleFilter(role.id)}
-                  >
-                    {role.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <FilterBar
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search users by name or email..."
+            quickFilters={[
+              {
+                key: 'role_id',
+                label: 'Role',
+                value: roleFilter,
+                options: [
+                  { value: 'all', label: 'All Roles' },
+                  ...roles.map((role) => ({
+                    value: role.id,
+                    label: role.name,
+                  })),
+                ],
+                onChange: (value) =>
+                  updateFilters({ role_id: value === 'all' ? undefined : value }),
+              },
+            ]}
+            onClearAll={() => {
+              setSearch('');
+              updateFilters({ role_id: undefined });
+            }}
+          />
         </CardHeader>
 
         <CardContent>

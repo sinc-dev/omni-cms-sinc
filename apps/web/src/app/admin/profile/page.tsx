@@ -1,15 +1,16 @@
 'use client';
 
 export const runtime = 'edge';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Save, Loader2, User as UserIcon } from 'lucide-react';
+import { Save, Loader2, User as UserIcon, Upload, X } from 'lucide-react';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { apiClient } from '@/lib/api-client';
 
 interface UserInfo {
   id: string;
@@ -32,19 +33,27 @@ interface UserMember {
 
 export default function ProfilePage() {
   const { organization, isLoading: orgLoading } = useOrganization();
-  const api = useApiClient();
+  let api: ReturnType<typeof useApiClient> | null = null;
+  try {
+    if (organization) {
+      api = useApiClient();
+    }
+  } catch {
+    api = null;
+  }
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [userMemberships, setUserMemberships] = useState<UserMember[]>([]);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load user information
   useEffect(() => {
-    if (!organization || !api || orgLoading) {
-      setLoading(false);
+    if (orgLoading) {
       return;
     }
 
@@ -53,53 +62,56 @@ export default function ProfilePage() {
       clearError();
 
       try {
-        // Get current user from users list (we'll find by email from JWT or get first user as fallback)
-        // In a real implementation, you'd have a /me endpoint
-        const usersResponse = (await api.getUsers()) as {
+        // Get current user profile (doesn't require organization)
+        const userResponse = (await apiClient.getCurrentUser()) as {
           success: boolean;
-          data: Array<{
-            userId: string;
-            user: {
-              id: string;
-              name: string;
-              email: string;
-              avatarUrl?: string | null;
-            };
-            role: {
-              name: string;
-              description?: string | null;
-            };
-            organizationId: string;
-            roleId: string;
-          }>;
+          data: UserInfo;
         };
 
-        if (usersResponse.success && usersResponse.data.length > 0) {
-          // For now, get the first user (in production, match by JWT email)
-          const firstMember = usersResponse.data[0];
-          const user = firstMember.user;
-          
-          // Get all memberships for this user across organizations
-          const memberships: UserMember[] = usersResponse.data
-            .filter(m => m.user.id === user.id)
-            .map(m => ({
-              userId: m.userId,
-              organizationId: m.organizationId,
-              roleId: m.roleId,
-              role: m.role,
-            }));
-
-          setUserInfo({
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            avatarUrl: user.avatarUrl,
-            isSuperAdmin: false, // Would come from API
-            createdAt: new Date().toISOString(), // Would come from API
-          });
+        if (userResponse.success && userResponse.data) {
+          const user = userResponse.data;
+          setUserInfo(user);
           setName(user.name);
           setEmail(user.email);
-          setUserMemberships(memberships);
+
+          // Also fetch organization memberships if organization is available
+          if (organization && api) {
+            try {
+              const usersResponse = (await api.getUsers()) as {
+                success: boolean;
+                data: Array<{
+                  userId: string;
+                  user: {
+                    id: string;
+                    name: string;
+                    email: string;
+                    avatarUrl?: string | null;
+                  };
+                  role: {
+                    name: string;
+                    description?: string | null;
+                  };
+                  organizationId: string;
+                  roleId: string;
+                }>;
+              };
+
+              if (usersResponse.success && usersResponse.data.length > 0) {
+                const memberships: UserMember[] = usersResponse.data
+                  .filter(m => m.user.id === user.id)
+                  .map(m => ({
+                    userId: m.userId,
+                    organizationId: m.organizationId,
+                    roleId: m.roleId,
+                    role: m.role,
+                  }));
+                setUserMemberships(memberships);
+              }
+            } catch (err) {
+              // Silently fail - memberships are optional
+              console.error('Failed to load memberships:', err);
+            }
+          }
         }
       } catch (err) {
         console.error('Failed to load user info:', err);
@@ -110,10 +122,10 @@ export default function ProfilePage() {
     }, { title: 'Failed to Load Profile' });
 
     fetchUserInfo();
-  }, [organization, api, orgLoading, withErrorHandling, clearError, handleError]);
+  }, [orgLoading, organization, api, withErrorHandling, clearError, handleError]);
 
   const handleSave = withErrorHandling(async () => {
-    if (!api || !userInfo || !name.trim()) {
+    if (!userInfo || !name.trim()) {
       handleError('Name is required', { title: 'Validation Error' });
       return;
     }
@@ -122,11 +134,17 @@ export default function ProfilePage() {
     clearError();
 
     try {
-      // Note: In a real implementation, you'd have an updateUser endpoint
-      // For now, we'll just show a message that this feature needs backend support
-      handleError('User profile updates require backend API support. This feature is coming soon.', {
-        title: 'Not Implemented',
-      });
+      // Profile update doesn't require organization
+      const response = (await apiClient.updateProfile({ name })) as {
+        success: boolean;
+        data: UserInfo;
+      };
+
+      if (response.success && response.data) {
+        setUserInfo(response.data);
+        setName(response.data.name);
+        // Show success message or handle success state
+      }
     } catch (err) {
       handleError(err, { title: 'Failed to Update Profile' });
     } finally {
@@ -134,14 +152,141 @@ export default function ProfilePage() {
     }
   }, { title: 'Failed to Update Profile' });
 
-  if (orgLoading || !organization) {
+  const handleAvatarUpload = withErrorHandling(async (file: File) => {
+    if (!api || !organization) {
+      handleError('No organization selected or API unavailable', { title: 'Upload Error' });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    clearError();
+
+    try {
+      // Get image dimensions
+      let width: number | undefined;
+      let height: number | undefined;
+
+      if (file.type.startsWith('image/')) {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        await new Promise((resolve, reject) => {
+          img.onload = () => {
+            width = img.width;
+            height = img.height;
+            URL.revokeObjectURL(url);
+            resolve(null);
+          };
+          img.onerror = reject;
+          img.src = url;
+        });
+      }
+
+      // Request upload URL and create media record
+      const uploadResponse = (await api.requestUploadUrl({
+        filename: file.name,
+        mimeType: file.type,
+        fileSize: file.size,
+        width,
+        height,
+      })) as {
+        success: boolean;
+        data: {
+          uploadUrl: string;
+          fileKey: string;
+          publicUrl: string;
+          media: {
+            id: string;
+            publicUrl: string;
+          };
+        };
+      };
+
+      if (!uploadResponse.success) {
+        throw new Error('Failed to get upload URL');
+      }
+
+      const { uploadUrl, publicUrl } = uploadResponse.data;
+
+      // Upload file to R2 using presigned URL
+      const uploadResult = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type,
+        },
+      });
+
+      if (!uploadResult.ok) {
+        throw new Error('Upload to storage failed');
+      }
+
+      // Update profile with new avatar URL
+      const profileResponse = (await api.updateProfile({ avatarUrl: publicUrl })) as {
+        success: boolean;
+        data: UserInfo;
+      };
+
+      if (profileResponse.success && profileResponse.data) {
+        setUserInfo(profileResponse.data);
+      }
+    } catch (err) {
+      handleError(err, { title: 'Failed to Upload Avatar' });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }, { title: 'Failed to Upload Avatar' });
+
+  const handleAvatarRemove = withErrorHandling(async () => {
+    setUploadingAvatar(true);
+    clearError();
+
+    try {
+      // Avatar removal doesn't require organization
+      const response = (await apiClient.updateProfile({ avatarUrl: null })) as {
+        success: boolean;
+        data: UserInfo;
+      };
+
+      if (response.success && response.data) {
+        setUserInfo(response.data);
+      }
+    } catch (err) {
+      handleError(err, { title: 'Failed to Remove Avatar' });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }, { title: 'Failed to Remove Avatar' });
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        handleError('Please select an image file', { title: 'Invalid File Type' });
+        return;
+      }
+
+      // Validate file size (max 5MB for avatars)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        handleError('Image size must be less than 5MB', { title: 'File Too Large' });
+        return;
+      }
+
+      handleAvatarUpload(file);
+    }
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  if (orgLoading) {
     return (
       <div className="space-y-6">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">
-              {orgLoading ? 'Loading...' : 'Please select an organization to view your profile.'}
-            </p>
+            <p className="text-sm text-muted-foreground">Loading...</p>
           </CardContent>
         </Card>
       </div>
@@ -209,21 +354,55 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-4">
-              <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
+              <div className="relative h-20 w-20 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                 {userInfo.avatarUrl ? (
                   <img
                     src={userInfo.avatarUrl}
                     alt={userInfo.name}
-                    className="h-20 w-20 rounded-full"
+                    className="h-20 w-20 rounded-full object-cover"
                   />
                 ) : (
                   <UserIcon className="h-10 w-10 text-muted-foreground" />
                 )}
+                {uploadingAvatar && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-full">
+                    <Loader2 className="h-6 w-6 animate-spin text-white" />
+                  </div>
+                )}
               </div>
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground mb-1">Profile Picture</p>
-                <p className="text-xs text-muted-foreground">
-                  Avatar management coming soon
+                <div className="flex gap-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingAvatar || !organization || !api}
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    {userInfo.avatarUrl ? 'Change' : 'Upload'}
+                  </Button>
+                  {userInfo.avatarUrl && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAvatarRemove}
+                      disabled={uploadingAvatar}
+                    >
+                      <X className="mr-2 h-4 w-4" />
+                      Remove
+                    </Button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {organization && api ? 'JPG, PNG or GIF. Max size 5MB.' : 'Select an organization to upload avatar.'}
                 </p>
               </div>
             </div>

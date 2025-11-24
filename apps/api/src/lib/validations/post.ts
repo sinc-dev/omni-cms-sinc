@@ -27,6 +27,9 @@ export const createPostSchema = z.object({
   taxonomies: z.record(z.string(), z.array(z.string())).optional(),
   relationships: z.record(z.string(), z.array(z.string())).optional(),
   autoSave: z.boolean().optional().default(false), // Flag to indicate auto-save
+  createdAt: z.number().int().positive().optional(), // Unix timestamp (seconds)
+  updatedAt: z.number().int().positive().optional(), // Unix timestamp (seconds)
+  publishedAt: z.number().int().positive().optional().nullable(), // Unix timestamp (seconds)
 });
 
 export const updatePostSchema = z.object({
