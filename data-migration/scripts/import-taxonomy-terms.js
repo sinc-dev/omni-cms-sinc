@@ -96,9 +96,14 @@ export async function importTaxonomyTerms(baseUrl, orgId, orgSlug, taxonomyMap) 
     for (const [taxonomySlug, terms] of Object.entries(customTaxonomies)) {
       if (!Array.isArray(terms) || terms.length === 0) continue;
 
-      const taxonomyId = taxonomyMap.get(taxonomySlug);
+      // Normalize slug (convert underscores to hyphens to match taxonomy import)
+      const normalizedSlug = taxonomySlug.replace(/_/g, '-');
+      
+      // Try exact match first, then normalized slug
+      let taxonomyId = taxonomyMap.get(taxonomySlug) || taxonomyMap.get(normalizedSlug);
+      
       if (!taxonomyId) {
-        console.warn(`   ⚠ Taxonomy "${taxonomySlug}" not found, skipping terms`);
+        console.warn(`   ⚠ Taxonomy "${taxonomySlug}" (normalized: "${normalizedSlug}") not found, skipping terms`);
         continue;
       }
 
@@ -179,7 +184,7 @@ async function importTermsForTaxonomy(baseUrl, orgId, taxonomyId, taxonomySlug, 
         name: term.name,
         slug: sanitizedSlug,
         description: term.description || '',
-        parent_id: parentId || null,
+        parentId: parentId || null, // Use parentId, not parent_id
       });
       termMap.set(key, createdTerm.id);
       created++;

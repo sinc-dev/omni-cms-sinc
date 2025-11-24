@@ -19,7 +19,7 @@ export interface FilterCondition {
   id: string;
   field: string;
   operator: FilterOperator;
-  value: string | string[] | Date | { from: Date; to: Date } | null;
+  value: string | string[] | Date | number | { from: Date; to: Date } | null;
 }
 
 export interface FilterField {
@@ -181,7 +181,7 @@ export function useAdvancedFilters(config: FilterConfig) {
         if (!field) return;
 
         let operator: FilterOperator = 'equals';
-        let filterValue: string | Date | { from: Date; to: Date } | null =
+        let filterValue: string | string[] | Date | number | { from: Date; to: Date } | null =
           value;
 
         // Handle date ranges

@@ -4,8 +4,7 @@ export const runtime = 'edge';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Plus, Search, ChevronLeft, ChevronRight, Edit, Trash2 } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Edit, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
@@ -85,8 +84,66 @@ export default function PostsPage() {
   const publishedTo = getFilter('published_to');
   const sortValue = getFilter('sort') || 'createdAt_desc';
 
+  // Date range state
+  const [createdDateRange, setCreatedDateRange] = useState<{
+    from: Date | undefined;
+    to: Date | undefined;
+  }>({
+    from: createdFrom ? new Date(createdFrom) : undefined,
+    to: createdTo ? new Date(createdTo) : undefined,
+  });
+
+  const [publishedDateRange, setPublishedDateRange] = useState<{
+    from: Date | undefined;
+    to: Date | undefined;
+  }>({
+    from: publishedFrom ? new Date(publishedFrom) : undefined,
+    to: publishedTo ? new Date(publishedTo) : undefined,
+  });
+
+  // Sync date ranges with URL params
+  useEffect(() => {
+    if (createdFrom || createdTo) {
+      setCreatedDateRange({
+        from: createdFrom ? new Date(createdFrom) : undefined,
+        to: createdTo ? new Date(createdTo) : undefined,
+      });
+    }
+  }, [createdFrom, createdTo]);
+
+  useEffect(() => {
+    if (publishedFrom || publishedTo) {
+      setPublishedDateRange({
+        from: publishedFrom ? new Date(publishedFrom) : undefined,
+        to: publishedTo ? new Date(publishedTo) : undefined,
+      });
+    }
+  }, [publishedFrom, publishedTo]);
+
+  // Handle date range changes
+  const handleCreatedDateRangeChange = (range: {
+    from: Date | undefined;
+    to: Date | undefined;
+  }) => {
+    setCreatedDateRange(range);
+    updateFilters({
+      created_from: range.from?.toISOString().split('T')[0],
+      created_to: range.to?.toISOString().split('T')[0],
+    });
+  };
+
+  const handlePublishedDateRangeChange = (range: {
+    from: Date | undefined;
+    to: Date | undefined;
+  }) => {
+    setPublishedDateRange(range);
+    updateFilters({
+      published_from: range.from?.toISOString().split('T')[0],
+      published_to: range.to?.toISOString().split('T')[0],
+    });
+  };
+
   // Get status enum values from schema
-  const statusEnum = postsSchema?.enums?.status?.values || ['draft', 'published', 'archived'];
   const statusProperty = postsSchema?.properties?.find(p => p.name === 'status');
   const statusOptions = statusProperty?.options || [
     { value: 'draft', label: 'Draft' },

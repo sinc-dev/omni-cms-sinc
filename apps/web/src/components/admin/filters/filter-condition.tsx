@@ -88,12 +88,19 @@ export function FilterConditionComponent({
     if (condition.operator === 'between' && field.type === 'date') {
       const range =
         condition.value && typeof condition.value === 'object' && 'from' in condition.value
-          ? condition.value
+          ? (condition.value as { from: Date; to: Date })
           : { from: undefined, to: undefined };
       return (
         <DateRangePicker
           dateRange={range}
-          onSelect={(range) => onUpdate({ value: range })}
+          onSelect={(selectedRange) => {
+            // Convert to required type format - only set if both dates are present
+            if (selectedRange.from && selectedRange.to) {
+              onUpdate({ value: { from: selectedRange.from, to: selectedRange.to } as { from: Date; to: Date } });
+            } else {
+              onUpdate({ value: null });
+            }
+          }}
         />
       );
     }
@@ -180,9 +187,10 @@ export function FilterConditionComponent({
               ? condition.value.toString()
               : ''
           }
-          onChange={(e) =>
-            onUpdate({ value: e.target.value ? Number(e.target.value) : null })
-          }
+          onChange={(e) => {
+            const numValue = e.target.value ? Number(e.target.value) : null;
+            onUpdate({ value: (numValue as number | null) as string | string[] | Date | number | { from: Date; to: Date } | null });
+          }}
           className="w-[180px]"
           placeholder="Enter value"
         />

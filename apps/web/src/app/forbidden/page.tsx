@@ -20,14 +20,14 @@ export default function ForbiddenPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground text-center">
-            You don't have permission to access this resource. Please contact your administrator if you believe this is an error.
+            You don&apos;t have permission to access this resource. Please contact your administrator if you believe this is an error.
           </p>
           
           <div className="rounded-md bg-muted p-3">
             <p className="text-xs font-medium mb-1">What you can do:</p>
             <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
               <li>Contact your administrator to request access</li>
-              <li>Check if you're signed in with the correct account</li>
+              <li>Check if you&apos;re signed in with the correct account</li>
               <li>Return to a page you have access to</li>
             </ul>
           </div>

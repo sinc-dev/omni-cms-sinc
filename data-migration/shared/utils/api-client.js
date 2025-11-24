@@ -64,7 +64,9 @@ export async function apiRequest(url, options = {}) {
       }
       // Extract error message from nested error object if present
       const errorMessage = errorData.error?.message || errorData.message || response.statusText;
-      throw new Error(`API Error ${response.status}: ${errorMessage}`);
+      const errorDetails = errorData.error?.details || errorData.error?.code || '';
+      const fullError = errorDetails ? `${errorMessage} (${errorDetails})` : errorMessage;
+      throw new Error(`API Error ${response.status}: ${fullError}`);
     }
 
     const data = await response.json();
