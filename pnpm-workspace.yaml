@@ -1,5 +1,6 @@
 packages:
-  - web
+  - "apps/*"
+  - "packages/*"
 
 onlyBuiltDependencies:
   - es5-ext

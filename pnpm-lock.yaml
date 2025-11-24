@@ -8,7 +8,62 @@ importers:
 
   .: {}
 
-  web:
+  apps/api:
+    dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.937.0
+        version: 3.937.0
+      '@aws-sdk/s3-request-presigner':
+        specifier: ^3.937.0
+        version: 3.937.0
+      '@graphql-tools/schema':
+        specifier: ^10.0.29
+        version: 10.0.29(graphql@16.12.0)
+      drizzle-orm:
+        specifier: ^0.29.1
+        version: 0.29.5(@cloudflare/workers-types@4.20251121.0)(@types/better-sqlite3@7.6.13)(@types/react@19.2.6)(react@19.2.0)
+      graphql:
+        specifier: ^16.12.0
+        version: 16.12.0
+      hono:
+        specifier: ^4.10.6
+        version: 4.10.6
+      jose:
+        specifier: ^5.1.3
+        version: 5.10.0
+      nanoid:
+        specifier: ^5.0.4
+        version: 5.1.6
+      zod:
+        specifier: ^4.1.12
+        version: 4.1.12
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20231218.0
+        version: 4.20251121.0
+      '@miniflare/d1':
+        specifier: ^2.14.4
+        version: 2.14.4
+      '@types/node':
+        specifier: ^20
+        version: 20.19.25
+      drizzle-kit:
+        specifier: ^0.20.9
+        version: 0.20.18
+      miniflare:
+        specifier: ^4.20251118.1
+        version: 4.20251118.1
+      tsx:
+        specifier: ^4.7.0
+        version: 4.20.6
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+      wrangler:
+        specifier: ^3.22.1
+        version: 3.114.15(@cloudflare/workers-types@4.20251121.0)
+
+  apps/web:
     dependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.937.0
