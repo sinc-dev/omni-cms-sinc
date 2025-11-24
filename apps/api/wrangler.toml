@@ -29,17 +29,19 @@ persist = true
 head_sampling_rate = 1
 
 # Environment Variables
-# Note: Secrets (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY) should be set in Cloudflare Dashboard
-# Go to Workers & Pages → omni-cms-api → Settings → Variables and Secrets
+# Secrets (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY) are set via:
+#   wrangler secret put R2_ACCESS_KEY_ID
+#   wrangler secret put R2_SECRET_ACCESS_KEY
+# They are NOT stored in this file for security reasons.
+
 [vars]
+# Non-sensitive configuration values
+R2_ACCOUNT_ID = "9a2b6956cc47f63e13beb91af5363970"
 R2_BUCKET_NAME = "omni-cms-media"
 R2_PUBLIC_URL = "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com"
 CF_ACCESS_AUD = "7291b33d4c255188f0d63a05cf91f9e72e1e6606fb2acb148360886c42e52083"
 CF_ACCESS_TEAM_DOMAIN = "sincdev.cloudflareaccess.com"
 NEXT_PUBLIC_APP_URL = "omni-cms-sinc.joseph-9a2.workers.dev"
-
-# R2_ACCOUNT_ID should also be set in dashboard (non-secret but for consistency)
-# R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY MUST be set as secrets in dashboard
 
 
 

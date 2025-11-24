@@ -222,6 +222,23 @@ async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings,
           publishedAt: post.publishedAt, // Unix timestamp from WordPress
         };
 
+        // Validate postTypeId exists
+        if (!postTypeId) {
+          throw new Error(`Post type ID not found for "${contentType}"`);
+        }
+
+        // Validate taxonomy term IDs exist (check first few)
+        const invalidTaxonomyTerms = [];
+        for (const [taxonomySlug, termIds] of Object.entries(taxonomies)) {
+          if (Array.isArray(termIds)) {
+            for (const termId of termIds.slice(0, 3)) { // Check first 3
+              if (termId && typeof termId === 'string' && !termId.match(/^[a-zA-Z0-9_-]+$/)) {
+                invalidTaxonomyTerms.push(`${taxonomySlug}:${termId}`);
+              }
+            }
+          }
+        }
+
         const created = await createPost(baseUrl, orgId, postData, apiKey);
         postMap.set(post.metadata.wordpressId, created.id);
         existingSlugs.add(post.slug); // Add to set to avoid duplicates in same batch
