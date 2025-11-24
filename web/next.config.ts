@@ -13,26 +13,23 @@ const nextConfig: NextConfig = {
     root,
   },
   
-  // 1. Disable Client Source Maps
+  // 1. Disable Source Maps (Critical)
   productionBrowserSourceMaps: false,
-  
-  // 2. Externalize Heavy Packages (at root level for Next.js 16)
-  // Only externalize AWS SDK - lucide-react is handled by Next.js optimizePackageImports
-  serverExternalPackages: ["@aws-sdk/client-s3"],
-  
-  // 3. Disable Server Source Maps
   experimental: {
     serverSourceMaps: false,
   },
+
+  // 2. Remove 'serverExternalPackages' 
+  // Let Webpack bundle and tree-shake @aws-sdk/client-s3 naturally.
   
-  // 3. Use default output (Cloudflare handles tracing best this way)
-  // output: 'standalone' - Keep this commented out or removed
-  
-  // 4. Force Webpack to drop source maps entirely (The Nuclear Option)
+  // 3. Force Webpack to drop source maps entirely
   webpack: (config) => {
     config.devtool = false;
     return config;
   },
+  
+  // Enable compression for build artifacts
+  compress: true,
   
   // Ignore linting/type errors during build
   // @ts-expect-error - 'eslint' is valid in runtime but missing in Next.js 16 types
