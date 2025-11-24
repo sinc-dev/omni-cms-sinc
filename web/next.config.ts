@@ -9,7 +9,6 @@ const nextConfig: NextConfig = {
   // This ensures Next.js can find next/package.json and the lockfile
   outputFileTracingRoot: root,
   
-  // @ts-expect-error - 'turbopack' is valid in runtime but missing in current types
   turbopack: {
     root,
   },
@@ -17,7 +16,11 @@ const nextConfig: NextConfig = {
   // 1. Disable Client Source Maps
   productionBrowserSourceMaps: false,
   
-  // 2. Disable Server Source Maps
+  // 2. Externalize Heavy Packages (at root level for Next.js 16)
+  // Try to externalize heavy packages so they aren't bundled 79 times
+  serverExternalPackages: ["@aws-sdk/client-s3", "lucide-react"],
+  
+  // 3. Disable Server Source Maps
   experimental: {
     serverSourceMaps: false,
   },

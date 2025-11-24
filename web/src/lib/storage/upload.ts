@@ -1,6 +1,5 @@
-import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { r2Client, R2_BUCKET_NAME } from './r2-client';
+// Dynamic imports for AWS SDK to prevent bundling into routes that don't use media upload
+import { getR2Client, R2_BUCKET_NAME } from './r2-client';
 import { nanoid } from 'nanoid';
 
 /**
@@ -13,6 +12,11 @@ export async function generatePresignedUploadUrl(
   contentType: string,
   originalFilename: string
 ) {
+  // Dynamic import - only loads AWS SDK when this function is called
+  const { PutObjectCommand } = await import('@aws-sdk/client-s3');
+  const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
+  
+  const r2Client = await getR2Client();
   const ext = originalFilename.split('.').pop();
   const fileKey = `${nanoid()}.${ext}`;
 
@@ -40,6 +44,10 @@ export async function generatePresignedUploadUrl(
  * @param fileKey The key of the file to delete
  */
 export async function deleteFileFromR2(fileKey: string) {
+  // Dynamic import - only loads AWS SDK when this function is called
+  const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
+  
+  const r2Client = await getR2Client();
   const command = new DeleteObjectCommand({
     Bucket: R2_BUCKET_NAME,
     Key: fileKey,
