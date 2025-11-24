@@ -17,8 +17,8 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   
   // 2. Externalize Heavy Packages (at root level for Next.js 16)
-  // Try to externalize heavy packages so they aren't bundled 79 times
-  serverExternalPackages: ["@aws-sdk/client-s3", "lucide-react"],
+  // Only externalize AWS SDK - lucide-react is handled by Next.js optimizePackageImports
+  serverExternalPackages: ["@aws-sdk/client-s3"],
   
   // 3. Disable Server Source Maps
   experimental: {
