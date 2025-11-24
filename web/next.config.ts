@@ -12,25 +12,27 @@ const nextConfig: NextConfig = {
     root,
   },
   
-  // 👇 CRITICAL: Disable source maps to drastically reduce bundle size (50-70% reduction)
-  // 1. Disable Client Source Maps
+  // 👇 CRITICAL: Disable source maps to drastically reduce bundle size
   productionBrowserSourceMaps: false,
   
-  // 2. Disable Server Source Maps (Crucial for Cloudflare)
-  // This is the key fix - server source maps are what's causing the 64MB bundle
   experimental: {
     serverSourceMaps: false,
-    // Reduce bundle size by optimizing server components
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
   },
   
-  // 3. Optimize output tracing to reduce bundle size
-  // Note: Cloudflare ignores 'standalone' output format but respects the tracing optimizations that come with it
-  output: 'standalone',
+  // ❌ REMOVED: output: 'standalone' - causes code duplication issues with Cloudflare
+  // Standard output allows next-on-pages to trace dependencies more accurately
   
-  // 4. Force Webpack to drop source maps entirely (brute force approach)
+  // 👇 CRITICAL: Force tree-shaking for Lucide icons to prevent 10MB+ duplication
+  // This ensures only the exact icons used are bundled, not the entire library
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{lowerCase camelCase member}}',
+      skipDefaultConversion: true,
+    },
+  },
+  
+  // Force Webpack to drop source maps entirely
   webpack: (config) => {
-    // Disable all source maps
     config.devtool = false;
     return config;
   },
