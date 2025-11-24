@@ -5,12 +5,13 @@ import path from "node:path";
 const root = path.join(__dirname, "..");
 
 const nextConfig: NextConfig = {
-  // Set both outputFileTracingRoot and turbopack.root to the same monorepo root
+  // Set outputFileTracingRoot to monorepo root
   // This ensures Next.js can find next/package.json and the lockfile
   outputFileTracingRoot: root,
   
+  // Configure Turbopack for monorepo (Next.js 16 uses Turbopack by default)
   turbopack: {
-    root,
+    root: root, // Point to monorepo root where next/package.json is
   },
   
   // 1. Disable Source Maps (Critical)
@@ -31,11 +32,8 @@ const nextConfig: NextConfig = {
   // Enable compression for build artifacts
   compress: true,
   
-  // Ignore linting/type errors during build
-  // @ts-expect-error - 'eslint' is valid in runtime but missing in Next.js 16 types
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // Note: eslint config removed - Next.js 16 doesn't support it in next.config.ts
+  // Use .eslintrc.json or eslint.config.js instead
   typescript: {
     ignoreBuildErrors: true,
   },

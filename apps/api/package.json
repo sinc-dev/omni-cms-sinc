@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy --minify",
+    "dev": "pnpm exec wrangler dev",
+    "deploy": "pnpm exec wrangler deploy --minify --yes",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "db:generate": "drizzle-kit generate:sqlite",
     "db:migrate": "wrangler d1 migrations apply omni-cms --local",
@@ -32,6 +32,6 @@
     "miniflare": "^4.20251118.1",
     "tsx": "^4.7.0",
     "typescript": "^5",
-    "wrangler": "^3.22.1"
+    "wrangler": "^4.50.0"
   }
 }
