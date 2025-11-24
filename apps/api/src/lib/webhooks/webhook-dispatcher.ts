@@ -1,14 +1,33 @@
 import { eq, and } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { webhooks, webhookLogs } from '@/db/schema';
-// Note: In Cloudflare Workers, use Web Crypto API for HMAC
-// This is a simplified version - in production, use proper Web Crypto API
+/**
+ * Create HMAC-SHA256 signature using Web Crypto API
+ * This is the proper implementation for Cloudflare Workers
+ */
 async function createHmac(secret: string, data: string): Promise<string> {
-  // In Cloudflare Workers, use:
-  // const key = await crypto.subtle.importKey(...)
-  // const signature = await crypto.subtle.sign(...)
-  // For now, return a placeholder - this needs proper implementation
-  return btoa(secret + data).substring(0, 64);
+  // Import the secret key for HMAC
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  
+  const key = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  
+  // Sign the data
+  const signature = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    encoder.encode(data)
+  );
+  
+  // Convert to hex string
+  const hashArray = Array.from(new Uint8Array(signature));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 import type { DbClient } from '@/db/client';
 

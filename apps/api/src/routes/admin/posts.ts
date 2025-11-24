@@ -196,7 +196,7 @@ app.post(
       }
 
       // Invalidate cache
-      await invalidatePostCache(organizationId!, postId);
+      await invalidatePostCache(organizationId!, postId, db as any);
 
       // Dispatch webhook
       await dispatchWebhook(db, organizationId!, {

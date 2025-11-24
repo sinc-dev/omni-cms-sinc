@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { eq, and } from 'drizzle-orm';
 import type { CloudflareBindings } from '../../types';
-import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-middleware';
+import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-admin-middleware';
 import { successResponse, Errors } from '../../lib/api/hono-response';
 import { posts, organizations } from '../../db/schema';
 import { invalidatePostCache } from '../../lib/cache/invalidation';
@@ -43,13 +43,7 @@ app.post(
     
     // Invalidate cache when post is published
     try {
-      const org = await db.query.organizations.findFirst({
-        where: (o, { eq }) => eq(o.id, organizationId!),
-      });
-      
-      if (org && updatedResult.slug) {
-        await invalidatePostCache(org.slug, updatedResult.slug);
-      }
+      await invalidatePostCache(organizationId!, updatedResult.slug, db);
     } catch (error) {
       console.error('Failed to invalidate cache:', error);
     }
@@ -107,13 +101,7 @@ app.delete(
     
     // Invalidate cache when post is unpublished
     try {
-      const org = await db.query.organizations.findFirst({
-        where: (o, { eq }) => eq(o.id, organizationId!),
-      });
-      
-      if (org && updatedResult.slug) {
-        await invalidatePostCache(org.slug, updatedResult.slug);
-      }
+      await invalidatePostCache(organizationId!, updatedResult.slug, db);
     } catch (error) {
       console.error('Failed to invalidate cache:', error);
     }

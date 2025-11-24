@@ -15,6 +15,8 @@ import { CustomFieldRenderer } from '@/components/admin/editor/custom-field-rend
 import { MediaPicker } from '@/components/admin/editor/media-picker';
 import { TaxonomySelector } from '@/components/admin/editor/taxonomy-selector';
 import { AutoSaveIndicator } from '@/components/admin/editor/auto-save-indicator';
+import { RelationshipList } from '@/components/admin/posts/relationship-list';
+import { RelationshipSelector } from '@/components/admin/posts/relationship-selector';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
@@ -555,6 +557,53 @@ export default function NewPostPage() {
                     taxonomy={taxonomy}
                     selectedTermIds={taxonomyValues[taxonomy.slug] || []}
                     onChange={(termIds) => updateTaxonomy(taxonomy.slug, termIds)}
+                    onCreateTerm={async (termData) => {
+                      try {
+                        const response = (await api.createTaxonomyTerm(taxonomy.id, {
+                          name: termData.name,
+                          slug: termData.slug,
+                        })) as {
+                          success: boolean;
+                          data: { id: string; name: string; slug: string };
+                        };
+                        if (response.success && response.data) {
+                          // Refresh terms for this taxonomy
+                          const termsResponse = (await api.getTaxonomyTerms(taxonomy.id)) as {
+                            success: boolean;
+                            data: Array<{ id: string; name: string; slug: string; parentId?: string | null }>;
+                          };
+                          if (termsResponse.success) {
+                            setTaxonomies((prev) =>
+                              prev.map((t) =>
+                                t.id === taxonomy.id
+                                  ? { ...t, terms: termsResponse.data }
+                                  : t
+                              )
+                            );
+                          }
+                          return response.data;
+                        }
+                        return null;
+                      } catch (err) {
+                        console.error('Failed to create term:', err);
+                        return null;
+                      }
+                    }}
+                    onRefreshTerms={async () => {
+                      const termsResponse = (await api.getTaxonomyTerms(taxonomy.id)) as {
+                        success: boolean;
+                        data: Array<{ id: string; name: string; slug: string; parentId?: string | null }>;
+                      };
+                      if (termsResponse.success) {
+                        setTaxonomies((prev) =>
+                          prev.map((t) =>
+                            t.id === taxonomy.id
+                              ? { ...t, terms: termsResponse.data }
+                              : t
+                          )
+                        );
+                      }
+                    }}
                   />
                 ))}
               </CardContent>
@@ -636,6 +685,25 @@ export default function NewPostPage() {
               />
             </CardContent>
           </Card>
+
+          {postId && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Relationships</CardTitle>
+                  <RelationshipSelector
+                    fromPostId={postId}
+                    onRelationshipCreated={() => {
+                      // Relationships will refresh automatically
+                    }}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <RelationshipList postId={postId} />
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

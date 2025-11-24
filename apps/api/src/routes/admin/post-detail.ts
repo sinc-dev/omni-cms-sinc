@@ -179,9 +179,9 @@ app.patch(
       await cleanupOldVersions(db, postId);
 
       // Invalidate cache
-      await invalidatePostCache(organizationId!, postId);
+      await invalidatePostCache(organizationId!, postId, db);
       if (updateData.taxonomies) {
-        await invalidateTaxonomyCache(organizationId!);
+        await invalidateTaxonomyCache(organizationId!, undefined, undefined, db);
       }
 
       // Dispatch webhook
@@ -237,7 +237,7 @@ app.delete(
       ));
 
       // Invalidate cache
-      await invalidatePostCache(organizationId!, postId);
+      await invalidatePostCache(organizationId!, postId, db);
 
       // Dispatch webhook
       await dispatchWebhook(db, organizationId!, {

@@ -15,6 +15,13 @@
       "when": 1763820980761,
       "tag": "0001_oval_stranger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1763989018049,
+      "tag": "0002_parallel_piledriver",
+      "breakpoints": true
     }
   ]
 }

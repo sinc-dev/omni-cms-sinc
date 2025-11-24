@@ -1,10 +1,10 @@
 import { Hono } from 'hono';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import type { CloudflareBindings } from '../../types';
-import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-middleware';
+import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-admin-middleware';
 import { successResponse, Errors } from '../../lib/api/hono-response';
 import { updatePostTypeSchema } from '../../lib/validations/post-type';
-import { postTypes } from '../../db/schema';
+import { postTypes, posts } from '../../db/schema';
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -115,8 +115,22 @@ app.delete(
       return c.json(Errors.notFound('Post type'), 404);
     }
 
-    // TODO: Check if there are posts using this type before deletion
-    // For now, we'll allow deletion
+    // Check if there are posts using this type before deletion
+    const postsCountResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(posts)
+      .where(eq(posts.postTypeId, typeId));
+    
+    const count = postsCountResult[0]?.count || 0;
+    
+    if (count > 0) {
+      return c.json(
+        Errors.badRequest(
+          `Cannot delete post type. There ${count === 1 ? 'is' : 'are'} ${count} post${count !== 1 ? 's' : ''} using this type. Please delete or reassign these posts first.`
+        ),
+        400
+      );
+    }
 
     await db
       .delete(postTypes)

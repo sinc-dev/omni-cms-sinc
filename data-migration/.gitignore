@@ -1,0 +1,27 @@
+# Raw scraped data
+**/raw-data/**/*.json
+**/raw-data/**/*.jpg
+**/raw-data/**/*.png
+**/raw-data/**/*.gif
+**/raw-data/**/*.pdf
+
+# Transformed data (can be regenerated)
+**/transformed/**/*.json
+
+# Downloaded media
+**/media/**
+
+# Organization IDs and secrets
+organizations.json
+*.env
+.env.local
+.env.api-keys
+.env.wordpress-auth
+api-keys.json
+
+# Node modules (if scripts have dependencies)
+node_modules/
+
+# Logs
+*.log
+

@@ -55,7 +55,7 @@ export function useSchema(objectType: string): UseSchemaResult {
     try {
       setLoading(true);
       setError(null);
-      const response = await (api as any).getSchema(objectType) as { success: boolean; data: Schema };
+      const response = await api.getSchemaByObjectType(objectType) as { success: boolean; data: Schema };
       if (response.success) {
         setSchema(response.data);
       } else {

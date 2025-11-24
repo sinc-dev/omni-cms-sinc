@@ -160,9 +160,33 @@ export function useApiClient() {
       createApiKey: (data: { name: string; scopes?: string[]; rateLimit?: number; expiresAt?: string | null }) => apiClient.createApiKey(orgId, data),
       rotateApiKey: (keyId: string) => apiClient.rotateApiKey(orgId, keyId),
       // Schema endpoints
-      getSchema: (objectType: string) => apiClient.getSchema(orgId, objectType),
+      getSchema: () => apiClient.getSchema(orgId),
+      getSchemaByObjectType: (objectType: string) => apiClient.getSchemaByObjectType(orgId, objectType),
       getPostTypeSchema: (postTypeId: string) => apiClient.getPostTypeSchema(orgId, postTypeId),
       getPostTypesSchema: () => apiClient.getPostTypesSchema(orgId),
+      getDatabaseSchema: () => apiClient.getDatabaseSchema(orgId),
+      // Post Type Fields
+      getPostTypeFields: (postTypeId: string) => apiClient.getPostTypeFields(orgId, postTypeId),
+      attachFieldToPostType: (postTypeId: string, data: {
+        customFieldId: string;
+        isRequired?: boolean;
+        order?: number;
+        defaultValue?: string;
+      }) => apiClient.attachFieldToPostType(orgId, postTypeId, data),
+      detachFieldFromPostType: (postTypeId: string, fieldId: string) =>
+        apiClient.detachFieldFromPostType(orgId, postTypeId, fieldId),
+      updateFieldOrder: (postTypeId: string, fieldOrders: Array<{ fieldId: string; order: number }>) =>
+        apiClient.updateFieldOrder(orgId, postTypeId, fieldOrders),
+      // Post Relationships
+      getPostRelationships: (postId: string) => apiClient.getPostRelationships(orgId, postId),
+      createPostRelationship: (fromPostId: string, data: { toPostId: string; relationshipType: string }) =>
+        apiClient.createPostRelationship(orgId, fromPostId, data),
+      deletePostRelationship: (relationshipId: string) => apiClient.deletePostRelationship(orgId, relationshipId),
+      // Organization management (super admin only)
+      getOrganizations: () => apiClient.getOrganizations(),
+      getOrganization: (orgId: string) => apiClient.getOrganization(orgId),
+      createOrganization: (data: unknown) => apiClient.createOrganization(data),
+      updateOrganization: (orgId: string, data: unknown) => apiClient.updateOrganization(orgId, data),
     };
   }, [organization]);
 }

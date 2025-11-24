@@ -1,0 +1,254 @@
+{
+  "study-in-kazakhstan": {
+    "blogs": {
+      "contentType": "blogs",
+      "totalItems": 21,
+      "featuredMedia": {
+        "count": 5,
+        "ids": {}
+      },
+      "mediaReferences": [],
+      "directUrls": [],
+      "metaMediaFields": {},
+      "totalFeaturedMedia": 21,
+      "uniqueMediaIds": 21,
+      "mediaIds": [
+        57204,
+        57208,
+        57199,
+        57196,
+        57192,
+        57186,
+        57183,
+        57177,
+        57179,
+        57168,
+        45561,
+        45537,
+        45185,
+        45545,
+        45316,
+        45534,
+        45548,
+        44563,
+        44527,
+        45556
+      ]
+    },
+    "programs": {
+      "contentType": "programs",
+      "totalItems": 3400,
+      "featuredMedia": {
+        "count": 0,
+        "ids": {}
+      },
+      "mediaReferences": [],
+      "directUrls": [],
+      "metaMediaFields": {},
+      "totalFeaturedMedia": 0,
+      "uniqueMediaIds": 0,
+      "mediaIds": []
+    },
+    "universities": {
+      "contentType": "universities",
+      "totalItems": 114,
+      "featuredMedia": {
+        "count": 0,
+        "ids": {}
+      },
+      "mediaReferences": [],
+      "directUrls": [],
+      "metaMediaFields": {},
+      "totalFeaturedMedia": 0,
+      "uniqueMediaIds": 0,
+      "mediaIds": []
+    },
+    "team-members": {
+      "contentType": "team-members",
+      "totalItems": 14,
+      "featuredMedia": {
+        "count": 4,
+        "ids": {}
+      },
+      "mediaReferences": [],
+      "directUrls": [],
+      "metaMediaFields": {},
+      "totalFeaturedMedia": 13,
+      "uniqueMediaIds": 13,
+      "mediaIds": [
+        45349,
+        45342,
+        45337,
+        35090,
+        35050,
+        45333,
+        35086,
+        35070,
+        34773,
+        34774,
+        35035,
+        35074,
+        35093
+      ]
+    },
+    "reviews": {
+      "contentType": "reviews",
+      "totalItems": 129,
+      "featuredMedia": {
+        "count": 0,
+        "ids": {}
+      },
+      "mediaReferences": [],
+      "directUrls": [],
+      "metaMediaFields": {},
+      "totalFeaturedMedia": 0,
+      "uniqueMediaIds": 0,
+      "mediaIds": []
+    }
+  },
+  "paris-american-international-university": {
+    "blogs": {
+      "contentType": "blogs",
+      "totalItems": 46,
+      "featuredMedia": {
+        "count": 5,
+        "ids": {}
+      },
+      "mediaReferences": [],
+      "directUrls": [
+        {
+          "path": "item[0].content.rendered",
+          "value": "\n<p>When most students think about college expenses, <strong>tuition</strong> is the first thing tha"
+        },
+        {
+          "path": "item[1].content.rendered",
+          "value": "\n<p>In today’s fast-moving digital world, professionals are learning smarter — not harder. Online le"
+        },
+        {
+          "path": "item[2].content.rendered",
+          "value": "\n<p>For many working professionals, finding time to study while managing a 9–5 job feels like an imp"
+        },
+        {
+          "path": "item[3].content.rendered",
+          "value": "\n<p>In today’s world, education is one of the most valuable investments you can make, not just in yo"
+        },
+        {
+          "path": "item[4].content.rendered",
+          "value": "\n<p>In today’s fast-changing world, the way we learn is evolving faster than ever before. Traditiona"
+        }
+      ],
+      "metaMediaFields": {},
+      "totalFeaturedMedia": 46,
+      "uniqueMediaIds": 46,
+      "mediaIds": [
+        16676,
+        16677,
+        16667,
+        16657,
+        16613,
+        16563,
+        16636,
+        16630,
+        16628,
+        16615,
+        16608,
+        16465,
+        16360,
+        16361,
+        16362,
+        16364,
+        16366,
+        16367,
+        16369,
+        16370
+      ]
+    },
+    "programs": {
+      "contentType": "programs",
+      "totalItems": 45,
+      "featuredMedia": {
+        "count": 0,
+        "ids": {}
+      },
+      "mediaReferences": [],
+      "directUrls": [],
+      "metaMediaFields": {},
+      "totalFeaturedMedia": 0,
+      "uniqueMediaIds": 0,
+      "mediaIds": []
+    },
+    "academic-staff": {
+      "contentType": "academic-staff",
+      "totalItems": 10,
+      "featuredMedia": {
+        "count": 5,
+        "ids": {}
+      },
+      "mediaReferences": [],
+      "directUrls": [],
+      "metaMediaFields": {},
+      "totalFeaturedMedia": 10,
+      "uniqueMediaIds": 10,
+      "mediaIds": [
+        14448,
+        14449,
+        14450,
+        14451,
+        14452,
+        14453,
+        14454,
+        14455,
+        14456,
+        14457
+      ]
+    },
+    "team-members": {
+      "contentType": "team-members",
+      "totalItems": 4,
+      "featuredMedia": {
+        "count": 4,
+        "ids": {}
+      },
+      "mediaReferences": [],
+      "directUrls": [],
+      "metaMediaFields": {},
+      "totalFeaturedMedia": 4,
+      "uniqueMediaIds": 4,
+      "mediaIds": [
+        16429,
+        16427,
+        16425,
+        16444
+      ]
+    },
+    "instructors": {
+      "contentType": "instructors",
+      "totalItems": 14,
+      "featuredMedia": {
+        "count": 5,
+        "ids": {}
+      },
+      "mediaReferences": [],
+      "directUrls": [],
+      "metaMediaFields": {},
+      "totalFeaturedMedia": 14,
+      "uniqueMediaIds": 14,
+      "mediaIds": [
+        12115,
+        12113,
+        12111,
+        12109,
+        12107,
+        12105,
+        12103,
+        12099,
+        12097,
+        12095,
+        12093,
+        12091,
+        12089,
+        12086
+      ]
+    }
+  }
+}

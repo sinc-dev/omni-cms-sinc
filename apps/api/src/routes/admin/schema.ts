@@ -3,7 +3,8 @@ import { eq } from 'drizzle-orm';
 import type { CloudflareBindings } from '../../types';
 import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-middleware';
 import { successResponse, Errors } from '../../lib/api/hono-response';
-import { postTypes, customFields, taxonomies } from '../../db/schema';
+import { postTypes, customFields, taxonomies, postRelationships, posts } from '../../db/schema';
+import { sql } from 'drizzle-orm';
 import {
   PostStatus,
   CustomFieldType,
@@ -47,6 +48,51 @@ app.get(
           terms: true,
         },
       });
+
+      // Query distinct relationship types from post_relationships
+      // Join with posts to ensure we only get relationships for this organization
+      const relationshipTypesResult = await db
+        .selectDistinct({ relationshipType: postRelationships.relationshipType })
+        .from(postRelationships)
+        .innerJoin(posts, eq(postRelationships.fromPostId, posts.id))
+        .where(eq(posts.organizationId, organizationId!));
+
+      const relationshipTypes = relationshipTypesResult
+        .map((r) => r.relationshipType)
+        .filter(Boolean)
+        .sort();
+
+      // Query distinct field types from custom_fields
+      const fieldTypesResult = await db
+        .selectDistinct({ fieldType: customFields.fieldType })
+        .from(customFields)
+        .where(eq(customFields.organizationId, organizationId!));
+
+      const fieldTypes = fieldTypesResult
+        .map((f) => f.fieldType)
+        .filter(Boolean)
+        .sort();
+
+      // Generate color mappings for relationship types and field types
+      const generateColorMapping = (types: string[]) => {
+        const defaultColors = [
+          '#3b82f6', // blue
+          '#10b981', // green
+          '#f59e0b', // orange
+          '#ef4444', // red
+          '#8b5cf6', // purple
+          '#ec4899', // pink
+          '#06b6d4', // cyan
+          '#84cc16', // lime
+          '#f97316', // orange-600
+          '#6366f1', // indigo
+        ];
+        const mapping: Record<string, string> = {};
+        types.forEach((type, index) => {
+          mapping[type] = defaultColors[index % defaultColors.length];
+        });
+        return mapping;
+      };
 
       // Build post types with their associated custom fields
       // Note: In the current schema, custom fields are organization-wide,
@@ -235,6 +281,14 @@ app.get(
           customFieldSlug: {
             pattern: '^[a-z0-9_]+$',
             message: 'Custom field slug must contain only lowercase letters, numbers, and underscores',
+          },
+        },
+        metadata: {
+          relationshipTypes: relationshipTypes,
+          fieldTypes: fieldTypes,
+          colorMappings: {
+            relationshipTypes: generateColorMapping(relationshipTypes),
+            fieldTypes: generateColorMapping(fieldTypes),
           },
         },
       };

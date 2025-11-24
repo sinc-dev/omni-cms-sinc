@@ -1,0 +1,25 @@
+{
+  "name": "data-migration",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "WordPress to Omni-CMS data migration scripts",
+  "scripts": {
+    "test-api": "node scripts/test-api.js",
+    "test-api-quick": "node scripts/test-api-quick.js",
+    "explore": "node scripts/explore-wordpress-sites.js",
+    "analyze": "node scripts/analyze-sample-data.js",
+    "setup-orgs": "node scripts/setup-organizations-with-keys.js",
+    "fetch-all": "node scripts/fetch-all-data.js",
+    "fetch-quick": "node scripts/fetch-all-data-quick.js",
+    "fetch-media": "node scripts/fetch-media-details.js",
+    "fetch-taxonomies": "node scripts/fetch-custom-taxonomies.js",
+    "transform": "node shared/transformers/transform-all.js",
+    "import": "node scripts/import-all.js",
+    "import:test": "cross-env TEST_MODE=true TEST_LIMIT=40 node scripts/import-all.js",
+    "parse-xml": "node scripts/parse-wordpress-xml.js",
+    "discover-types": "node scripts/discover-jetengine-types.js"
+  },
+  "devDependencies": {
+    "fast-xml-parser": "^5.3.2"
+  }
+}

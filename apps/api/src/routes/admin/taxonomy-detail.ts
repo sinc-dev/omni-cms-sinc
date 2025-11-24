@@ -1,10 +1,10 @@
 import { Hono } from 'hono';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql, inArray } from 'drizzle-orm';
 import type { CloudflareBindings } from '../../types';
-import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-middleware';
+import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-admin-middleware';
 import { successResponse, Errors } from '../../lib/api/hono-response';
 import { updateTaxonomySchema } from '../../lib/validations/taxonomy';
-import { taxonomies } from '../../db/schema';
+import { taxonomies, taxonomyTerms, postTaxonomies } from '../../db/schema';
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -117,8 +117,35 @@ app.delete(
       return c.json(Errors.notFound('Taxonomy'), 404);
     }
 
-    // TODO: Check if there are posts using this taxonomy before deletion
-    // For now, we'll allow deletion
+    // Check if there are posts using this taxonomy before deletion
+    // First get all terms for this taxonomy
+    const terms = await db.query.taxonomyTerms.findMany({
+      where: (tt, { eq }) => eq(tt.taxonomyId, taxonomyId),
+      columns: { id: true },
+    });
+
+    if (terms.length > 0) {
+      const termIds = terms.map((t) => t.id);
+      
+      // Check if any posts are tagged with these terms
+      const postsCountResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(postTaxonomies)
+        .where(
+          sql`${postTaxonomies.taxonomyTermId} IN (${sql.join(termIds.map((id) => sql`${id}`), sql`, `)})`
+        );
+      
+      const count = postsCountResult[0]?.count || 0;
+      
+      if (count > 0) {
+        return c.json(
+          Errors.badRequest(
+            `Cannot delete taxonomy. There ${count === 1 ? 'is' : 'are'} ${count} post${count !== 1 ? 's' : ''} tagged with terms from this taxonomy. Please remove these tags first.`
+          ),
+          400
+        );
+      }
+    }
 
     await db
       .delete(taxonomies)

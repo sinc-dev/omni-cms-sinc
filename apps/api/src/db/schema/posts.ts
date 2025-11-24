@@ -141,6 +141,19 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   relationshipsFrom: many(postRelationships),
 }));
 
+export const postRelationshipsRelations = relations(postRelationships, ({ one }) => ({
+  fromPost: one(posts, {
+    fields: [postRelationships.fromPostId],
+    references: [posts.id],
+    relationName: 'relationshipsFrom',
+  }),
+  toPost: one(posts, {
+    fields: [postRelationships.toPostId],
+    references: [posts.id],
+    relationName: 'relationshipsTo',
+  }),
+}));
+
 export type Post = typeof posts.$inferSelect;
 export type NewPost = typeof posts.$inferInsert;
 export type PostFieldValue = typeof postFieldValues.$inferSelect;

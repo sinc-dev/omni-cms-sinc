@@ -2,7 +2,16 @@
 
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ChevronRight, ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { ChevronRight, ChevronDown, Plus, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -18,6 +27,8 @@ interface TaxonomySelectorProps {
   taxonomy: Taxonomy;
   selectedTermIds: string[];
   onChange: (termIds: string[]) => void;
+  onCreateTerm?: (term: { name: string; slug: string }) => Promise<{ id: string; name: string; slug: string } | null>;
+  onRefreshTerms?: () => Promise<void>;
 }
 
 function TermCheckbox({
@@ -94,9 +105,123 @@ export function TaxonomySelector({
   taxonomy,
   selectedTermIds,
   onChange,
+  onCreateTerm,
+  onRefreshTerms,
 }: TaxonomySelectorProps) {
   const terms = taxonomy.terms || [];
   const rootTerms = terms.filter((t) => !t.parentId);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newTermName, setNewTermName] = useState('');
+  const [newTermSlug, setNewTermSlug] = useState('');
+  const [creating, setCreating] = useState(false);
+
+  const generateSlug = (nameValue: string) => {
+    return nameValue
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  const handleCreateTerm = async () => {
+    if (!newTermName.trim() || !onCreateTerm) return;
+
+    setCreating(true);
+    try {
+      const slug = newTermSlug || generateSlug(newTermName);
+      const newTerm = await onCreateTerm({
+        name: newTermName.trim(),
+        slug,
+      });
+
+      // Refresh terms if callback provided
+      if (onRefreshTerms) {
+        await onRefreshTerms();
+      }
+
+      // Auto-select the newly created term
+      if (newTerm?.id) {
+        onChange([...selectedTermIds, newTerm.id]);
+      }
+
+      // Reset form and close dialog
+      setNewTermName('');
+      setNewTermSlug('');
+      setCreateDialogOpen(false);
+    } catch (err) {
+      console.error('Failed to create term:', err);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const CreateTermButton = () => {
+    if (!onCreateTerm) return null;
+
+    return (
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm" className="w-full mt-2">
+            <Plus className="mr-2 h-4 w-4" />
+            Add New {taxonomy.name.slice(0, -1)}
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New {taxonomy.name.slice(0, -1)}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="term-name">Name *</Label>
+              <Input
+                id="term-name"
+                placeholder={`e.g., ${taxonomy.name === 'Categories' ? 'Technology' : 'Tag Name'}`}
+                value={newTermName}
+                onChange={(e) => {
+                  setNewTermName(e.target.value);
+                  if (!newTermSlug) {
+                    setNewTermSlug(generateSlug(e.target.value));
+                  }
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="term-slug">Slug</Label>
+              <Input
+                id="term-slug"
+                placeholder="auto-generated"
+                value={newTermSlug}
+                onChange={(e) => setNewTermSlug(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setCreateDialogOpen(false);
+                  setNewTermName('');
+                  setNewTermSlug('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleCreateTerm} disabled={creating || !newTermName.trim()}>
+                {creating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create'
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
 
   if (taxonomy.isHierarchical) {
     return (
@@ -117,6 +242,7 @@ export function TaxonomySelector({
             ))
           )}
         </div>
+        <CreateTermButton />
       </div>
     );
   }
@@ -155,6 +281,7 @@ export function TaxonomySelector({
           })
         )}
       </div>
+      <CreateTermButton />
     </div>
   );
 }

@@ -96,7 +96,9 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserMember | null>(null);
+  const [detailUser, setDetailUser] = useState<UserMember | null>(null);
   const [email, setEmail] = useState('');
   const [roleId, setRoleId] = useState('');
   const [adding, setAdding] = useState(false);
@@ -250,6 +252,11 @@ export default function UsersPage() {
     setEditDialogOpen(true);
   };
 
+  const handleViewDetails = (user: UserMember) => {
+    setDetailUser(user);
+    setDetailDialogOpen(true);
+  };
+
   const totalPages = Math.ceil(total / perPage);
 
   if (orgLoading || !organization) {
@@ -300,11 +307,14 @@ export default function UsersPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
+                {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
                 <select
                   id="role"
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   value={roleId}
                   onChange={(e) => setRoleId(e.target.value)}
+                  aria-label="Select role for new user"
+                  title="Select role for new user"
                 >
                   <option value="">Select a role...</option>
                   {roles.map((role) => (
@@ -460,7 +470,17 @@ export default function UsersPage() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
+                              onClick={() => handleViewDetails(member)}
+                              aria-label={`View details for ${member.user.name}`}
+                            >
+                              <UserIcon className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
                               onClick={() => handleEditClick(member)}
+                              aria-label={`Edit role for ${member.user.name}`}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -471,6 +491,7 @@ export default function UsersPage() {
                               onClick={() =>
                                 handleRemoveUser(member.userId, member.user.name)
                               }
+                              aria-label={`Remove ${member.user.name}`}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -530,10 +551,13 @@ export default function UsersPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="edit-role">Role</Label>
+              {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
               <select
                 id="edit-role"
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={roleId}
+                aria-label="Select role for user"
+                title="Select role for user"
                 onChange={(e) => setRoleId(e.target.value)}
               >
                 <option value="">Select a role...</option>
@@ -562,6 +586,100 @@ export default function UsersPage() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Details Dialog */}
+      <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+          </DialogHeader>
+          {detailUser && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
+                  {detailUser.user.avatarUrl ? (
+                    <img
+                      src={detailUser.user.avatarUrl}
+                      alt={detailUser.user.name}
+                      className="h-16 w-16 rounded-full"
+                    />
+                  ) : (
+                    <UserIcon className="h-8 w-8 text-muted-foreground" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">{detailUser.user.name}</h3>
+                  <p className="text-sm text-muted-foreground">{detailUser.user.email}</p>
+                </div>
+              </div>
+
+              <div className="grid gap-4">
+                <div>
+                  <Label className="text-xs text-muted-foreground">User ID</Label>
+                  <p className="text-sm font-mono">{detailUser.user.id}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Role</Label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Shield className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-sm font-medium">{detailUser.role.name}</p>
+                  </div>
+                  {detailUser.role.description && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {detailUser.role.description}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Member Since</Label>
+                  <p className="text-sm">
+                    {detailUser.createdAt
+                      ? new Date(detailUser.createdAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })
+                      : '—'}
+                  </p>
+                </div>
+                {detailUser.updatedAt && (
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Last Updated</Label>
+                    <p className="text-sm">
+                      {new Date(detailUser.updatedAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setDetailDialogOpen(false);
+                    setDetailUser(null);
+                  }}
+                >
+                  Close
+                </Button>
+                <Button
+                  onClick={() => {
+                    setDetailDialogOpen(false);
+                    handleEditClick(detailUser);
+                  }}
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Role
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

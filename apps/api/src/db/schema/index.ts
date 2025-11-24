@@ -4,6 +4,7 @@ export * from './users';
 export * from './roles';
 export * from './users-organizations';
 export * from './post-types';
+export * from './post-type-fields';
 export * from './custom-fields';
 export * from './posts';
 export * from './taxonomies';

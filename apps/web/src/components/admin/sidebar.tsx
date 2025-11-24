@@ -9,6 +9,7 @@ import {
     Image,
     Tags,
     Users,
+    User,
     Settings,
     FolderTree,
     Layers,
@@ -18,6 +19,8 @@ import {
     FileText as FileTemplate,
     CheckCircle2,
     Key,
+    Database,
+    Network,
 } from 'lucide-react';
 
 const navigation = [
@@ -27,6 +30,8 @@ const navigation = [
     { name: 'Taxonomies', href: '/admin/taxonomies', icon: Tags },
     { name: 'Post Types', href: '/admin/post-types', icon: FolderTree },
     { name: 'Custom Fields', href: '/admin/custom-fields', icon: Layers },
+    { name: 'Data Models', href: '/models', icon: Database },
+    { name: 'Relationships', href: '/admin/relationships', icon: Network },
     { name: 'Content Blocks', href: '/admin/content-blocks', icon: Blocks },
     { name: 'Templates', href: '/admin/templates', icon: FileTemplate },
     { name: 'Reviews', href: '/admin/reviews', icon: CheckCircle2 },
@@ -35,6 +40,7 @@ const navigation = [
     { name: 'API Keys', href: '/admin/api-keys', icon: Key },
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
+    { name: 'Profile', href: '/admin/profile', icon: User },
 ];
 
 export function Sidebar() {

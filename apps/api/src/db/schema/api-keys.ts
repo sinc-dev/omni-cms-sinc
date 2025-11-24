@@ -22,6 +22,9 @@ export const apiKeys = sqliteTable(
     createdAt: integer('created_at', { mode: 'timestamp' })
       .notNull()
       .$defaultFn(() => new Date()),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .$defaultFn(() => new Date()),
     lastUsedAt: integer('last_used_at', { mode: 'timestamp' }),
     expiresAt: integer('expires_at', { mode: 'timestamp' }), // null = never expires
   },

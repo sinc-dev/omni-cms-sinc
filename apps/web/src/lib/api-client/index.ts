@@ -96,6 +96,12 @@ class ApiClient {
     });
   }
 
+  async deleteOrganization(orgId: string) {
+    return this.request(`/api/admin/v1/organizations/${orgId}`, {
+      method: 'DELETE',
+    });
+  }
+
   // Posts
   async getPosts(orgId: string, params?: Record<string, string>) {
     const query = params ? `?${new URLSearchParams(params)}` : '';
@@ -657,7 +663,11 @@ class ApiClient {
   }
 
   // Schema endpoints
-  async getSchema(orgId: string, objectType: string) {
+  async getSchema(orgId: string) {
+    return this.request(`/api/admin/v1/organizations/${orgId}/schema`);
+  }
+
+  async getSchemaByObjectType(orgId: string, objectType: string) {
     return this.request(`/api/admin/v1/organizations/${orgId}/schema/${objectType}`);
   }
 
@@ -667,6 +677,77 @@ class ApiClient {
 
   async getPostTypesSchema(orgId: string) {
     return this.request(`/api/admin/v1/organizations/${orgId}/schema/post-types`);
+  }
+
+  // Post Type Fields
+  async getPostTypeFields(orgId: string, postTypeId: string) {
+    return this.request(`/api/admin/v1/organizations/${orgId}/post-types/${postTypeId}/fields`);
+  }
+
+  async attachFieldToPostType(
+    orgId: string,
+    postTypeId: string,
+    data: {
+      customFieldId: string;
+      isRequired?: boolean;
+      order?: number;
+      defaultValue?: string;
+    }
+  ) {
+    return this.request(`/api/admin/v1/organizations/${orgId}/post-types/${postTypeId}/fields`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async detachFieldFromPostType(orgId: string, postTypeId: string, fieldId: string) {
+    return this.request(
+      `/api/admin/v1/organizations/${orgId}/post-types/${postTypeId}/fields/${fieldId}`,
+      {
+        method: 'DELETE',
+      }
+    );
+  }
+
+  async updateFieldOrder(
+    orgId: string,
+    postTypeId: string,
+    fieldOrders: Array<{ fieldId: string; order: number }>
+  ) {
+    return this.request(
+      `/api/admin/v1/organizations/${orgId}/post-types/${postTypeId}/fields/reorder`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ fieldOrders }),
+      }
+    );
+  }
+
+  // Post Relationships
+  async getPostRelationships(orgId: string, postId: string) {
+    return this.request(`/api/admin/v1/organizations/${orgId}/posts/${postId}/relationships`);
+  }
+
+  async createPostRelationship(
+    orgId: string,
+    fromPostId: string,
+    data: { toPostId: string; relationshipType: string }
+  ) {
+    return this.request(`/api/admin/v1/organizations/${orgId}/posts/${fromPostId}/relationships`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deletePostRelationship(orgId: string, relationshipId: string) {
+    return this.request(`/api/admin/v1/organizations/${orgId}/relationships/${relationshipId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Database Schema
+  async getDatabaseSchema(orgId: string) {
+    return this.request(`/api/admin/v1/organizations/${orgId}/schema/database`);
   }
 }
 

@@ -2,7 +2,8 @@
 
 export const runtime = 'edge';
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,7 +32,6 @@ import {
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
-import { cn } from '@/lib/utils';
 
 interface PostType {
   id: string;
@@ -58,14 +58,8 @@ interface PaginatedResponse {
 
 export default function PostTypesPage() {
   const { organization, isLoading: orgLoading } = useOrganization();
-  let api: ReturnType<typeof useApiClient> | null = null;
-  try {
-    if (organization) {
-      api = useApiClient();
-    }
-  } catch {
-    api = null;
-  }
+  // Always call hooks unconditionally - React rules
+  const api = useApiClient();
 
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
   const [postTypes, setPostTypes] = useState<PostType[]>([]);
@@ -104,7 +98,6 @@ export default function PostTypesPage() {
   // Fetch post types
   useEffect(() => {
     if (!organization || !api || orgLoading) {
-      setLoading(false);
       return;
     }
 
@@ -346,7 +339,10 @@ export default function PostTypesPage() {
                   key={postType.id}
                   className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
                 >
-                  <div className="flex items-center gap-3">
+                  <Link
+                    href={`/admin/post-types/${postType.id}`}
+                    className="flex items-center gap-3 flex-1 min-w-0"
+                  >
                     <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                       {postType.icon ? (
                         <span className="text-lg">{postType.icon}</span>
@@ -354,7 +350,7 @@ export default function PostTypesPage() {
                         <FileText className="h-5 w-5 text-muted-foreground" />
                       )}
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <div className="font-medium">{postType.name}</div>
                       <div className="text-xs text-muted-foreground">
                         {postType.slug} {postType.isHierarchical && '• Hierarchical'}
@@ -365,7 +361,7 @@ export default function PostTypesPage() {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </Link>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -373,6 +369,12 @@ export default function PostTypesPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link href={`/admin/post-types/${postType.id}`}>
+                          <FileText className="mr-2 h-4 w-4" />
+                          View Details
+                        </Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => openEditDialog(postType)}>
                         <Edit className="mr-2 h-4 w-4" />
                         Edit

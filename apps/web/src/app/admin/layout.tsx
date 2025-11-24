@@ -3,6 +3,7 @@ import { Sidebar } from '@/components/admin/sidebar';
 import { Header } from '@/components/admin/header';
 import { AdminBreadcrumbs } from '@/components/admin/breadcrumbs';
 import { OrganizationProvider } from '@/lib/context/organization-context';
+import { SchemaProvider } from '@/lib/context/schema-context';
 import { ToastProvider } from '@/components/ui/toast';
 import { ErrorBoundary } from '@/components/error-boundary';
 
@@ -13,7 +14,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     return (
         <ErrorBoundary>
             <OrganizationProvider>
-                <ToastProvider>
+                <SchemaProvider>
+                    <ToastProvider>
                     <div className="flex h-screen overflow-hidden bg-background">
                         {/* Sidebar */}
                         <Sidebar />
@@ -27,7 +29,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                             </main>
                         </div>
                     </div>
-                </ToastProvider>
+                    </ToastProvider>
+                </SchemaProvider>
             </OrganizationProvider>
         </ErrorBoundary>
     );
