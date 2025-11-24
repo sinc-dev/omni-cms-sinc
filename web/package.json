@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "TURBOPACK=0 next build",
-    "build:cf": "TURBOPACK=0 next build && ln -s . web && find .vercel -name '*.map' -delete && find .next -name '*.map' -delete && npx @cloudflare/next-on-pages@1 && rm web",
+    "build:cf": "TURBOPACK=0 next build && ln -s . web && find .next -name '*.map' -delete && npx @cloudflare/next-on-pages@1 && rm web",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
