@@ -2,6 +2,7 @@
 
 export const runtime = 'edge';
 import { useState, useEffect } from 'react';
+import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +34,19 @@ import {
 import { apiClient } from '@/lib/api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { ExportDialog, ImportDialog } from '@/components/admin/import-export';
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+  FormErrorSummary,
+  useFormState,
+} from '@/components/ui/form';
+import { organizationFormDialogSchema } from '@/lib/validations/organization';
+import type { OrganizationFormDialogInput } from '@/lib/validations/organization';
 
 interface Organization {
   id: string;
@@ -53,16 +67,9 @@ export default function OrganizationsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
-  const [saving, setSaving] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [selectedOrgForImportExport, setSelectedOrgForImportExport] = useState<Organization | null>(null);
-
-  // Form state
-  const [name, setName] = useState('');
-  const [slug, setSlug] = useState('');
-  const [domain, setDomain] = useState('');
-  const [settings, setSettings] = useState('{}');
 
   // Debounce search
   useEffect(() => {
@@ -120,37 +127,19 @@ export default function OrganizationsPage() {
       .replace(/^-+|-+$/g, '');
   };
 
-  const handleCreate = withErrorHandling(async () => {
-    if (!name || !slug) {
-      handleError('Name and slug are required', { title: 'Validation Error' });
-      return;
-    }
-
-    setSaving(true);
+  const handleCreate = withErrorHandling(async (data: OrganizationFormDialogInput) => {
     clearError();
 
     try {
-      let settingsObj = {};
-      try {
-        settingsObj = JSON.parse(settings);
-      } catch {
-        handleError('Invalid JSON in settings', { title: 'Validation Error' });
-        setSaving(false);
-        return;
-      }
+      const settingsObj = JSON.parse(data.settings);
 
       await apiClient.createOrganization({
-        name,
-        slug,
-        domain: domain || null,
+        name: data.name,
+        slug: data.slug,
+        domain: data.domain || null,
         settings: settingsObj,
       });
 
-      // Reset form and close dialog
-      setName('');
-      setSlug('');
-      setDomain('');
-      setSettings('{}');
       setDialogOpen(false);
 
       // Refresh organizations list
@@ -163,43 +152,28 @@ export default function OrganizationsPage() {
       }
     } catch (err) {
       handleError(err, { title: 'Failed to Create Organization' });
-    } finally {
-      setSaving(false);
     }
   }, { title: 'Failed to Create Organization' });
 
-  const handleEdit = withErrorHandling(async () => {
-    if (!editingOrg || !name || !slug) {
-      handleError('Name and slug are required', { title: 'Validation Error' });
+  const handleEdit = withErrorHandling(async (data: OrganizationFormDialogInput) => {
+    if (!editingOrg) {
+      handleError('Organization is required', { title: 'Validation Error' });
       return;
     }
 
-    setSaving(true);
     clearError();
 
     try {
-      let settingsObj = {};
-      try {
-        settingsObj = JSON.parse(settings);
-      } catch {
-        handleError('Invalid JSON in settings', { title: 'Validation Error' });
-        setSaving(false);
-        return;
-      }
+      const settingsObj = JSON.parse(data.settings);
 
       await apiClient.updateOrganization(editingOrg.id, {
-        name,
-        slug,
-        domain: domain || null,
+        name: data.name,
+        slug: data.slug,
+        domain: data.domain || null,
         settings: settingsObj,
       });
 
-      // Reset form and close dialog
       setEditingOrg(null);
-      setName('');
-      setSlug('');
-      setDomain('');
-      setSettings('{}');
       setEditDialogOpen(false);
 
       // Refresh organizations list
@@ -212,8 +186,6 @@ export default function OrganizationsPage() {
       }
     } catch (err) {
       handleError(err, { title: 'Failed to Update Organization' });
-    } finally {
-      setSaving(false);
     }
   }, { title: 'Failed to Update Organization' });
 
@@ -240,10 +212,6 @@ export default function OrganizationsPage() {
 
   const openEditDialog = (org: Organization) => {
     setEditingOrg(org);
-    setName(org.name);
-    setSlug(org.slug);
-    setDomain(org.domain || '');
-    setSettings(org.settings ? JSON.stringify(JSON.parse(org.settings), null, 2) : '{}');
     setEditDialogOpen(true);
   };
 
@@ -265,77 +233,25 @@ export default function OrganizationsPage() {
             <DialogHeader>
               <DialogTitle>Create Organization</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
-                <Input
-                  id="name"
-                  placeholder="My Organization"
-                  value={name}
-                  onChange={(e) => {
-                    setName(e.target.value);
-                    if (!slug) {
-                      setSlug(generateSlug(e.target.value));
-                    }
-                  }}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="slug">Slug *</Label>
-                <Input
-                  id="slug"
-                  placeholder="my-organization"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="domain">Domain (Optional)</Label>
-                <Input
-                  id="domain"
-                  placeholder="example.com"
-                  value={domain}
-                  onChange={(e) => setDomain(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="settings">Settings (JSON)</Label>
-                <Textarea
-                  id="settings"
-                  placeholder='{"key": "value"}'
-                  value={settings}
-                  onChange={(e) => setSettings(e.target.value)}
-                  rows={6}
-                  className="font-mono text-sm"
-                />
-              </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setDialogOpen(false);
-                    setName('');
-                    setSlug('');
-                    setDomain('');
-                    setSettings('{}');
-                    clearError();
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleCreate} disabled={saving || !name || !slug}>
-                  {saving ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    'Create'
-                  )}
-                </Button>
-              </div>
-            </div>
+            <Form
+              schema={organizationFormDialogSchema}
+              defaultValues={{
+                name: '',
+                slug: '',
+                domain: '',
+                settings: '{}',
+              }}
+              onSubmit={handleCreate}
+              mode="onBlur"
+            >
+              <CreateOrganizationFormContent
+                onCancel={() => {
+                  setDialogOpen(false);
+                  clearError();
+                }}
+                generateSlug={generateSlug}
+              />
+            </Form>
           </DialogContent>
         </Dialog>
       </div>
@@ -458,74 +374,29 @@ export default function OrganizationsPage() {
           <DialogHeader>
             <DialogTitle>Edit Organization</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-name">Name *</Label>
-              <Input
-                id="edit-name"
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  if (!slug) {
-                    setSlug(generateSlug(e.target.value));
-                  }
-                }}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-slug">Slug *</Label>
-              <Input
-                id="edit-slug"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-domain">Domain (Optional)</Label>
-              <Input
-                id="edit-domain"
-                value={domain}
-                onChange={(e) => setDomain(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-settings">Settings (JSON)</Label>
-              <Textarea
-                id="edit-settings"
-                value={settings}
-                onChange={(e) => setSettings(e.target.value)}
-                rows={6}
-                className="font-mono text-sm"
-              />
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
+          {editingOrg && (
+            <Form
+              schema={organizationFormDialogSchema}
+              defaultValues={{
+                name: editingOrg.name || '',
+                slug: editingOrg.slug || '',
+                domain: editingOrg.domain || '',
+                settings: editingOrg.settings
+                  ? JSON.stringify(JSON.parse(editingOrg.settings), null, 2)
+                  : '{}',
+              }}
+              onSubmit={handleEdit}
+              mode="onBlur"
+            >
+              <EditOrganizationFormContent
+                onCancel={() => {
                   setEditDialogOpen(false);
                   setEditingOrg(null);
-                  setName('');
-                  setSlug('');
-                  setDomain('');
-                  setSettings('{}');
                   clearError();
                 }}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleEdit} disabled={saving || !name || !slug}>
-                {saving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating...
-                  </>
-                ) : (
-                  'Update'
-                )}
-              </Button>
-            </div>
-          </div>
+              />
+            </Form>
+          )}
         </DialogContent>
       </Dialog>
 
@@ -587,4 +458,251 @@ export default function OrganizationsPage() {
     </div>
   );
 }
+
+// Create Organization Form Content
+function CreateOrganizationFormContent({
+  onCancel,
+  generateSlug,
+}: {
+  onCancel: () => void;
+  generateSlug: (name: string) => string;
+}) {
+  const { form, isSubmitting, isValid, errors } = useFormState<OrganizationFormDialogInput>();
+
+  return (
+    <>
+      <div className="space-y-4">
+        <FormField name="name">
+          {({ value, onChange, onBlur, error, invalid }) => (
+            <FormItem>
+              <FormLabel required error={invalid} htmlFor="name">
+                Name
+              </FormLabel>
+              <FormControl error={invalid}>
+                <Input
+                  id="name"
+                  placeholder="My Organization"
+                  value={value as string}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    onChange(newValue);
+                    // Auto-generate slug if slug is empty
+                    const currentSlug = form.getValues('slug');
+                    if (!currentSlug) {
+                      form.setValue('slug', generateSlug(newValue));
+                    }
+                  }}
+                  onBlur={onBlur}
+                  error={invalid}
+                />
+              </FormControl>
+              <FormMessage error={error} />
+            </FormItem>
+          )}
+        </FormField>
+
+        <FormField name="slug">
+          {({ value, onChange, onBlur, error, invalid }) => (
+            <FormItem>
+              <FormLabel required error={invalid} htmlFor="slug">
+                Slug
+              </FormLabel>
+              <FormControl error={invalid}>
+                <Input
+                  id="slug"
+                  placeholder="my-organization"
+                  value={value as string}
+                  onChange={(e) => onChange(e.target.value)}
+                  onBlur={onBlur}
+                  error={invalid}
+                />
+              </FormControl>
+              <FormDescription>
+                Used in URLs and API endpoints. Cannot contain spaces or special characters.
+              </FormDescription>
+              <FormMessage error={error} />
+            </FormItem>
+          )}
+        </FormField>
+
+        <FormField name="domain">
+          {({ value, onChange, onBlur, error, invalid }) => (
+            <FormItem>
+              <FormLabel error={invalid} htmlFor="domain">
+                Domain (Optional)
+              </FormLabel>
+              <FormControl error={invalid}>
+                <Input
+                  id="domain"
+                  placeholder="example.com"
+                  value={(value as string) || ''}
+                  onChange={(e) => onChange(e.target.value)}
+                  onBlur={onBlur}
+                  error={invalid}
+                />
+              </FormControl>
+              <FormMessage error={error} />
+            </FormItem>
+          )}
+        </FormField>
+
+        <FormField name="settings">
+          {({ value, onChange, onBlur, error, invalid }) => (
+            <FormItem>
+              <FormLabel error={invalid} htmlFor="settings">
+                Settings (JSON)
+              </FormLabel>
+              <FormControl error={invalid}>
+                <Textarea
+                  id="settings"
+                  placeholder='{"key": "value"}'
+                  value={value as string}
+                  onChange={(e) => onChange(e.target.value)}
+                  onBlur={onBlur}
+                  rows={6}
+                  className="font-mono text-sm"
+                  error={invalid}
+                />
+              </FormControl>
+              <FormMessage error={error} />
+            </FormItem>
+          )}
+        </FormField>
+
+        <FormErrorSummary errors={errors as Record<string, { message?: string }>} />
+
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting || !isValid}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              'Create'
+            )}
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// Edit Organization Form Content
+function EditOrganizationFormContent({ onCancel }: { onCancel: () => void }) {
+  const { form, isSubmitting, isValid, errors } = useFormState<OrganizationFormDialogInput>();
+
+  return (
+    <>
+      <div className="space-y-4">
+        <FormField name="name">
+          {({ value, onChange, onBlur, error, invalid }) => (
+            <FormItem>
+              <FormLabel required error={invalid} htmlFor="edit-name">
+                Name
+              </FormLabel>
+              <FormControl error={invalid}>
+                <Input
+                  id="edit-name"
+                  value={value as string}
+                  onChange={(e) => onChange(e.target.value)}
+                  onBlur={onBlur}
+                  error={invalid}
+                />
+              </FormControl>
+              <FormMessage error={error} />
+            </FormItem>
+          )}
+        </FormField>
+
+        <FormField name="slug">
+          {({ value, onChange, onBlur, error, invalid }) => (
+            <FormItem>
+              <FormLabel required error={invalid} htmlFor="edit-slug">
+                Slug
+              </FormLabel>
+              <FormControl error={invalid}>
+                <Input
+                  id="edit-slug"
+                  value={value as string}
+                  onChange={(e) => onChange(e.target.value)}
+                  onBlur={onBlur}
+                  error={invalid}
+                />
+              </FormControl>
+              <FormDescription>
+                Used in URLs and API endpoints. Cannot contain spaces or special characters.
+              </FormDescription>
+              <FormMessage error={error} />
+            </FormItem>
+          )}
+        </FormField>
+
+        <FormField name="domain">
+          {({ value, onChange, onBlur, error, invalid }) => (
+            <FormItem>
+              <FormLabel error={invalid} htmlFor="edit-domain">
+                Domain (Optional)
+              </FormLabel>
+              <FormControl error={invalid}>
+                <Input
+                  id="edit-domain"
+                  value={(value as string) || ''}
+                  onChange={(e) => onChange(e.target.value)}
+                  onBlur={onBlur}
+                  error={invalid}
+                />
+              </FormControl>
+              <FormMessage error={error} />
+            </FormItem>
+          )}
+        </FormField>
+
+        <FormField name="settings">
+          {({ value, onChange, onBlur, error, invalid }) => (
+            <FormItem>
+              <FormLabel error={invalid} htmlFor="edit-settings">
+                Settings (JSON)
+              </FormLabel>
+              <FormControl error={invalid}>
+                <Textarea
+                  id="edit-settings"
+                  value={value as string}
+                  onChange={(e) => onChange(e.target.value)}
+                  onBlur={onBlur}
+                  rows={6}
+                  className="font-mono text-sm"
+                  error={invalid}
+                />
+              </FormControl>
+              <FormMessage error={error} />
+            </FormItem>
+          )}
+        </FormField>
+
+        <FormErrorSummary errors={errors as Record<string, { message?: string }>} />
+
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting || !isValid}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Updating...
+              </>
+            ) : (
+              'Update'
+            )}
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 

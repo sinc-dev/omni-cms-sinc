@@ -71,15 +71,44 @@ export function ImportDialog({
 
     // Validate file type
     if (!selectedFile.name.endsWith('.json')) {
-      setFileError('Please select a JSON file');
+      setFileError('Please select a JSON file (.json extension required)');
       setFile(null);
       return;
     }
 
-    // Validate file size (warn if > 10MB)
+    // Validate file size
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (selectedFile.size > maxSize) {
+      setFileError(`File is too large (${(selectedFile.size / 1024 / 1024).toFixed(2)}MB). Maximum size is 50MB.`);
+      setFile(null);
+      return;
+    }
+
+    // Warn if file is large but still allow
     if (selectedFile.size > 10 * 1024 * 1024) {
       setFileError('File is large (>10MB). Import may take a while.');
     }
+
+    // Validate JSON structure immediately
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        JSON.parse(text);
+        // Valid JSON, clear any previous errors
+        if (fileError && fileError.includes('Invalid JSON')) {
+          setFileError(null);
+        }
+      } catch (err) {
+        setFileError('Invalid JSON file. Please check the file format.');
+        setFile(null);
+      }
+    };
+    reader.onerror = () => {
+      setFileError('Failed to read file. Please try again.');
+      setFile(null);
+    };
+    reader.readAsText(selectedFile);
 
     setFile(selectedFile);
   };
@@ -185,7 +214,9 @@ export function ImportDialog({
         <div className="space-y-4 py-4">
           {/* File Upload */}
           <div className="space-y-2">
-            <Label htmlFor="import-file">Import File (JSON)</Label>
+            <Label htmlFor="import-file" required={!file}>
+              Import File (JSON)
+            </Label>
             <div className="flex items-center gap-2">
               <input
                 ref={fileInputRef}
@@ -194,18 +225,22 @@ export function ImportDialog({
                 accept=".json,application/json"
                 onChange={handleFileSelect}
                 className="hidden"
+                aria-invalid={fileError ? 'true' : 'false'}
               />
               <Button
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={importing}
-                className="w-full"
+                className={cn(
+                  "w-full",
+                  fileError && "border-destructive"
+                )}
               >
                 <Upload className="mr-2 h-4 w-4" />
                 {file ? file.name : 'Select JSON File'}
               </Button>
             </div>
-            {file && (
+            {file && !fileError && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <FileText className="h-4 w-4" />
                 <span>
@@ -214,10 +249,15 @@ export function ImportDialog({
               </div>
             )}
             {fileError && (
-              <div className="flex items-center gap-2 text-sm text-destructive">
-                <AlertCircle className="h-4 w-4" />
+              <div className="flex items-start gap-2 text-sm text-destructive">
+                <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                 <span>{fileError}</span>
               </div>
+            )}
+            {!file && !fileError && (
+              <p className="text-xs text-muted-foreground">
+                Select a JSON file exported from this system or compatible format.
+              </p>
             )}
           </div>
 

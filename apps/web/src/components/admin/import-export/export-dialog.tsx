@@ -156,9 +156,21 @@ export function ExportDialog({ open, onOpenChange, organizationId }: ExportDialo
             </div>
           </div>
 
+          {!includePosts && !includeMedia && !includeTaxonomies && !includeCustomFields && (
+            <div className="flex items-center gap-2 rounded-md bg-muted p-3">
+              <AlertCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+              <p className="text-sm text-muted-foreground">
+                Please select at least one option to export.
+              </p>
+            </div>
+          )}
+
           {error && (
             <div className="rounded-md bg-destructive/10 p-3">
-              <p className="text-sm text-destructive">{error}</p>
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+                <p className="text-sm text-destructive">{error}</p>
+              </div>
             </div>
           )}
         </div>
@@ -174,6 +186,11 @@ export function ExportDialog({ open, onOpenChange, organizationId }: ExportDialo
           <Button
             onClick={handleExport}
             disabled={exporting || (!includePosts && !includeMedia && !includeTaxonomies && !includeCustomFields)}
+            aria-label={
+              !includePosts && !includeMedia && !includeTaxonomies && !includeCustomFields
+                ? 'Please select at least one option to export'
+                : 'Export organization data'
+            }
           >
             {exporting ? (
               <>

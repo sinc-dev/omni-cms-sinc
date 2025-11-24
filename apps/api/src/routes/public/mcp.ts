@@ -886,6 +886,36 @@ app.get(
               referrer: 'string (optional)',
             },
           },
+
+          media: {
+            method: 'GET',
+            path: '/media/:fileKey',
+            description: 'Serve media files from R2 via Workers route. Supports image variants via query parameter.',
+            auth: 'none',
+            params: {
+              fileKey: 'R2 storage key (URL-encoded file path)',
+            },
+            queryParams: {
+              variant: 'Optional image variant: "thumbnail" or "large". Falls back to original if variant not available.',
+            },
+            response: {
+              type: 'File stream',
+              headers: {
+                'Content-Type': 'Inferred from file extension or R2 metadata',
+                'Cache-Control': 'public, max-age=31536000, immutable',
+                'ETag': 'File ETag for cache validation',
+                'Last-Modified': 'File upload timestamp',
+              },
+            },
+            example: '/api/public/v1/media/b443MNOxWMqWavh9CgMUI.jpg?variant=thumbnail',
+            notes: [
+              'Media files are served from private R2 bucket via Workers route',
+              'Long-term caching (1 year) with ETag support for efficient delivery',
+              'Variants are pre-generated files stored in R2 with suffix (e.g., "_thumbnail", "_large")',
+              'If variant not found, original file is served (for images)',
+              'Base URL comes from APP_URL environment variable',
+            ],
+          },
         },
       },
 
@@ -950,6 +980,7 @@ app.get(
           id: 'string',
           organizationId: 'string',
           uploaderId: 'string',
+          fileKey: 'string (R2 storage key, used in media URLs)',
           filename: 'string',
           mimeType: 'string',
           fileSize: 'number',
@@ -985,6 +1016,42 @@ app.get(
           slug: 'string',
           createdAt: 'datetime',
           updatedAt: 'datetime',
+        },
+      },
+
+      mediaUrls: {
+        description: 'Media files are served via Workers route for security and caching',
+        baseUrl: '{APP_URL}/api/public/v1/media/{fileKey}',
+        generation: {
+          method: 'Media URLs are generated using the fileKey field from the media object',
+          baseUrlSource: 'APP_URL environment variable (e.g., "https://omni-cms-api.joseph-9a2.workers.dev")',
+          fallback: 'If APP_URL not set, falls back to R2 public URL or direct R2 URL',
+        },
+        variants: {
+          description: 'Image variants can be requested via query parameter',
+          supported: ['thumbnail', 'large'],
+          usage: '{baseUrl}?variant=thumbnail or {baseUrl}?variant=large',
+          implementation: 'Variants are pre-generated files stored in R2 with suffix (e.g., "file_thumbnail.jpg")',
+          fallback: 'If variant not found, original file is served (for images only)',
+        },
+        caching: {
+          strategy: 'Long-term caching with immutable flag',
+          headers: {
+            'Cache-Control': 'public, max-age=31536000, immutable',
+            'ETag': 'File ETag for cache validation',
+            'Last-Modified': 'File upload timestamp',
+          },
+          benefits: [
+            'Efficient edge caching via Cloudflare CDN',
+            'Reduced R2 egress costs',
+            'Faster content delivery',
+            'Conditional requests supported (304 Not Modified)',
+          ],
+        },
+        examples: {
+          original: 'https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/media/b443MNOxWMqWavh9CgMUI.jpg',
+          thumbnail: 'https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/media/b443MNOxWMqWavh9CgMUI.jpg?variant=thumbnail',
+          large: 'https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/media/b443MNOxWMqWavh9CgMUI.jpg?variant=large',
         },
       },
 
@@ -1106,6 +1173,41 @@ app.get(
           method: 'GET',
           url: '/api/public/v1/study-in-kazakhstan/taxonomies/program-types',
           description: 'Get program types taxonomy from Study In Kazakhstan',
+        },
+        getMediaFile: {
+          method: 'GET',
+          url: '/api/public/v1/media/b443MNOxWMqWavh9CgMUI.jpg',
+          description: 'Get original media file',
+          response: 'File stream with Content-Type and Cache-Control headers',
+        },
+        getMediaThumbnail: {
+          method: 'GET',
+          url: '/api/public/v1/media/b443MNOxWMqWavh9CgMUI.jpg?variant=thumbnail',
+          description: 'Get thumbnail variant of media file',
+          response: 'File stream (falls back to original if thumbnail not available)',
+        },
+        getMediaLarge: {
+          method: 'GET',
+          url: '/api/public/v1/media/b443MNOxWMqWavh9CgMUI.jpg?variant=large',
+          description: 'Get large variant of media file',
+          response: 'File stream (falls back to original if large variant not available)',
+        },
+        postWithMedia: {
+          description: 'Example post response showing featuredImage URL structure',
+          example: {
+            id: 'post_123',
+            title: 'Example Post',
+            slug: 'example-post',
+            featuredImage: {
+              id: 'media_456',
+              fileKey: 'b443MNOxWMqWavh9CgMUI.jpg',
+              filename: 'example-image.jpg',
+              url: 'https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/media/b443MNOxWMqWavh9CgMUI.jpg',
+              thumbnailUrl: 'https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/media/b443MNOxWMqWavh9CgMUI.jpg?variant=thumbnail',
+              largeUrl: 'https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/media/b443MNOxWMqWavh9CgMUI.jpg?variant=large',
+            },
+          },
+          note: 'Media URLs use Workers route format: {APP_URL}/api/public/v1/media/{fileKey}',
         },
       },
     };

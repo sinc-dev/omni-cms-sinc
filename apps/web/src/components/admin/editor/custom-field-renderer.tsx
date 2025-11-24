@@ -134,13 +134,16 @@ export function CustomFieldRenderer({
 
       case 'select':
         const options = settings.options || [];
+        const selectValue = value !== null && value !== undefined ? String(value) : '';
+        // Ensure the value exists in options, otherwise show empty
+        const isValidValue = !selectValue || options.includes(selectValue);
         return (
           <select
             id={field.slug}
             aria-label={field.name}
             title={field.name}
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            value={String(value || '')}
+            value={isValidValue ? selectValue : ''}
             onChange={(e) => onChange(e.target.value || null)}
             required={required}
           >

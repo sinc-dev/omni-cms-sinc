@@ -537,7 +537,18 @@ export default function UsersPage() {
       </Card>
 
       {/* Edit Role Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+      <Dialog 
+        open={editDialogOpen} 
+        onOpenChange={(open) => {
+          setEditDialogOpen(open);
+          if (!open) {
+            // Reset when dialog closes
+            setSelectedUser(null);
+            setRoleId('');
+            clearError();
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -551,7 +562,7 @@ export default function UsersPage() {
               <select
                 id="edit-role"
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={roleId}
+                value={roleId || (selectedUser?.roleId || '')}
                 aria-label="Select role for user"
                 title="Select role for user"
                 onChange={(e) => setRoleId(e.target.value)}
@@ -570,9 +581,6 @@ export default function UsersPage() {
                 variant="outline"
                 onClick={() => {
                   setEditDialogOpen(false);
-                  setSelectedUser(null);
-                  setRoleId('');
-                  clearError();
                 }}
               >
                 Cancel

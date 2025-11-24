@@ -58,5 +58,40 @@ export const updatePostSchema = z.object({
   autoSave: z.boolean().optional().default(false), // Flag to indicate auto-save
 });
 
+// Schema for post edit form (with required fields for validation)
+export const editPostFormSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(500),
+  slug: z
+    .string()
+    .min(1, 'Slug is required')
+    .max(500)
+    .refine((val) => /^[a-z0-9-]+$/.test(val), {
+      message: 'Slug must contain only lowercase letters, numbers, and hyphens',
+    }),
+  content: z.string().optional().nullable(),
+  excerpt: z.string().max(1000).optional().nullable(),
+  status: z.enum(['draft', 'published', 'archived']),
+  scheduledPublishAt: z
+    .string()
+    .optional()
+    .refine(
+      (val) => {
+        if (!val || val.trim() === '') return true;
+        try {
+          new Date(val);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      {
+        message: 'Please enter a valid date and time',
+      }
+    )
+    .nullable(),
+  featuredImageId: z.string().optional().nullable(),
+});
+
 export type CreatePostInput = z.infer<typeof createPostSchema>;
 export type UpdatePostInput = z.infer<typeof updatePostSchema>;
+export type EditPostFormInput = z.infer<typeof editPostFormSchema>;
