@@ -11,10 +11,6 @@ const nextConfig: NextConfig = {
   turbopack: {
     root,
   },
-  // Ensure 'output' is NOT set to 'export' or 'standalone'
-  // @cloudflare/next-on-pages expects the standard default output to process
-  // output: 'standalone', // <--- DO NOT USE THIS
-  // output: 'export',    // <--- DO NOT USE THIS
   
   // 👇 CRITICAL: Disable source maps to drastically reduce bundle size (50-70% reduction)
   // 1. Disable Client Source Maps
@@ -28,18 +24,14 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
   },
   
-  // 3. Force Webpack to drop source maps entirely (brute force approach)
-  webpack: (config, { isServer }) => {
+  // 3. Optimize output tracing to reduce bundle size
+  // Note: Cloudflare ignores 'standalone' output format but respects the tracing optimizations that come with it
+  output: 'standalone',
+  
+  // 4. Force Webpack to drop source maps entirely (brute force approach)
+  webpack: (config) => {
     // Disable all source maps
     config.devtool = false;
-    
-    if (isServer) {
-      // Optimize server bundle
-      config.optimization = {
-        ...config.optimization,
-        minimize: true,
-      };
-    }
     return config;
   },
   
