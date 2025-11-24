@@ -21,9 +21,9 @@ app.get(
       });
     }
 
-    const url = new URL(c.req.url);
-    const baseUrl = url.origin; // Or use APP_URL env var if configured
-
+    // Get domain from query parameter, organization, env var, or request origin (priority order)
+    const domainParam = c.req.query('domain');
+    
     // Find organization by slug
     const organization = await db.query.organizations.findFirst({
       where: (o, { eq }) => eq(o.slug, orgSlug),
@@ -33,6 +33,41 @@ app.get(
       return c.text(Errors.notFound('Organization').error.message, 404, {
         'Content-Type': 'text/plain',
       });
+    }
+
+    // Determine base URL with priority: query param > organization.domain > APP_URL > request origin
+    let baseUrl: string;
+    if (domainParam) {
+      // Validate and normalize domain from query parameter
+      try {
+        const domainUrl = domainParam.startsWith('http') 
+          ? new URL(domainParam)
+          : new URL(`https://${domainParam}`);
+        baseUrl = domainUrl.origin;
+      } catch {
+        return c.text(Errors.badRequest('Invalid domain format').error.message, 400, {
+          'Content-Type': 'text/plain',
+        });
+      }
+    } else if (organization.domain) {
+      // Use organization's domain field
+      try {
+        const domainUrl = organization.domain.startsWith('http')
+          ? new URL(organization.domain)
+          : new URL(`https://${organization.domain}`);
+        baseUrl = domainUrl.origin;
+      } catch {
+        // Fall back to request origin if organization.domain is invalid
+        const url = new URL(c.req.url);
+        baseUrl = url.origin;
+      }
+    } else if (c.env.APP_URL) {
+      // Use APP_URL environment variable
+      baseUrl = c.env.APP_URL;
+    } else {
+      // Fall back to request origin
+      const url = new URL(c.req.url);
+      baseUrl = url.origin;
     }
 
     // Fetch all published posts for this organization

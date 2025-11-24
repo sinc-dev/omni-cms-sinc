@@ -1,0 +1,86 @@
+# Cursor Rules for Omni-CMS
+
+## MCP Documentation Maintenance
+
+**CRITICAL**: When making changes to API routes, you MUST update the MCP documentation in `apps/api/src/routes/public/mcp.ts`.
+
+### When to Update MCP Documentation
+
+Update the MCP documentation (`apps/api/src/routes/public/mcp.ts`) whenever you:
+
+1. **Add a new route endpoint** - Add complete documentation including:
+   - Method (GET, POST, PATCH, DELETE, etc.)
+   - Path with all parameters
+   - Description
+   - Authentication requirements
+   - Query parameters (if any)
+   - Request body fields (if any)
+   - Response structure
+   - Any special notes or warnings
+
+2. **Modify an existing endpoint** - Update documentation for:
+   - New query parameters
+   - New request body fields
+   - Changed response structure
+   - Changed authentication requirements
+   - Changed path or method
+
+3. **Remove an endpoint** - Remove from MCP documentation
+
+4. **Add major features** - Document:
+   - New query parameter options
+   - New response fields
+   - New error responses
+   - Breaking changes
+
+### MCP Documentation Structure
+
+The MCP documentation follows this structure:
+- `endpoints.admin.{resource}.{action}` - Admin endpoints
+- `endpoints.public.{resource}.{action}` - Public endpoints
+
+Each endpoint should include:
+- `method`: HTTP method
+- `path`: Full path with parameters
+- `description`: Clear description
+- `auth`: 'required', 'optional', or 'none'
+- `params`: Array of path parameters
+- `queryParams`: Object or array of query parameters with descriptions
+- `body`: Object describing request body fields
+- `response`: Description of response structure
+- `includes`: Relations included in response (if applicable)
+- `note`: Any special notes or warnings
+
+### Verification Checklist
+
+Before committing route changes, verify:
+- [ ] All new endpoints are documented in MCP
+- [ ] All modified endpoints have updated MCP documentation
+- [ ] Query parameters are documented with types and defaults
+- [ ] Request body fields are documented with types and requirements
+- [ ] Response structures are documented
+- [ ] Authentication requirements are accurate
+- [ ] Special notes or warnings are included
+
+### Example Update Pattern
+
+When adding a new endpoint:
+1. Implement the route in the appropriate route file
+2. Immediately update `apps/api/src/routes/public/mcp.ts` with complete documentation
+3. Test the endpoint
+4. Verify MCP documentation matches implementation
+
+## Code Style
+
+- Use TypeScript strict mode
+- Follow existing code patterns and conventions
+- Use Hono framework patterns consistently
+- Document complex logic with comments
+
+## Testing
+
+- Test all new endpoints before committing
+- Verify authentication and authorization work correctly
+- Test error cases and edge cases
+- Ensure MCP documentation matches actual behavior
+

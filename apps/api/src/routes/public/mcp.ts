@@ -68,8 +68,20 @@ app.get(
               path: '/organizations/:orgId/posts',
               description: 'List posts with pagination and filtering',
               auth: 'required',
-              queryParams: ['page', 'per_page', 'status', 'postTypeId', 'search'],
-              response: 'Paginated array of post objects',
+              queryParams: {
+                page: 'Page number (default: 1)',
+                per_page: 'Items per page (default: 20)',
+                status: 'Filter by status: draft | published | archived',
+                postTypeId: 'Filter by post type ID',
+                search: 'Search in title, content, and excerpt',
+                author_id: 'Filter by author ID',
+                created_from: 'Filter posts created after date (ISO 8601, e.g., "2024-01-01T00:00:00Z")',
+                created_to: 'Filter posts created before date (ISO 8601, e.g., "2024-12-31T23:59:59Z")',
+                published_from: 'Filter posts published after date (ISO 8601, e.g., "2024-01-01T00:00:00Z")',
+                published_to: 'Filter posts published before date (ISO 8601, e.g., "2024-12-31T23:59:59Z")',
+                sort: 'Sort order: "field_asc" or "field_desc" (e.g., "createdAt_desc", "title_asc"). Supported fields: createdAt, updatedAt, publishedAt, title, slug (default: createdAt_desc)',
+              },
+              response: 'Paginated array of post objects with author and postType relations',
             },
             get: {
               method: 'GET',
@@ -77,6 +89,7 @@ app.get(
               description: 'Get a single post by ID',
               auth: 'required',
               params: ['orgId', 'postId'],
+              includes: 'Relations included in response: author, postType, taxonomies, customFields, featuredImage, relatedPosts',
             },
             create: {
               method: 'POST',
@@ -98,7 +111,21 @@ app.get(
               path: '/organizations/:orgId/posts/:postId',
               description: 'Update an existing post',
               auth: 'required',
-              body: 'Partial post object',
+              body: {
+                title: 'string (optional)',
+                slug: 'string (optional)',
+                content: 'string (optional)',
+                excerpt: 'string (optional)',
+                status: 'draft | published | archived (optional)',
+                featuredImageId: 'string | null (optional)',
+                scheduledPublishAt: 'string | null (optional, ISO 8601 datetime)',
+                structuredData: 'object | null (optional, JSON object)',
+                customFields: 'object (optional, key-value pairs where key is customFieldId)',
+                taxonomies: 'array | object (optional, array of termIds or object { taxonomyId: [termIds] })',
+                relationships: 'array (optional, array of relationship objects)',
+                autoSave: 'boolean (optional, if true, does not create version)',
+              },
+              note: 'Version is automatically created before update unless autoSave is true',
             },
             delete: {
               method: 'DELETE',
@@ -124,18 +151,29 @@ app.get(
                 path: '/organizations/:orgId/posts/:postId/versions',
                 description: 'List all versions of a post',
                 auth: 'required',
+                response: 'Array of version objects with creator relation',
               },
               get: {
                 method: 'GET',
                 path: '/organizations/:orgId/posts/:postId/versions/:versionId',
                 description: 'Get a specific version',
                 auth: 'required',
+                response: 'Version object with creator relation',
               },
               restore: {
                 method: 'POST',
                 path: '/organizations/:orgId/posts/:postId/versions/:versionId/restore',
-                description: 'Restore a post to a previous version',
+                description: 'Restore a post to a previous version (creates backup version before restore)',
                 auth: 'required',
+                params: ['orgId', 'postId', 'versionId'],
+                response: {
+                  success: true,
+                  data: {
+                    message: 'Version restored',
+                    restoredVersion: 'Version object that was restored',
+                    backupVersion: 'New version object created from current state before restore',
+                  },
+                },
               },
             },
             lock: {
@@ -144,18 +182,56 @@ app.get(
                 path: '/organizations/:orgId/posts/:postId/lock',
                 description: 'Check post edit lock status',
                 auth: 'required',
+                response: {
+                  success: true,
+                  data: {
+                    locked: 'boolean',
+                    lock: 'Lock object with user info (null if not locked)',
+                    lockFields: {
+                      id: 'string',
+                      userId: 'string',
+                      userName: 'string',
+                      userAvatar: 'string | null',
+                      lockedAt: 'datetime',
+                      expiresAt: 'datetime',
+                      isOwner: 'boolean',
+                    },
+                  },
+                },
               },
               acquire: {
                 method: 'POST',
                 path: '/organizations/:orgId/posts/:postId/lock',
-                description: 'Acquire or refresh edit lock',
+                description: 'Acquire or refresh edit lock (30 minute expiration)',
                 auth: 'required',
+                response: {
+                  success: true,
+                  data: {
+                    lock: 'Lock object',
+                    message: 'Lock acquired | Lock refreshed',
+                  },
+                  error: '409 Conflict if another user has the lock',
+                },
               },
               release: {
                 method: 'DELETE',
                 path: '/organizations/:orgId/posts/:postId/lock',
-                description: 'Release edit lock',
+                description: 'Release edit lock (only lock owner can release)',
                 auth: 'required',
+                response: { message: 'Lock released' },
+              },
+              takeover: {
+                method: 'POST',
+                path: '/organizations/:orgId/posts/:postId/lock/takeover',
+                description: 'Force takeover of lock (requires posts:update permission)',
+                auth: 'required',
+                response: {
+                  success: true,
+                  data: {
+                    lock: 'Lock object',
+                    message: 'Lock taken over',
+                  },
+                },
               },
             },
             presence: {
@@ -164,12 +240,26 @@ app.get(
                 path: '/organizations/:orgId/posts/:postId/presence',
                 description: 'Update user presence (heartbeat)',
                 auth: 'required',
+                response: { message: 'Presence updated' },
               },
               get: {
                 method: 'GET',
                 path: '/organizations/:orgId/posts/:postId/presence',
-                description: 'Get active users viewing the post',
+                description: 'Get active users viewing the post (users seen in last 2 minutes)',
                 auth: 'required',
+                response: {
+                  success: true,
+                  data: {
+                    activeUsers: 'Array of user objects',
+                    userFields: {
+                      id: 'string',
+                      name: 'string | null',
+                      email: 'string',
+                      avatarUrl: 'string | null',
+                      lastSeenAt: 'datetime',
+                    },
+                  },
+                },
               },
             },
             workflow: {
@@ -178,37 +268,92 @@ app.get(
                 path: '/organizations/:orgId/posts/:postId/workflow?action=submit',
                 description: 'Submit post for review',
                 auth: 'required',
+                body: {
+                  reviewerId: 'string (optional, assign specific reviewer)',
+                },
+                response: { message: 'Post submitted for review' },
               },
               approve: {
                 method: 'POST',
                 path: '/organizations/:orgId/posts/:postId/workflow?action=approve',
                 description: 'Approve a post',
                 auth: 'required',
+                body: {
+                  comment: 'string (optional, approval comment)',
+                },
+                response: { message: 'Post approved' },
               },
               reject: {
                 method: 'POST',
                 path: '/organizations/:orgId/posts/:postId/workflow?action=reject',
                 description: 'Reject a post',
                 auth: 'required',
-                body: { comment: 'string (required)' },
+                body: {
+                  comment: 'string (required, rejection comment)',
+                },
+                response: { message: 'Post rejected' },
               },
             },
             fromTemplate: {
               method: 'POST',
               path: '/organizations/:orgId/posts/from-template',
-              description: 'Create a post from a template',
+              description: 'Create a post from a template (always creates as draft)',
               auth: 'required',
               body: {
                 templateId: 'string (required)',
                 title: 'string (required)',
                 slug: 'string (required)',
               },
+              response: 'Created post object with content and customFields from template',
             },
             pendingReview: {
               method: 'GET',
               path: '/organizations/:orgId/posts/pending-review',
               description: 'List posts pending review',
               auth: 'required',
+              response: 'Array of post objects with author and postType relations, ordered by updatedAt descending',
+            },
+            relationships: {
+              list: {
+                method: 'GET',
+                path: '/organizations/:orgId/posts/:postId/relationships',
+                description: 'List all relationships for a post (both incoming and outgoing)',
+                auth: 'required',
+                params: ['orgId', 'postId'],
+                response: {
+                  success: true,
+                  data: 'Array of relationship objects with direction field (outgoing/incoming)',
+                  relationshipFields: {
+                    id: 'string',
+                    fromPostId: 'string',
+                    toPostId: 'string',
+                    relationshipType: 'string',
+                    relatedPost: 'Post object (null if post not found)',
+                    direction: 'outgoing | incoming',
+                    createdAt: 'datetime',
+                  },
+                },
+              },
+              create: {
+                method: 'POST',
+                path: '/organizations/:orgId/posts/:fromPostId/relationships',
+                description: 'Create a relationship between posts',
+                auth: 'required',
+                params: ['orgId', 'fromPostId'],
+                body: {
+                  toPostId: 'string (required)',
+                  relationshipType: 'string (required)',
+                },
+                response: 'Relationship object',
+              },
+              delete: {
+                method: 'DELETE',
+                path: '/organizations/:orgId/relationships/:relationshipId',
+                description: 'Delete a relationship',
+                auth: 'required',
+                params: ['orgId', 'relationshipId'],
+                response: { deleted: true },
+              },
             },
           },
 
@@ -218,7 +363,16 @@ app.get(
               path: '/organizations/:orgId/media',
               description: 'List media files',
               auth: 'required',
-              queryParams: ['page', 'per_page', 'search'],
+              queryParams: {
+                page: 'Page number (default: 1)',
+                per_page: 'Items per page (default: 20)',
+                search: 'Search in filename',
+                type: 'Filter by media type: image | video | other',
+                created_from: 'Filter media created after date (ISO 8601, e.g., "2024-01-01T00:00:00Z")',
+                created_to: 'Filter media created before date (ISO 8601, e.g., "2024-12-31T23:59:59Z")',
+                sort: 'Sort order: filename_asc | filename_desc | createdAt_asc | createdAt_desc (default: createdAt_desc)',
+              },
+              response: 'Paginated array of media objects with uploader relation and URLs',
             },
             get: {
               method: 'GET',
@@ -252,6 +406,7 @@ app.get(
               body: {
                 altText: 'string (optional)',
                 caption: 'string (optional)',
+                metadata: 'object (optional, key-value pairs stored as JSON)',
               },
             },
             delete: {
@@ -268,6 +423,12 @@ app.get(
               path: '/organizations/:orgId/post-types',
               description: 'List post types',
               auth: 'required',
+              queryParams: {
+                page: 'Page number (default: 1)',
+                per_page: 'Items per page (default: 20)',
+                search: 'Search in post type name',
+              },
+              response: 'Paginated array of post type objects',
             },
             get: {
               method: 'GET',
@@ -286,6 +447,7 @@ app.get(
                 description: 'string (optional)',
                 icon: 'string (optional)',
                 isHierarchical: 'boolean (default: false)',
+                settings: 'object (optional, JSON object)',
               },
             },
             update: {
@@ -300,6 +462,62 @@ app.get(
               description: 'Delete a post type',
               auth: 'required',
             },
+            fields: {
+              list: {
+                method: 'GET',
+                path: '/organizations/:orgId/post-types/:postTypeId/fields',
+                description: 'List fields attached to a post type',
+                auth: 'required',
+                params: ['orgId', 'postTypeId'],
+                response: {
+                  success: true,
+                  data: 'Array of post type field attachments with customField relation',
+                  fieldAttachmentFields: {
+                    id: 'string',
+                    postTypeId: 'string',
+                    customFieldId: 'string',
+                    isRequired: 'boolean',
+                    defaultValue: 'string | null',
+                    order: 'number',
+                    createdAt: 'datetime',
+                    customField: 'CustomField object',
+                  },
+                },
+              },
+              attach: {
+                method: 'POST',
+                path: '/organizations/:orgId/post-types/:postTypeId/fields',
+                description: 'Attach a custom field to a post type',
+                auth: 'required',
+                params: ['orgId', 'postTypeId'],
+                body: {
+                  customFieldId: 'string (required)',
+                  isRequired: 'boolean (default: false)',
+                  order: 'number (default: 0)',
+                  defaultValue: 'string (optional)',
+                },
+                response: 'Post type field attachment object with customField relation',
+              },
+              remove: {
+                method: 'DELETE',
+                path: '/organizations/:orgId/post-types/:postTypeId/fields/:fieldId',
+                description: 'Remove a field from a post type',
+                auth: 'required',
+                params: ['orgId', 'postTypeId', 'fieldId'],
+                response: { deleted: true },
+              },
+              reorder: {
+                method: 'PATCH',
+                path: '/organizations/:orgId/post-types/:postTypeId/fields/reorder',
+                description: 'Reorder fields attached to a post type',
+                auth: 'required',
+                params: ['orgId', 'postTypeId'],
+                body: {
+                  fieldOrders: 'array of { fieldId: string, order: number }',
+                },
+                response: { updated: 'number (count of updated fields)' },
+              },
+            },
           },
 
           taxonomies: {
@@ -308,12 +526,19 @@ app.get(
               path: '/organizations/:orgId/taxonomies',
               description: 'List taxonomies',
               auth: 'required',
+              queryParams: {
+                page: 'Page number (default: 1)',
+                per_page: 'Items per page (default: 20)',
+                search: 'Search in taxonomy name',
+              },
+              response: 'Paginated array of taxonomy objects',
             },
             get: {
               method: 'GET',
               path: '/organizations/:orgId/taxonomies/:taxonomyId',
               description: 'Get taxonomy details',
               auth: 'required',
+              response: 'Taxonomy object with terms relation included',
             },
             create: {
               method: 'POST',
@@ -334,7 +559,7 @@ app.get(
             },
             delete: {
               method: 'DELETE',
-              path: '/organizations/:taxonomies/:taxonomyId',
+              path: '/organizations/:orgId/taxonomies/:taxonomyId',
               description: 'Delete a taxonomy',
               auth: 'required',
             },
@@ -378,6 +603,14 @@ app.get(
               path: '/organizations/:orgId/custom-fields',
               description: 'List custom fields',
               auth: 'required',
+              queryParams: {
+                page: 'Page number (default: 1)',
+                per_page: 'Items per page (default: 20)',
+                search: 'Search in field name',
+                field_type: 'Filter by field type',
+                sort: 'Sort order: createdAt_asc | createdAt_desc | updatedAt_asc | updatedAt_desc | name_asc | name_desc | slug_asc | slug_desc (default: createdAt_desc)',
+              },
+              response: 'Paginated array of custom field objects',
             },
             get: {
               method: 'GET',
@@ -394,7 +627,7 @@ app.get(
                 name: 'string (required)',
                 slug: 'string (required)',
                 fieldType: 'text | textarea | rich_text | number | boolean | date | datetime | media | relation | select | multi_select | json',
-                settings: 'object (optional)',
+                settings: 'object (optional, JSON object with field-specific configuration)',
               },
             },
             update: {
@@ -417,7 +650,14 @@ app.get(
               path: '/organizations/:orgId/users',
               description: 'List users in organization',
               auth: 'required',
-              queryParams: ['search', 'roleId'],
+              queryParams: {
+                page: 'Page number (default: 1)',
+                per_page: 'Items per page (default: 20)',
+                search: 'Search in user name or email',
+                roleId: 'Filter by role ID',
+                sort: 'Sort order: name_asc | name_desc | email_asc | email_desc | createdAt_asc | createdAt_desc (default: createdAt_desc)',
+              },
+              response: 'Paginated array of user objects with role relation',
             },
             get: {
               method: 'GET',
@@ -459,12 +699,49 @@ app.get(
             },
           },
 
+          profile: {
+            get: {
+              method: 'GET',
+              path: '/profile',
+              description: 'Get current authenticated user\'s profile',
+              auth: 'required',
+              response: {
+                success: true,
+                data: {
+                  id: 'string',
+                  name: 'string | null',
+                  email: 'string',
+                  avatarUrl: 'string | null',
+                  isSuperAdmin: 'boolean',
+                  createdAt: 'datetime',
+                  updatedAt: 'datetime',
+                },
+              },
+            },
+            update: {
+              method: 'PATCH',
+              path: '/profile',
+              description: 'Update current user\'s profile',
+              auth: 'required',
+              body: {
+                name: 'string (optional)',
+                avatarUrl: 'string | null (optional)',
+              },
+              response: 'Updated user profile object',
+            },
+          },
+
           apiKeys: {
             list: {
               method: 'GET',
               path: '/organizations/:orgId/api-keys',
               description: 'List API keys',
               auth: 'required',
+              queryParams: {
+                page: 'Page number (default: 1)',
+                per_page: 'Items per page (default: 20)',
+              },
+              response: 'Paginated array of API key objects (without hashed key, only keyPrefix)',
             },
             get: {
               method: 'GET',
@@ -479,13 +756,14 @@ app.get(
               auth: 'required',
               body: {
                 name: 'string (required)',
-                scopes: 'string[] (optional)',
-                rateLimit: 'number (optional)',
-                expiresAt: 'string (optional, ISO date)',
+                scopes: 'string[] (optional, default: [])',
+                rateLimit: 'number (optional, default: 10000, positive integer)',
+                expiresAt: 'string | null (optional, ISO 8601 datetime)',
               },
               response: {
-                key: 'Full API key (only shown once)',
+                key: 'Full API key (only shown once, store securely)',
                 keyPrefix: 'Key prefix for identification',
+                warning: 'Store this key securely. It will not be shown again.',
               },
             },
             update: {
@@ -493,6 +771,12 @@ app.get(
               path: '/organizations/:orgId/api-keys/:keyId',
               description: 'Update API key',
               auth: 'required',
+              body: {
+                name: 'string (optional)',
+                rateLimit: 'number (optional, positive integer)',
+                expiresAt: 'string | null (optional, ISO 8601 datetime)',
+              },
+              note: 'Scopes cannot be updated via this endpoint. Use rotate to create new key with different scopes.',
             },
             rotate: {
               method: 'POST',
@@ -514,6 +798,11 @@ app.get(
               path: '/organizations/:orgId/webhooks',
               description: 'List webhooks',
               auth: 'required',
+              queryParams: {
+                page: 'Page number (default: 1)',
+                per_page: 'Items per page (default: 20)',
+              },
+              response: 'Paginated array of webhook objects (without secret)',
             },
             get: {
               method: 'GET',
@@ -527,9 +816,14 @@ app.get(
               description: 'Create a webhook',
               auth: 'required',
               body: {
-                url: 'string (required)',
-                events: 'string[] (required)',
-                secret: 'string (optional, auto-generated if not provided)',
+                name: 'string (required)',
+                url: 'string (required, valid URL)',
+                events: 'string[] (required, at least one event)',
+                active: 'boolean (optional, default: true)',
+              },
+              response: {
+                webhook: 'Webhook object with secret (only shown once)',
+                warning: 'Save this secret securely. It will not be shown again.',
               },
             },
             update: {
@@ -537,6 +831,12 @@ app.get(
               path: '/organizations/:orgId/webhooks/:webhookId',
               description: 'Update webhook',
               auth: 'required',
+              body: {
+                name: 'string (optional)',
+                url: 'string (optional, must be valid URL)',
+                events: 'string[] (optional)',
+                active: 'boolean (optional)',
+              },
             },
             delete: {
               method: 'DELETE',
@@ -565,6 +865,12 @@ app.get(
               path: '/organizations/:orgId/templates',
               description: 'List post templates',
               auth: 'required',
+              queryParams: {
+                page: 'Page number (default: 1)',
+                per_page: 'Items per page (default: 20)',
+                post_type: 'Filter by post type ID',
+              },
+              response: 'Paginated array of template objects',
             },
             get: {
               method: 'GET',
@@ -577,12 +883,26 @@ app.get(
               path: '/organizations/:orgId/templates',
               description: 'Create a template',
               auth: 'required',
+              body: {
+                postTypeId: 'string (required)',
+                name: 'string (required)',
+                slug: 'string (required)',
+                content: 'object (required, JSON object with post data like { content, excerpt, featuredImageId })',
+                customFields: 'object (optional, key-value pairs where key is customFieldId)',
+              },
             },
             update: {
               method: 'PATCH',
               path: '/organizations/:orgId/templates/:templateId',
               description: 'Update template',
               auth: 'required',
+              body: {
+                name: 'string (optional)',
+                slug: 'string (optional)',
+                postTypeId: 'string (optional)',
+                content: 'object (optional, JSON object with post data)',
+                customFields: 'object | null (optional, key-value pairs)',
+              },
             },
             delete: {
               method: 'DELETE',
@@ -598,6 +918,11 @@ app.get(
               path: '/organizations/:orgId/content-blocks',
               description: 'List reusable content blocks',
               auth: 'required',
+              queryParams: {
+                page: 'Page number (default: 1)',
+                per_page: 'Items per page (default: 20)',
+              },
+              response: 'Paginated array of content block objects',
             },
             get: {
               method: 'GET',
@@ -610,12 +935,24 @@ app.get(
               path: '/organizations/:orgId/content-blocks',
               description: 'Create a content block',
               auth: 'required',
+              body: {
+                name: 'string (required)',
+                slug: 'string (required)',
+                blockType: 'text | image | video | gallery | cta | code | embed (required)',
+                content: 'object (required, JSON object)',
+              },
             },
             update: {
               method: 'PATCH',
               path: '/organizations/:orgId/content-blocks/:blockId',
               description: 'Update content block',
               auth: 'required',
+              body: {
+                name: 'string (optional)',
+                slug: 'string (optional)',
+                blockType: 'text | image | video | gallery | cta | code | embed (optional)',
+                content: 'object (optional, JSON object)',
+              },
             },
             delete: {
               method: 'DELETE',
@@ -629,24 +966,33 @@ app.get(
             simple: {
               method: 'GET',
               path: '/organizations/:orgId/search',
-              description: 'Simple search',
+              description: 'Simple search (backward compatibility endpoint)',
               auth: 'required',
-              queryParams: ['q', 'entityType', 'limit'],
+              queryParams: {
+                q: 'Search query (required)',
+                page: 'Page number (default: 1)',
+                per_page: 'Items per page (default: 20)',
+                post_type: 'Filter by post type ID (optional)',
+                status: 'Filter by status (optional)',
+                author_id: 'Filter by author ID (optional)',
+              },
+              response: 'Paginated search results (converted from cursor-based)',
             },
             advanced: {
               method: 'POST',
               path: '/organizations/:orgId/search',
-              description: 'Advanced search with filters',
+              description: 'Advanced search with filters (HubSpot-style)',
               auth: 'required',
               body: {
                 entityType: 'posts | media | users | taxonomies | all',
-                properties: 'string[] (optional)',
-                filterGroups: 'array (optional)',
-                sorts: 'array (optional)',
+                properties: 'string[] (optional, properties to include in response)',
+                filterGroups: 'array (optional, filter groups with AND/OR operators)',
+                sorts: 'array (optional, sort configurations)',
                 limit: 'number (optional)',
-                after: 'string (optional, cursor)',
-                search: 'string (optional)',
+                after: 'string (optional, cursor for pagination)',
+                search: 'string (optional, text search query)',
               },
+              response: 'Cursor-based search results with results array and pagination cursor',
             },
           },
 
@@ -670,55 +1016,139 @@ app.get(
               description: 'Get schema for specific post type',
               auth: 'required',
             },
+            database: {
+              method: 'GET',
+              path: '/organizations/:orgId/schema/database',
+              description: 'Get raw database schema (tables, columns, indexes, foreign keys)',
+              auth: 'required',
+              params: ['orgId'],
+              response: {
+                success: true,
+                data: {
+                  tables: 'Array of table schema objects',
+                  tableSchemaFields: {
+                    name: 'string',
+                    columns: 'Array of column objects',
+                    indexes: 'Array of index objects',
+                  },
+                  columnFields: {
+                    name: 'string',
+                    type: 'string',
+                    primaryKey: 'boolean',
+                    nullable: 'boolean',
+                    unique: 'boolean (optional)',
+                    foreignKey: 'string (optional, format: "table.column")',
+                    defaultValue: 'string | null (optional)',
+                  },
+                  indexFields: {
+                    name: 'string',
+                    columns: 'string[]',
+                    unique: 'boolean',
+                  },
+                },
+              },
+            },
           },
 
           analytics: {
             overview: {
               method: 'GET',
               path: '/organizations/:orgId/analytics/overview',
-              description: 'Get analytics overview',
+              description: 'Get analytics overview (default: last 30 days)',
               auth: 'required',
-              queryParams: ['from', 'to', 'post_id'],
+              queryParams: {
+                from: 'Start date (ISO 8601, optional, default: 30 days ago)',
+                to: 'End date (ISO 8601, optional, default: now)',
+                post_id: 'Filter by specific post ID (optional)',
+              },
+              response: {
+                postId: 'string (if post_id provided)',
+                period: '{ from: datetime, to: datetime }',
+                analytics: 'Array of daily analytics (if post_id provided)',
+                daily: 'Array of daily aggregated analytics (if no post_id)',
+                totals: '{ views: number, uniqueViews: number, avgTimeOnPage?: number }',
+              },
             },
             posts: {
               method: 'GET',
               path: '/organizations/:orgId/analytics/posts',
-              description: 'Get analytics for all posts',
+              description: 'Get analytics for all posts (sorted by total views descending)',
               auth: 'required',
-              queryParams: ['page', 'per_page'],
+              queryParams: {
+                page: 'Page number (default: 1)',
+                per_page: 'Items per page (default: 20)',
+              },
+              response: {
+                success: true,
+                data: 'Paginated array of post objects with analytics',
+                postFields: {
+                  id: 'string',
+                  title: 'string',
+                  slug: 'string',
+                  status: 'string',
+                  publishedAt: 'datetime | null',
+                  totalViews: 'number',
+                  totalUniqueViews: 'number',
+                },
+              },
             },
           },
 
           ai: {
+            note: '⚠️ AI endpoints are still in development. DO NOT USE IN PRODUCTION until full AI integration is completed.',
             suggest: {
               method: 'POST',
               path: '/organizations/:orgId/ai?action=suggest',
               description: 'Get AI content suggestions',
               auth: 'required',
+              body: {
+                content: 'string (optional)',
+                title: 'string (optional)',
+                excerpt: 'string (optional)',
+                language: 'string (optional)',
+              },
+              response: { suggestions: 'array of suggestion objects' },
             },
             optimize: {
               method: 'POST',
               path: '/organizations/:orgId/ai?action=optimize',
               description: 'Optimize content with AI',
               auth: 'required',
+              body: {
+                content: 'string (required)',
+              },
+              response: 'Optimized content object',
             },
             generateMeta: {
               method: 'POST',
               path: '/organizations/:orgId/ai?action=generate-meta',
               description: 'Generate meta description',
               auth: 'required',
+              body: {
+                content: 'string (required)',
+              },
+              response: { metaDescription: 'string' },
             },
             generateAltText: {
               method: 'POST',
               path: '/organizations/:orgId/ai?action=generate-alt',
               description: 'Generate alt text for image',
               auth: 'required',
+              body: {
+                imageUrl: 'string (required, valid image URL)',
+              },
+              response: { altText: 'string' },
             },
             translate: {
               method: 'POST',
               path: '/organizations/:orgId/ai?action=translate',
               description: 'Translate content',
               auth: 'required',
+              body: {
+                content: 'string (required)',
+                targetLanguage: 'string (required)',
+              },
+              response: { translated: 'string' },
             },
           },
 
@@ -728,28 +1158,35 @@ app.get(
             description: 'Import organization data',
             auth: 'required',
             body: {
-              data: 'object (required)',
+              data: 'object (required, JSON import data)',
               options: {
-                skipExisting: 'boolean (optional)',
-                importMedia: 'boolean (optional)',
-                dryRun: 'boolean (optional)',
+                skipExisting: 'boolean (optional, default: false)',
+                importMedia: 'boolean (optional, default: false)',
+                dryRun: 'boolean (optional, default: false)',
               },
             },
+            response: 'Import result object with statistics',
           },
 
           export: {
             method: 'POST',
             path: '/organizations/:orgId/export',
-            description: 'Export organization data as JSON',
+            description: 'Export organization data as JSON file',
             auth: 'required',
             body: {
-              includePosts: 'boolean (optional)',
-              includeMedia: 'boolean (optional)',
-              includeTaxonomies: 'boolean (optional)',
-              includeCustomFields: 'boolean (optional)',
-              postTypeIds: 'string[] (optional)',
+              includePosts: 'boolean (optional, default: true)',
+              includeMedia: 'boolean (optional, default: true)',
+              includeTaxonomies: 'boolean (optional, default: true)',
+              includeCustomFields: 'boolean (optional, default: true)',
+              postTypeIds: 'string[] (optional, filter posts by post type IDs)',
             },
-            response: 'JSON file download',
+            response: {
+              type: 'File download (application/json)',
+              headers: {
+                'Content-Type': 'application/json',
+                'Content-Disposition': 'attachment; filename="export-{orgId}-{timestamp}.json"',
+              },
+            },
           },
 
           graphql: {
@@ -791,7 +1228,7 @@ app.get(
               },
               response: {
                 success: true,
-                data: 'Array of post objects with author, postType, featuredImage, taxonomies, and customFields',
+                data: 'Array of post objects with author, postType, featuredImage, taxonomies, and customFields. Note: relatedPosts are NOT included in list responses (only in single post responses)',
                 meta: {
                   page: 'Current page number',
                   perPage: 'Items per page',
@@ -817,6 +1254,14 @@ app.get(
               path: '/:orgSlug/taxonomies/:taxonomySlug',
               description: 'Get taxonomy with terms',
               auth: 'optional',
+              response: {
+                success: true,
+                data: {
+                  taxonomy: 'Taxonomy object',
+                  terms: 'Array of term objects (hierarchical structure if isHierarchical is true)',
+                  hierarchicalStructure: 'If isHierarchical is true, terms include children array',
+                },
+              },
             },
             termPosts: {
               method: 'GET',
@@ -830,22 +1275,39 @@ app.get(
           search: {
             method: 'POST',
             path: '/:orgSlug/search',
-            description: 'Public search endpoint',
-            auth: 'optional',
+            description: 'Public search endpoint (requires API key with posts:search scope)',
+            auth: 'required (API key with posts:search scope)',
             body: {
               entityType: 'posts | media | users | taxonomies | all',
-              limit: 'number',
-              properties: 'string[] (optional)',
-              filterGroups: 'array (optional)',
+              limit: 'number (optional)',
+              properties: 'string[] (optional, properties to include)',
+              filterGroups: 'array (optional, filter groups)',
+              sorts: 'array (optional, sort configurations)',
+              after: 'string (optional, cursor for pagination)',
+              search: 'string (optional, text search query)',
             },
+            response: 'Cursor-based search results',
+            note: 'API key is required. Search analytics are tracked automatically.',
           },
 
           sitemap: {
             method: 'GET',
             path: '/:orgSlug/sitemap.xml',
-            description: 'Generate sitemap XML',
+            description: 'Generate sitemap XML for published posts',
             auth: 'none',
-            response: 'XML sitemap',
+            queryParams: {
+              domain: 'Optional. Override the base URL domain for sitemap URLs. Can be a full URL (https://example.com) or domain only (example.com). Priority: query param > organization.domain > APP_URL env var > request origin',
+            },
+            response: {
+              type: 'XML file (application/xml)',
+              content: 'XML sitemap with all published posts. URLs use the domain determined by priority: query parameter > organization.domain > APP_URL env var > request origin',
+              headers: {
+                'Content-Type': 'application/xml; charset=utf-8',
+                'Cache-Control': 'public, s-maxage=900, stale-while-revalidate=1800',
+              },
+            },
+            example: '/api/public/v1/study-in-kazakhstan/sitemap.xml?domain=https://example.com',
+            note: 'Domain resolution priority: 1) domain query parameter, 2) organization.domain field, 3) APP_URL environment variable, 4) request origin (fallback)',
           },
 
           postShare: {
