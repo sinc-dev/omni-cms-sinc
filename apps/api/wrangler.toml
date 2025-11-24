@@ -13,3 +13,34 @@ migrations_dir = "drizzle/migrations"
 binding = "R2_BUCKET"
 bucket_name = "omni-cms-media"
 
+[observability]
+enabled = false
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+persist = true
+invocation_logs = true
+
+[observability.traces]
+enabled = false
+persist = true
+head_sampling_rate = 1
+
+# Environment Variables
+# For secrets (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, etc.), use:
+# wrangler secret put VARIABLE_NAME
+# Or set them in Cloudflare Dashboard → Workers → Settings → Variables
+[vars]
+# R2 Configuration
+R2_BUCKET_NAME = "omni-cms-media"
+# R2_ACCOUNT_ID - Set via wrangler secret put or dashboard
+# R2_ACCESS_KEY_ID - Set via wrangler secret put or dashboard
+# R2_SECRET_ACCESS_KEY - Set via wrangler secret put or dashboard
+# R2_PUBLIC_URL - Optional: Set via wrangler secret put or dashboard
+
+# Cloudflare Access
+# CF_ACCESS_TEAM_DOMAIN - Set via wrangler secret put or dashboard
+# CF_ACCESS_AUD - Set via wrangler secret put or dashboard
+

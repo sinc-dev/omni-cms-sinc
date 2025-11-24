@@ -43,7 +43,16 @@ export async function apiRequest(url, options = {}) {
   }
 
   try {
-    const response = await fetch(url, config);
+    // Add timeout to prevent hanging requests (60 seconds)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+    
+    const response = await fetch(url, {
+      ...config,
+      signal: controller.signal,
+    });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -61,6 +70,9 @@ export async function apiRequest(url, options = {}) {
     const data = await response.json();
     return data;
   } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timeout: The API request took longer than 60 seconds`);
+    }
     if (error.message.startsWith('API Error')) {
       throw error;
     }

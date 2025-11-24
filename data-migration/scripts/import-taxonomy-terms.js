@@ -142,8 +142,14 @@ async function importTermsForTaxonomy(baseUrl, orgId, taxonomyId, taxonomySlug, 
   });
 
   // Import terms in order (parents before children)
+  let processed = 0;
+  let created = 0;
+  let skipped = 0;
+  let failed = 0;
+
   for (const term of sortedTerms) {
     const key = `${taxonomySlug}-${term.id}`;
+    processed++;
     
     // Sanitize slug for comparison
     const sanitizedSlug = sanitizeSlug(term.slug || term.name);
@@ -153,6 +159,7 @@ async function importTermsForTaxonomy(baseUrl, orgId, taxonomyId, taxonomySlug, 
       const existingTerm = existingTerms.find(t => t.slug === sanitizedSlug);
       if (existingTerm) {
         termMap.set(key, existingTerm.id);
+        skipped++;
         continue;
       }
     }
@@ -168,21 +175,33 @@ async function importTermsForTaxonomy(baseUrl, orgId, taxonomyId, taxonomySlug, 
     }
 
     try {
-      const created = await createTaxonomyTerm(baseUrl, orgId, taxonomyId, {
+      const createdTerm = await createTaxonomyTerm(baseUrl, orgId, taxonomyId, {
         name: term.name,
         slug: sanitizedSlug,
         description: term.description || '',
         parent_id: parentId || null,
       });
-      termMap.set(key, created.id);
+      termMap.set(key, createdTerm.id);
+      created++;
+      
       // Log if slug was changed
       if (sanitizedSlug !== term.slug) {
         console.log(`   ✓ Created term "${term.name}" (slug: ${term.slug} → ${sanitizedSlug})`);
       }
+      
+      // Progress logging every 10 terms
+      if (processed % 10 === 0) {
+        console.log(`     Progress: ${processed}/${sortedTerms.length} processed (${created} created, ${skipped} skipped, ${failed} failed)`);
+      }
     } catch (error) {
       console.error(`   ✗ Failed to create term "${term.name}":`, error.message);
+      failed++;
       // Continue with other terms
     }
+  }
+  
+  if (sortedTerms.length > 0) {
+    console.log(`   ✓ Processed ${processed} terms (${created} created, ${skipped} skipped, ${failed} failed)`);
   }
 }
 

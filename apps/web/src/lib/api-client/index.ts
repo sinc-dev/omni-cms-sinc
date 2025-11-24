@@ -27,6 +27,19 @@ class ApiClient {
     });
 
     if (!response.ok) {
+      // Handle authentication/authorization errors with redirects
+      if (response.status === 401) {
+        // Redirect to unauthorized page
+        if (typeof window !== 'undefined') {
+          window.location.href = '/unauthorized';
+        }
+      } else if (response.status === 403) {
+        // Redirect to forbidden page
+        if (typeof window !== 'undefined') {
+          window.location.href = '/forbidden';
+        }
+      }
+
       let errorData: ErrorResponse | { message?: string } = {};
       
       try {
@@ -49,19 +62,43 @@ class ApiClient {
         'message' in errorData.error
       ) {
         const apiError = errorData as ErrorResponse;
+        
+        // Provide user-friendly error messages
+        let userMessage = apiError.error.message;
+        if (response.status === 401) {
+          userMessage = 'Your session has expired. Please sign in again.';
+        } else if (response.status === 403) {
+          userMessage = 'You don\'t have permission to perform this action.';
+        } else if (response.status === 404) {
+          userMessage = 'The requested resource was not found.';
+        } else if (response.status >= 500) {
+          userMessage = 'A server error occurred. Please try again later.';
+        }
+        
         throw new ApiError(
           apiError.error.code,
-          apiError.error.message,
+          userMessage,
           response.status,
           apiError.error.details
         );
       }
 
       // Fallback for non-standard error formats
-      const errorMessage =
+      let errorMessage =
         errorData && typeof errorData === 'object' && 'message' in errorData
           ? String(errorData.message)
           : `HTTP ${response.status}: ${response.statusText}`;
+      
+      // Provide user-friendly messages for common status codes
+      if (response.status === 401) {
+        errorMessage = 'Your session has expired. Please sign in again.';
+      } else if (response.status === 403) {
+        errorMessage = 'You don\'t have permission to perform this action.';
+      } else if (response.status === 404) {
+        errorMessage = 'The requested resource was not found.';
+      } else if (response.status >= 500) {
+        errorMessage = 'A server error occurred. Please try again later.';
+      }
       
       throw new ApiError(
         `HTTP_${response.status}`,
