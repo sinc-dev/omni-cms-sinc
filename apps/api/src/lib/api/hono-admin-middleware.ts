@@ -25,9 +25,8 @@ async function validateApiKeyForAdmin(
   }
 
   const token = authHeader.substring(7);
-  const keyPrefix = token.substring(0, 8);
-
-  const { compareApiKey, parseScopes } = await import('./api-keys');
+  const { compareApiKey, parseScopes, getKeyPrefix } = await import('./api-keys');
+  const keyPrefix = getKeyPrefix(token);
 
   const keys = await db.query.apiKeys.findMany({
     where: (keys, { eq, and: andFn, isNull: isNullFn, or: orFn, gte: gteFn }) => andFn(
@@ -181,15 +180,10 @@ export function permissionMiddleware(requiredPermission: Permission) {
       return c.json(Errors.badRequest('Organization ID required'), 400);
     }
 
-    const authMethod = ((c.var as any).authMethod as 'cloudflare-access' | 'api-key') || 'cloudflare-access';
-    
-    if (authMethod === 'api-key') {
+    // Check for API key first (even if authMethod says cloudflare-access)
+    const apiKey = c.get('apiKey');
+    if (apiKey) {
       // Check API key scopes
-      const apiKey = c.get('apiKey');
-      if (!apiKey) {
-        return c.json(Errors.unauthorized(), 401);
-      }
-      
       const scopes = apiKey.scopes || [];
       if (!hasScope(scopes, requiredPermission)) {
         return c.json(Errors.forbidden(), 403);
@@ -198,6 +192,8 @@ export function permissionMiddleware(requiredPermission: Permission) {
       await next();
       return;
     }
+    
+    const authMethod = ((c.var as any).authMethod as 'cloudflare-access' | 'api-key') || 'cloudflare-access';
     
     // For Cloudflare Access, check user permissions
     const db = c.get('db');

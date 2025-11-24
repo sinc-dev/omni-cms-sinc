@@ -7,8 +7,8 @@
 /**
  * Get API key from environment or config
  */
-function getApiKey() {
-  return process.env.OMNI_CMS_API_KEY || null;
+function getApiKey(providedKey = null) {
+  return providedKey || process.env.OMNI_CMS_API_KEY || null;
 }
 
 /**
@@ -19,9 +19,10 @@ export async function apiRequest(url, options = {}) {
     method = 'GET',
     body = null,
     headers = {},
+    apiKey: providedApiKey = null,
   } = options;
 
-  const apiKey = getApiKey();
+  const apiKey = getApiKey(providedApiKey);
   const defaultHeaders = {
     'Content-Type': 'application/json',
     ...headers,
@@ -68,15 +69,30 @@ export async function apiRequest(url, options = {}) {
 /**
  * Get organization ID by slug
  */
-export async function getOrganizationId(baseUrl, orgSlug) {
+export async function getOrganizationId(baseUrl, orgSlug, apiKey = null) {
   const url = `${baseUrl}/api/admin/v1/organizations`;
-  const data = await apiRequest(url);
+  const data = await apiRequest(url, { apiKey });
   
   if (!data.success || !data.data) {
     throw new Error('Failed to fetch organizations');
   }
 
-  const org = data.data.find(o => o.slug === orgSlug);
+  // When using API key auth, data.data is an array with a single organization
+  // When using user auth, data.data is an array of all user's organizations
+  const orgs = Array.isArray(data.data) ? data.data : [data.data];
+  
+  // If using API key, return the organization directly (it's already scoped)
+  if (apiKey && orgs.length === 1) {
+    const org = orgs[0];
+    // Verify slug matches (optional check)
+    if (org.slug !== orgSlug) {
+      console.warn(`⚠ API key organization slug (${org.slug}) doesn't match requested slug (${orgSlug}), using API key's organization`);
+    }
+    return org.id;
+  }
+
+  // Otherwise, search by slug
+  const org = orgs.find(o => o.slug === orgSlug);
   if (!org) {
     throw new Error(`Organization not found: ${orgSlug}`);
   }

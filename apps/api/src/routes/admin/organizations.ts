@@ -1,8 +1,9 @@
 import { Hono } from 'hono';
 import type { CloudflareBindings } from '../../types';
-import { authMiddleware, orgAccessMiddleware, getAuthContext } from '../../lib/api/hono-middleware';
+import { authMiddleware, orgAccessMiddleware, getAuthContext } from '../../lib/api/hono-admin-middleware';
 import { successResponse, paginatedResponse, Errors } from '../../lib/api/hono-response';
 import { organizations } from '../../db/schema';
+import type { Organization } from '../../db/schema/organizations';
 import { eq } from 'drizzle-orm';
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
@@ -12,17 +13,31 @@ app.get(
   '/',
   authMiddleware,
   async (c) => {
-    const { db, user } = getAuthContext(c);
+    const context = getAuthContext(c);
+    const { db, user, apiKey, authMethod } = context;
     
-    // Get user's organizations
-    const userOrgs = await db.query.usersOrganizations.findMany({
-      where: (uo, { eq }) => eq(uo.userId, user.id),
-      with: {
-        organization: true,
-      },
-    });
-
-    const orgs = userOrgs.map(uo => uo.organization);
+    let orgs: Organization[] = [];
+    
+    // Check for API key first (even if authMethod says cloudflare-access)
+    if (apiKey) {
+      // For API key authentication, return the organization associated with the key
+      const org = await db.query.organizations.findFirst({
+        where: (orgs, { eq }) => eq(orgs.id, apiKey.organizationId),
+      });
+      if (org) {
+        orgs = [org];
+      }
+    } else if (user) {
+      // For Cloudflare Access, get user's organizations
+      const userOrgs = await db.query.usersOrganizations.findMany({
+        where: (uo, { eq }) => eq(uo.userId, user.id),
+        with: {
+          organization: true,
+        },
+      });
+      orgs = userOrgs.map(uo => uo.organization);
+    }
+    
     return c.json(successResponse(orgs));
   }
 );

@@ -26,23 +26,39 @@ const TEST_MODE = process.env.TEST_MODE === 'true' || process.argv.includes('--t
 const TEST_LIMIT = parseInt(process.env.TEST_LIMIT || '40'); // Limit records for testing
 
 const ORGANIZATIONS = [
-  { slug: 'study-in-kazakhstan', name: 'Study In Kazakhstan' },
-  { slug: 'study-in-north-cyprus', name: 'Study in North Cyprus' },
-  { slug: 'paris-american-international-university', name: 'Paris American International University' },
+  { 
+    slug: 'study-in-kazakhstan', 
+    name: 'Study In Kazakhstan',
+    apiKey: process.env.OMNI_CMS_API_KEY_STUDY_IN_KAZAKHSTAN || process.env.OMNI_CMS_API_KEY || 'omni_099c139e8f5dce0edfc59cc9926d0cd7'
+  },
+  { 
+    slug: 'study-in-north-cyprus', 
+    name: 'Study in North Cyprus',
+    apiKey: process.env.OMNI_CMS_API_KEY_STUDY_IN_NORTH_CYPRUS || process.env.OMNI_CMS_API_KEY || 'omni_b9bda2be53873e496d4b357c5e47446a'
+  },
+  { 
+    slug: 'paris-american-international-university', 
+    name: 'Paris American International University',
+    apiKey: process.env.OMNI_CMS_API_KEY_PARIS_AMERICAN || process.env.OMNI_CMS_API_KEY || 'omni_5878190cc642fa7c6bedc2f91344103b'
+  },
 ];
 
 /**
  * Main import function
  */
-async function importOrganization(orgSlug, baseUrl) {
+async function importOrganization(orgSlug, baseUrl, apiKey) {
   console.log(`\n============================================================`);
   console.log(`Importing: ${orgSlug}`);
   console.log(`============================================================\n`);
 
+  // Set API key in environment for this organization
+  const originalApiKey = process.env.OMNI_CMS_API_KEY;
+  process.env.OMNI_CMS_API_KEY = apiKey;
+
   try {
     // Get organization ID
     console.log('1. Getting organization ID...');
-    const orgId = await getOrganizationId(baseUrl, orgSlug);
+    const orgId = await getOrganizationId(baseUrl, orgSlug, apiKey);
     console.log(`   ✓ Organization ID: ${orgId}\n`);
 
     // Step 1: Import Post Types
@@ -94,6 +110,11 @@ async function importOrganization(orgSlug, baseUrl) {
   } catch (error) {
     console.error(`\n✗ Error importing ${orgSlug}:`, error.message);
     throw error;
+  } finally {
+    // Restore original API key
+    if (originalApiKey !== undefined) {
+      process.env.OMNI_CMS_API_KEY = originalApiKey;
+    }
   }
 }
 
@@ -114,7 +135,7 @@ async function main() {
 
   for (const org of ORGANIZATIONS) {
     try {
-      const result = await importOrganization(org.slug, OMNI_CMS_BASE_URL);
+      const result = await importOrganization(org.slug, OMNI_CMS_BASE_URL, org.apiKey);
       results.push({ org: org.slug, ...result });
     } catch (error) {
       console.error(`Failed to import ${org.slug}:`, error.message);
