@@ -18,11 +18,12 @@ pnpm exec wrangler d1 execute omni-cms --local --command="$(Get-Content ../../da
 
 ## Step 2: Use the API Keys
 
-After executing the SQL, you'll have these API keys:
+After executing the SQL, API keys will be created in the database. 
 
-- **Study In Kazakhstan**: `omni_099c139e8f5dce0edfc59cc9926d0cd7`
-- **Study in North Cyprus**: `omni_b9bda2be53873e496d4b357c5e47446a`
-- **Paris American International University**: `omni_5878190cc642fa7c6bedc2f91344103b`
+**Note**: Full API keys are only shown once when created via the API. For local testing, you can:
+1. Create new API keys via the admin API
+2. Use the key prefixes shown in the database (e.g., `099c139e` for Study In Kazakhstan)
+3. Set environment variables: `OMNI_CMS_API_KEY_STUDY_IN_KAZAKHSTAN`, `OMNI_CMS_API_KEY_STUDY_IN_NORTH_CYPRUS`, or `OMNI_CMS_API_KEY_PARIS_AMERICAN`
 
 ## Step 3: Run Test Import
 
@@ -31,7 +32,7 @@ Use any of the API keys (they all have full permissions `*`):
 ```powershell
 cd data-migration
 $env:OMNI_CMS_BASE_URL="http://localhost:8787"
-$env:OMNI_CMS_API_KEY="omni_099c139e8f5dce0edfc59cc9926d0cd7"
+$env:OMNI_CMS_API_KEY="your_api_key_here"
 $env:TEST_MODE="true"
 $env:TEST_LIMIT="40"
 npm run import
@@ -57,7 +58,7 @@ pnpm exec wrangler d1 execute omni-cms --local --command="SELECT id, name, key_p
 Test if API key works:
 
 ```powershell
-$env:OMNI_CMS_API_KEY="omni_099c139e8f5dce0edfc59cc9926d0cd7"
+$env:OMNI_CMS_API_KEY="your_api_key_here"
 curl -H "Authorization: Bearer $env:OMNI_CMS_API_KEY" http://localhost:8787/api/admin/v1/organizations
 ```
 

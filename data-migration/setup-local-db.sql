@@ -18,10 +18,11 @@ VALUES ('ND-k8iHHx70s5XaW28Mk2', 'Paris American International University', 'par
 
 -- Step 2: Create API Keys
 
--- IMPORTANT: Copy these API keys - you will need them for authentication!
+-- IMPORTANT: API keys are stored as hashed values in the database
+-- Full keys are only shown once when created via the API
 
 -- API Key for Study In Kazakhstan (study-in-kazakhstan)
--- KEY: omni_099c139e8f5dce0edfc59cc9926d0cd7
+-- Key Prefix: 099c139e
 INSERT OR IGNORE INTO api_keys (
   id, organization_id, name, key, key_prefix, scopes, rate_limit, created_at, updated_at
 ) VALUES (
@@ -37,7 +38,7 @@ INSERT OR IGNORE INTO api_keys (
 );
 
 -- API Key for Study in North Cyprus (study-in-north-cyprus)
--- KEY: omni_b9bda2be53873e496d4b357c5e47446a
+-- Key Prefix: b9bda2be
 INSERT OR IGNORE INTO api_keys (
   id, organization_id, name, key, key_prefix, scopes, rate_limit, created_at, updated_at
 ) VALUES (
@@ -53,7 +54,7 @@ INSERT OR IGNORE INTO api_keys (
 );
 
 -- API Key for Paris American International University (paris-american-international-university)
--- KEY: omni_5878190cc642fa7c6bedc2f91344103b
+-- Key Prefix: 5878190c
 INSERT OR IGNORE INTO api_keys (
   id, organization_id, name, key, key_prefix, scopes, rate_limit, created_at, updated_at
 ) VALUES (

@@ -17,7 +17,7 @@ async function testR2Config() {
 
   if (!API_KEY) {
     console.error('❌ No API key found. Set OMNI_CMS_API_KEY environment variable.');
-    console.error('   Example: $env:OMNI_CMS_API_KEY="omni_b9bda2be53873e496d4b357c5e47446a"');
+    console.error('   Example: $env:OMNI_CMS_API_KEY="omni_your_api_key_here"');
     process.exit(1);
   }
 

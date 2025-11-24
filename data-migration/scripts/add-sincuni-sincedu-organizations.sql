@@ -14,10 +14,11 @@ VALUES ('VS89kFXFjNAkqfJd_szUa', 'SINCEDU', 'sincedu', strftime('%s', 'now'), st
 
 -- Step 2: Create API Keys
 
--- IMPORTANT: Copy these API keys - you will need them for authentication!
+-- IMPORTANT: API keys are stored as hashed values in the database
+-- Full keys are only shown once when created via the API
 
 -- API Key for SINCUNI (sincuni)
--- KEY: omni_50ce85c8d4687a3e126965da18ff2a39
+-- Key Prefix: 50ce85c8
 INSERT OR IGNORE INTO api_keys (
   id, organization_id, name, key, key_prefix, scopes, rate_limit, created_at, updated_at
 ) VALUES (
@@ -33,7 +34,7 @@ INSERT OR IGNORE INTO api_keys (
 );
 
 -- API Key for SINCEDU (sincedu)
--- KEY: omni_3b92a0d746985084c395b7767708cd51
+-- Key Prefix: 3b92a0d7
 INSERT OR IGNORE INTO api_keys (
   id, organization_id, name, key, key_prefix, scopes, rate_limit, created_at, updated_at
 ) VALUES (

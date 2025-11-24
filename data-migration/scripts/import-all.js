@@ -32,17 +32,17 @@ const ORGANIZATIONS = [
   { 
     slug: 'study-in-kazakhstan', 
     name: 'Study In Kazakhstan',
-    apiKey: process.env.OMNI_CMS_API_KEY_STUDY_IN_KAZAKHSTAN || process.env.OMNI_CMS_API_KEY || 'omni_099c139e8f5dce0edfc59cc9926d0cd7'
+    apiKey: process.env.OMNI_CMS_API_KEY_STUDY_IN_KAZAKHSTAN || process.env.OMNI_CMS_API_KEY
   },
   { 
     slug: 'study-in-north-cyprus', 
     name: 'Study in North Cyprus',
-    apiKey: process.env.OMNI_CMS_API_KEY_STUDY_IN_NORTH_CYPRUS || process.env.OMNI_CMS_API_KEY || 'omni_b9bda2be53873e496d4b357c5e47446a'
+    apiKey: process.env.OMNI_CMS_API_KEY_STUDY_IN_NORTH_CYPRUS || process.env.OMNI_CMS_API_KEY
   },
   { 
     slug: 'paris-american-international-university', 
     name: 'Paris American International University',
-    apiKey: process.env.OMNI_CMS_API_KEY_PARIS_AMERICAN || process.env.OMNI_CMS_API_KEY || 'omni_5878190cc642fa7c6bedc2f91344103b'
+    apiKey: process.env.OMNI_CMS_API_KEY_PARIS_AMERICAN || process.env.OMNI_CMS_API_KEY
   },
 ];
 
@@ -167,6 +167,21 @@ async function main() {
     console.log(`⏭️  SKIP MEDIA: Loading existing media mappings instead of uploading`);
   }
   console.log('');
+
+  // Validate API keys are provided
+  const missingKeys = ORGANIZATIONS.filter(org => !org.apiKey);
+  if (missingKeys.length > 0) {
+    console.error('\n❌ Error: Missing API keys for the following organizations:');
+    missingKeys.forEach(org => {
+      console.error(`   - ${org.name} (${org.slug})`);
+    });
+    console.error('\nPlease set the appropriate environment variables:');
+    console.error('   - OMNI_CMS_API_KEY (for all organizations)');
+    console.error('   - OMNI_CMS_API_KEY_STUDY_IN_KAZAKHSTAN');
+    console.error('   - OMNI_CMS_API_KEY_STUDY_IN_NORTH_CYPRUS');
+    console.error('   - OMNI_CMS_API_KEY_PARIS_AMERICAN');
+    process.exit(1);
+  }
 
   const results = [];
 

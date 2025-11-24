@@ -9,7 +9,7 @@ QUICK REFERENCE - Organizations with API Keys
    Organization Name: SINCUNI
    Slug: sincuni
    Organization ID: fCEkq72xPGJ8v0C7vtjbt
-   API Key: omni_50ce85c8d4687a3e126965da18ff2a39
+   API Key: omni_50ce85c8[REDACTED] (use environment variable)
    API Key ID: y6A2P-ihlaZkEgcNMQdwH
    API Key Prefix: 50ce85c8
    Scopes: ["*"] (Full Access)
@@ -20,7 +20,7 @@ QUICK REFERENCE - Organizations with API Keys
    Organization Name: SINCEDU
    Slug: sincedu
    Organization ID: VS89kFXFjNAkqfJd_szUa
-   API Key: omni_3b92a0d746985084c395b7767708cd51
+   API Key: omni_3b92a0d7[REDACTED] (use environment variable)
    API Key ID: n-0_jCdhIaLXEkeJ2mT2h
    API Key Prefix: 3b92a0d7
    Scopes: ["*"] (Full Access)
@@ -31,7 +31,7 @@ QUICK REFERENCE - Organizations with API Keys
    Organization Name: Study In Kazakhstan
    Slug: study-in-kazakhstan
    Organization ID: IBfLssGjH23-f9uxjH5Ms
-   API Key: omni_099c139e8f5dce0edfc59cc9926d0cd7
+   API Key: omni_099c139e[REDACTED] (use environment variable)
    API Key ID: TXGW54a9dCv2WJcNgvPjp
    API Key Prefix: 099c139e
    Scopes: ["*"] (Full Access)
@@ -42,7 +42,7 @@ QUICK REFERENCE - Organizations with API Keys
    Organization Name: Study in North Cyprus
    Slug: study-in-north-cyprus
    Organization ID: 3Kyv3hvrybf_YohTZRgPV
-   API Key: omni_b9bda2be53873e496d4b357c5e47446a
+   API Key: omni_b9bda2be[REDACTED] (use environment variable)
    API Key ID: enhELJZPFLQse2vO6e9MU
    API Key Prefix: b9bda2be
    Scopes: ["*"] (Full Access)
@@ -53,7 +53,7 @@ QUICK REFERENCE - Organizations with API Keys
    Organization Name: Paris American International University
    Slug: paris-american-international-university
    Organization ID: ND-k8iHHx70s5XaW28Mk2
-   API Key: omni_5878190cc642fa7c6bedc2f91344103b
+   API Key: omni_5878190c[REDACTED] (use environment variable)
    API Key ID: 3VOtlfiYSDrnP0AcTrZTo
    API Key Prefix: 5878190c
    Scopes: ["*"] (Full Access)
@@ -155,34 +155,53 @@ API KEY DETAILS (Full Keys from SQL Migration Files)
 ================================================================================
 
 1. SINCUNI:
-   - Full API Key: omni_50ce85c8d4687a3e126965da18ff2a39
    - Key Prefix: 50ce85c8
    - Scopes: ["*"] (Full Access)
    - Rate Limit: 10,000 requests/hour
+   - Note: Full key removed for security - use environment variable
 
 2. SINCEDU:
-   - Full API Key: omni_3b92a0d746985084c395b7767708cd51
    - Key Prefix: 3b92a0d7
    - Scopes: ["*"] (Full Access)
    - Rate Limit: 10,000 requests/hour
+   - Note: Full key removed for security - use environment variable
 
 3. Study In Kazakhstan:
-   - Full API Key: omni_099c139e8f5dce0edfc59cc9926d0cd7
    - Key Prefix: 099c139e
    - Scopes: ["*"] (Full Access)
    - Rate Limit: 10,000 requests/hour
+   - Note: Full key removed for security - use environment variable
 
 4. Study in North Cyprus:
-   - Full API Key: omni_b9bda2be53873e496d4b357c5e47446a
    - Key Prefix: b9bda2be
    - Scopes: ["*"] (Full Access)
    - Rate Limit: 10,000 requests/hour
+   - Note: Full key removed for security - use environment variable
 
 5. Paris American International University:
-   - Full API Key: omni_5878190cc642fa7c6bedc2f91344103b
    - Key Prefix: 5878190c
    - Scopes: ["*"] (Full Access)
    - Rate Limit: 10,000 requests/hour
+   - Note: Full key removed for security - use environment variable
+
+================================================================================
+SITEMAP URLs - All Organizations
+================================================================================
+
+1. SINCUNI:
+   https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/sincuni/sitemap.xml
+
+2. SINCEDU:
+   https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/sincedu/sitemap.xml
+
+3. Study In Kazakhstan:
+   https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-kazakhstan/sitemap.xml
+
+4. Study in North Cyprus:
+   https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-north-cyprus/sitemap.xml
+
+5. Paris American International University:
+   https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/paris-american-international-university/sitemap.xml
 
 ================================================================================
 BLOG FETCH ROUTES - Get 20 Posts for Each Organization
@@ -215,90 +234,90 @@ Route Pattern: GET /api/public/v1/:orgSlug/posts?per_page=20
 1. SINCUNI
    Organization Name: SINCUNI
    Slug: sincuni
-   API Key: omni_50ce85c8d4687a3e126965da18ff2a39
+   API Key: [REDACTED - use environment variable]
    
    Route: GET https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/sincuni/posts?per_page=20
    
    Example cURL:
    curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/sincuni/posts?per_page=20" \
-     -H "Authorization: Bearer omni_50ce85c8d4687a3e126965da18ff2a39"
+     -H "Authorization: Bearer $OMNI_CMS_API_KEY"
    
    Example JavaScript:
    fetch('https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/sincuni/posts?per_page=20', {
      headers: {
-       'Authorization': 'Bearer omni_50ce85c8d4687a3e126965da18ff2a39'
+       'Authorization': `Bearer ${process.env.OMNI_CMS_API_KEY}`
      }
    })
 
 2. SINCEDU
    Organization Name: SINCEDU
    Slug: sincedu
-   API Key: omni_3b92a0d746985084c395b7767708cd51
+   API Key: [REDACTED - use environment variable]
    
    Route: GET https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/sincedu/posts?per_page=20
    
    Example cURL:
    curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/sincedu/posts?per_page=20" \
-     -H "Authorization: Bearer omni_3b92a0d746985084c395b7767708cd51"
+     -H "Authorization: Bearer $OMNI_CMS_API_KEY"
    
    Example JavaScript:
    fetch('https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/sincedu/posts?per_page=20', {
      headers: {
-       'Authorization': 'Bearer omni_3b92a0d746985084c395b7767708cd51'
+       'Authorization': `Bearer ${process.env.OMNI_CMS_API_KEY}`
      }
    })
 
 3. Study In Kazakhstan
    Organization Name: Study In Kazakhstan
    Slug: study-in-kazakhstan
-   API Key: omni_099c139e8f5dce0edfc59cc9926d0cd7
+   API Key: [REDACTED - use environment variable]
    
    Route: GET https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-kazakhstan/posts?per_page=20
    
    Example cURL:
    curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-kazakhstan/posts?per_page=20" \
-     -H "Authorization: Bearer omni_099c139e8f5dce0edfc59cc9926d0cd7"
+     -H "Authorization: Bearer $OMNI_CMS_API_KEY"
    
    Example JavaScript:
    fetch('https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-kazakhstan/posts?per_page=20', {
      headers: {
-       'Authorization': 'Bearer omni_099c139e8f5dce0edfc59cc9926d0cd7'
+       'Authorization': `Bearer ${process.env.OMNI_CMS_API_KEY}`
      }
    })
 
 4. Study in North Cyprus
    Organization Name: Study in North Cyprus
    Slug: study-in-north-cyprus
-   API Key: omni_b9bda2be53873e496d4b357c5e47446a
+   API Key: [REDACTED - use environment variable]
    
    Route: GET https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-north-cyprus/posts?per_page=20
    
    Example cURL:
    curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-north-cyprus/posts?per_page=20" \
-     -H "Authorization: Bearer omni_b9bda2be53873e496d4b357c5e47446a"
+     -H "Authorization: Bearer $OMNI_CMS_API_KEY"
    
    Example JavaScript:
    fetch('https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-north-cyprus/posts?per_page=20', {
      headers: {
-       'Authorization': 'Bearer omni_b9bda2be53873e496d4b357c5e47446a'
+       'Authorization': `Bearer ${process.env.OMNI_CMS_API_KEY}`
      }
    })
 
 5. Paris American International University
    Organization Name: Paris American International University
    Slug: paris-american-international-university
-   API Key: omni_5878190cc642fa7c6bedc2f91344103b
+   API Key: [REDACTED - use environment variable]
    
    Route: GET https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/paris-american-international-university/posts?per_page=20
    
    Example cURL:
    curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/paris-american-international-university/posts?per_page=20" \
-     -H "Authorization: Bearer omni_5878190cc642fa7c6bedc2f91344103b"
+     -H "Authorization: Bearer $OMNI_CMS_API_KEY"
    
    Example JavaScript:
    fetch('https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/paris-american-international-university/posts?per_page=20', {
      headers: {
-       'Authorization': 'Bearer omni_5878190cc642fa7c6bedc2f91344103b'
+       'Authorization': `Bearer ${process.env.OMNI_CMS_API_KEY}`
      }
    })
 

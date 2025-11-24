@@ -232,9 +232,9 @@ Failed to create custom field "Review Unique Identifier": API Error 400: Bad Req
 ## 🔑 API Keys
 
 ### Local Testing
-- Study In Kazakhstan: `omni_099c139e8f5dce0edfc59cc9926d0cd7`
-- Study in North Cyprus: `omni_b9bda2be53873e496d4b357c5e47446a`
-- Paris American: `omni_5878190cc642fa7c6bedc2f91344103b`
+- Study In Kazakhstan: Use `OMNI_CMS_API_KEY_STUDY_IN_KAZAKHSTAN` environment variable
+- Study in North Cyprus: Use `OMNI_CMS_API_KEY_STUDY_IN_NORTH_CYPRUS` environment variable
+- Paris American: Use `OMNI_CMS_API_KEY_PARIS_AMERICAN` environment variable
 
 ### System User
 - ID: `system-user-api`

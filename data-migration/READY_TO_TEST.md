@@ -8,16 +8,19 @@
 
 ## Your API Keys
 
-- **Study In Kazakhstan**: `omni_099c139e8f5dce0edfc59cc9926d0cd7`
-- **Study in North Cyprus**: `omni_b9bda2be53873e496d4b357c5e47446a`
-- **Paris American International University**: `omni_5878190cc642fa7c6bedc2f91344103b`
+Set these environment variables:
+- **Study In Kazakhstan**: `OMNI_CMS_API_KEY_STUDY_IN_KAZAKHSTAN` or `OMNI_CMS_API_KEY`
+- **Study in North Cyprus**: `OMNI_CMS_API_KEY_STUDY_IN_NORTH_CYPRUS` or `OMNI_CMS_API_KEY`
+- **Paris American International University**: `OMNI_CMS_API_KEY_PARIS_AMERICAN` or `OMNI_CMS_API_KEY`
+
+**Note**: API keys are stored securely and should not be committed to git. Use environment variables or a secure secret management system.
 
 ## Run Test Import
 
 ```powershell
 cd data-migration
 $env:OMNI_CMS_BASE_URL="http://localhost:8787"
-$env:OMNI_CMS_API_KEY="omni_099c139e8f5dce0edfc59cc9926d0cd7"
+$env:OMNI_CMS_API_KEY="your_api_key_here"
 $env:TEST_MODE="true"
 $env:TEST_LIMIT="40"
 npm run import
@@ -39,7 +42,7 @@ Remove `TEST_MODE` and `TEST_LIMIT` to run full import:
 
 ```powershell
 $env:OMNI_CMS_BASE_URL="http://localhost:8787"
-$env:OMNI_CMS_API_KEY="omni_099c139e8f5dce0edfc59cc9926d0cd7"
+$env:OMNI_CMS_API_KEY="your_api_key_here"
 npm run import
 ```
 
