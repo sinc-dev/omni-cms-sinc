@@ -53,6 +53,13 @@ The import follows this order (correct):
 - Missing universities: ✅ Handled (warns and skips)
 - Error handling: ✅ Continues on failure
 
+### ✅ Update Media References (NEW)
+- Missing media: ✅ Handled (only updates if media exists in mediaMap)
+- Missing posts: ✅ Handled (skips if post not found)
+- Featured images: ✅ Updates if missing or invalid
+- Custom field media: ✅ Updates if missing or invalid (preserves existing values)
+- Error handling: ✅ Continues on failure
+
 ## Potential Issues & Recommendations
 
 ### 1. Media Fallback Values ⚠️
@@ -103,6 +110,8 @@ Media (independent)
 Posts (depends on all above) ✓
     ↓
 Relationships (depends on Posts) ✓
+    ↓
+Update Media References (depends on Posts and Media) ✓
 ```
 
 ### Missing Reference Handling

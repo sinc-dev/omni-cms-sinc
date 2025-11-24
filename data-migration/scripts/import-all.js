@@ -2,7 +2,7 @@
  * Import All Data to Omni-CMS
  * 
  * Main import script that orchestrates the entire import process
- * Follows the correct order: post types → taxonomies → terms → custom fields → media → posts → relationships
+ * Follows the correct order: post types → taxonomies → terms → custom fields → media → posts → relationships → update media references
  */
 
 import fs from 'fs/promises';
@@ -98,6 +98,11 @@ async function importOrganization(orgSlug, baseUrl, apiKey) {
     console.log('8. Importing relationships...');
     await importRelationships(baseUrl, orgId, orgSlug, postMap);
     console.log(`   ✓ Imported relationships\n`);
+
+    // Step 8: Update Media References
+    console.log('9. Updating media references in posts...');
+    await updateMediaReferences(baseUrl, orgId, orgSlug, apiKey);
+    console.log(`   ✓ Updated media references\n`);
 
     console.log(`\n✓ Import complete for ${orgSlug}!`);
     

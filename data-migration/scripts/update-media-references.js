@@ -167,17 +167,35 @@ export async function updateMediaReferences(baseUrl, orgId, orgSlug, apiKey) {
           return;
         }
 
+        // Fetch current post to check what needs updating
+        let currentPost = null;
+        try {
+          const getPostUrl = `${baseUrl}/api/admin/v1/organizations/${orgId}/posts/${omniPostId}`;
+          const postData = await apiRequest(getPostUrl, { apiKey });
+          if (postData.success && postData.data) {
+            currentPost = postData.data;
+          }
+        } catch (error) {
+          console.warn(`     ⚠ Could not fetch post ${omniPostId}: ${error.message}`);
+          skipped++;
+          return;
+        }
+
         const updates = {};
         let hasUpdates = false;
 
-        // Check featured image
+        // Check featured image - only update if missing or invalid
         if (post.featuredImageId) {
           if (typeof post.featuredImageId === 'string' && post.featuredImageId.startsWith('wp-media-')) {
             const wpMediaId = parseInt(post.featuredImageId.replace('wp-media-', ''));
             const omniMediaId = mediaMap.get(wpMediaId);
             if (omniMediaId) {
-              updates.featuredImageId = omniMediaId;
-              hasUpdates = true;
+              // Only update if current featured image is missing or invalid
+              const currentFeaturedImage = currentPost.featuredImageId;
+              if (!currentFeaturedImage || (typeof currentFeaturedImage === 'string' && currentFeaturedImage.startsWith('wp-media-'))) {
+                updates.featuredImageId = omniMediaId;
+                hasUpdates = true;
+              }
             }
           }
         }
@@ -185,11 +203,6 @@ export async function updateMediaReferences(baseUrl, orgId, orgSlug, apiKey) {
         // Check custom fields for media references
         const mediaRefs = extractMediaReferences(post.customFields);
         if (mediaRefs.length > 0) {
-          // We need to get the post first to see current custom field values
-          // Then update only the fields that have missing media
-          // For now, we'll update all custom fields that have media references
-          // This is a simplified approach - in production you might want to fetch the post first
-          
           // Load custom field mapping
           const customFieldMapPath = path.join(
             __dirname,
@@ -205,29 +218,52 @@ export async function updateMediaReferences(baseUrl, orgId, orgSlug, apiKey) {
             // Custom fields mapping not found - skip custom field updates
           }
 
-          if (customFieldMap.size > 0) {
-            const customFieldUpdates = {};
+          if (customFieldMap.size > 0 && currentPost) {
+            const currentCustomFields = {};
             
-            for (const ref of mediaRefs) {
-              const fieldId = customFieldMap.get(ref.fieldSlug);
-              if (!fieldId) continue;
-
-              const omniMediaId = mediaMap.get(ref.wpMediaId);
-              if (!omniMediaId) continue;
-
-              if (ref.arrayIndex !== undefined) {
-                // Array field - we'd need to fetch current value and update array
-                // For now, skip array updates (would require fetching post first)
-                continue;
-              } else {
-                // Single media field
-                customFieldUpdates[fieldId] = omniMediaId;
-                hasUpdates = true;
+            // Build map of fieldId -> current value from post's fieldValues
+            if (currentPost.fieldValues) {
+              for (const fv of currentPost.fieldValues) {
+                currentCustomFields[fv.customFieldId] = fv.value;
               }
             }
 
-            if (Object.keys(customFieldUpdates).length > 0) {
+                const customFieldUpdates = { ...currentCustomFields };
+                let customFieldsChanged = false;
+                
+                for (const ref of mediaRefs) {
+                  const fieldId = customFieldMap.get(ref.fieldSlug);
+                  if (!fieldId) continue;
+
+                  const omniMediaId = mediaMap.get(ref.wpMediaId);
+                  if (!omniMediaId) continue;
+
+                  // Check if current value is missing or invalid
+                  const currentValue = currentCustomFields[fieldId];
+                  const needsUpdate = !currentValue || 
+                    (typeof currentValue === 'string' && currentValue.startsWith('wp-media-')) ||
+                    (Array.isArray(currentValue) && currentValue.some(v => typeof v === 'string' && v.startsWith('wp-media-')));
+
+                  if (needsUpdate) {
+                    if (ref.arrayIndex !== undefined) {
+                      // Array field - merge with existing array
+                      const currentArray = Array.isArray(currentValue) ? [...currentValue] : [];
+                      if (currentArray[ref.arrayIndex] && typeof currentArray[ref.arrayIndex] === 'string' && currentArray[ref.arrayIndex].startsWith('wp-media-')) {
+                        currentArray[ref.arrayIndex] = omniMediaId;
+                        customFieldUpdates[fieldId] = currentArray;
+                        customFieldsChanged = true;
+                      }
+                    } else {
+                      // Single media field
+                      customFieldUpdates[fieldId] = omniMediaId;
+                      customFieldsChanged = true;
+                    }
+                  }
+                }
+
+            if (customFieldsChanged) {
               updates.customFields = customFieldUpdates;
+              hasUpdates = true;
             }
           }
         }
