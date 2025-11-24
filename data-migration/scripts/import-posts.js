@@ -253,7 +253,15 @@ async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings,
           console.warn(`     ⏭️  Post "${post.title}" already exists, skipping`);
           skipped++;
         } else {
-          console.error(`     ✗ Failed to import post "${post.title}":`, error.message);
+          const errorMsg = error.message || String(error);
+          // Extract more details from error message for foreign key errors
+          let detailedError = errorMsg;
+          if (errorMsg.includes('FOREIGN KEY') || errorMsg.includes('SQLITE_CONSTRAINT')) {
+            const taxKeys = Object.keys(taxonomies || {});
+            const customFieldKeys = Object.keys(customFields || {});
+            detailedError = `${errorMsg}\n       Details: PostTypeId=${postTypeId}, Slug=${post.slug}, Taxonomies=[${taxKeys.join(', ')}], CustomFields=[${customFieldKeys.join(', ')}]`;
+          }
+          console.error(`     ✗ Failed to import post "${post.title}":`, detailedError);
           failed++;
         }
       }
