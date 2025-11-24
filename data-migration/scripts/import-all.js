@@ -16,6 +16,7 @@ import { importCustomFields } from './import-custom-fields.js';
 import { importMedia } from './import-media.js';
 import { importPosts } from './import-posts.js';
 import { importRelationships } from './import-relationships.js';
+import { updateMediaReferences } from './update-media-references.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
