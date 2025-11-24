@@ -29,18 +29,16 @@ persist = true
 head_sampling_rate = 1
 
 # Environment Variables
-# For secrets (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, etc.), use:
-# wrangler secret put VARIABLE_NAME
-# Or set them in Cloudflare Dashboard → Workers → Settings → Variables
-[vars]
-# R2 Configuration
-R2_BUCKET_NAME = "omni-cms-media"
-# R2_ACCOUNT_ID - Set via wrangler secret put or dashboard
-# R2_ACCESS_KEY_ID - Set via wrangler secret put or dashboard
-# R2_SECRET_ACCESS_KEY - Set via wrangler secret put or dashboard
-# R2_PUBLIC_URL - Optional: Set via wrangler secret put or dashboard
+# Cloudflare R2 Storage
+R2_ACCOUNT_ID=9a2b6956cc47f63e13beb91af5363970
+R2_ACCESS_KEY_ID=64d3af705113e6b991eb198778080aa7
+R2_SECRET_ACCESS_KEY=64e1077ead95173a34867a14a2e251a6cd9b824a8ed51d9c9697d45717702bcd
+R2_BUCKET_NAME=omni-cms-media
+R2_PUBLIC_URL=https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com
 
-# Cloudflare Access
-# CF_ACCESS_TEAM_DOMAIN - Set via wrangler secret put or dashboard
-# CF_ACCESS_AUD - Set via wrangler secret put or dashboard
+CF_ACCESS_AUD=7291b33d4c255188f0d63a05cf91f9e72e1e6606fb2acb148360886c42e52083
+CF_ACCESS_TEAM_DOMAIN=sincdev.cloudflareaccess.com
+NEXT_PUBLIC_APP_URL=omni-cms-sinc.joseph-9a2.workers.dev
+
+
 

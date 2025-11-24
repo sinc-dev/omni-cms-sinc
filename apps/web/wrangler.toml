@@ -12,22 +12,9 @@ database_id = "12aad490-4c2d-4cdb-b07f-0f536e20e994"
 binding = "R2_BUCKET"
 bucket_name = "omni-cms-media"
 
-[observability]
-enabled = false
-head_sampling_rate = 1
-
-[observability.logs]
-enabled = true
-head_sampling_rate = 1
-persist = true
-invocation_logs = true
-
-[observability.traces]
-enabled = false
-persist = true
-head_sampling_rate = 1
-
 # Environment Variables
+# Note: Observability configuration is not supported for Pages projects
+# For logging and monitoring, use Cloudflare Dashboard → Pages → Analytics
 # Note: For Cloudflare Pages, environment variables are typically set in the dashboard:
 # Cloudflare Dashboard → Pages → Settings → Environment Variables
 # 

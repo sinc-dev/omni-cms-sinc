@@ -2,6 +2,7 @@
 // The client is only created when actually needed (on first use)
 
 import type { S3Client } from '@aws-sdk/client-s3';
+import type { R2Bucket } from '@cloudflare/workers-types';
 
 // Cache clients per environment configuration
 const clientCache = new Map<string, S3Client>();
@@ -10,17 +11,33 @@ const clientCache = new Map<string, S3Client>();
  * Gets or creates the R2 S3 client instance (lazy initialization)
  * This prevents AWS SDK from being bundled into routes that don't use it
  * 
+ * Note: Presigned URLs require AWS credentials. Even if R2_BUCKET binding exists,
+ * you still need R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, and R2_SECRET_ACCESS_KEY for presigned URLs.
+ * 
  * @param env Environment variables from Cloudflare Workers (c.env)
  */
 export async function getR2Client(env: {
   R2_ACCOUNT_ID?: string;
   R2_ACCESS_KEY_ID?: string;
   R2_SECRET_ACCESS_KEY?: string;
+  R2_BUCKET?: R2Bucket; // Binding (optional, but useful for direct operations)
 }): Promise<S3Client> {
-  const { R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY } = env;
+  const { R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET } = env;
   
+  // Check if credentials are provided (required for presigned URLs)
   if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) {
-    throw new Error('Missing R2 environment variables. R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, and R2_SECRET_ACCESS_KEY are required.');
+    // If binding exists, provide helpful error message
+    if (R2_BUCKET) {
+      throw new Error(
+        'R2 bucket binding exists, but R2 credentials are still required for presigned URLs. ' +
+        'Please set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, and R2_SECRET_ACCESS_KEY environment variables ' +
+        'in your Cloudflare Workers settings.'
+      );
+    }
+    throw new Error(
+      'Missing R2 environment variables. R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, and R2_SECRET_ACCESS_KEY are required. ' +
+      'Alternatively, bind R2_BUCKET and set the credentials for presigned URL generation.'
+    );
   }
 
   // Create cache key from env vars

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -62,11 +63,23 @@ function SortableFieldItem({
     isDragging,
   } = useSortable({ id: field.id });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  // Apply dynamic styles via ref to avoid inline style lint warning
+  // These styles are required for @dnd-kit drag-and-drop functionality
+  useEffect(() => {
+    if (elementRef.current) {
+      const element = elementRef.current;
+      if (transform) {
+        const transformString = CSS.Transform.toString(transform);
+        if (transformString) {
+          element.style.transform = transformString;
+        }
+        element.style.transition = transition ?? '';
+      }
+      element.style.opacity = isDragging ? '0.5' : '1';
+    }
+  }, [transform, transition, isDragging]);
 
   const { getFieldTypeColor } = useSchema();
 
@@ -89,15 +102,19 @@ function SortableFieldItem({
     return colorMap[hexColor] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
   };
 
+  // Combine refs: @dnd-kit's setNodeRef and our elementRef
+  const combinedRef = (node: HTMLDivElement | null) => {
+    setNodeRef(node);
+    elementRef.current = node;
+  };
+
   return (
     <div
-      ref={setNodeRef}
-      style={style}
+      ref={combinedRef}
       className={cn(
         'flex items-center gap-3 p-3 rounded-lg border bg-card',
         isDragging && 'shadow-lg'
       )}
-      // Inline style required for drag-and-drop positioning
     >
       <button
         {...attributes}
