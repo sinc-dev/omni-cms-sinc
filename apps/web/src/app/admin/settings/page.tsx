@@ -7,10 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2 } from 'lucide-react';
+import { Save, Loader2, Download, Upload } from 'lucide-react';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { ExportDialog, ImportDialog } from '@/components/admin/import-export';
 
 export default function SettingsPage() {
   const { organization, isLoading: orgLoading } = useOrganization();
@@ -18,6 +19,8 @@ export default function SettingsPage() {
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   // Form state
   const [name, setName] = useState('');
@@ -229,6 +232,33 @@ export default function SettingsPage() {
 
         <Card>
           <CardHeader>
+            <CardTitle>Data Management</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Export your organization data as JSON or import data from a JSON file.
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setExportDialogOpen(true)}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Export Data
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setImportDialogOpen(true)}
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Import Data
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle>API Keys</CardTitle>
           </CardHeader>
           <CardContent>
@@ -241,6 +271,45 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <ExportDialog
+        open={exportDialogOpen}
+        onOpenChange={setExportDialogOpen}
+      />
+
+      <ImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImportComplete={() => {
+          // Optionally refresh data after import
+          if (organization && api) {
+            const fetchOrganization = withErrorHandling(async () => {
+              const response = (await api.getOrganization(organization.id)) as {
+                success: boolean;
+                data: {
+                  id: string;
+                  name: string;
+                  slug: string;
+                  domain: string | null;
+                  settings: string | null;
+                };
+              };
+              if (response.success && response.data) {
+                const orgData = response.data;
+                setName(orgData.name);
+                setSlug(orgData.slug);
+                setDomain(orgData.domain || '');
+                setSettings(
+                  orgData.settings
+                    ? JSON.stringify(JSON.parse(orgData.settings), null, 2)
+                    : '{}'
+                );
+              }
+            }, { title: 'Failed to Refresh Data' });
+            fetchOrg();
+          }
+        }}
+      />
     </div>
   );
 }

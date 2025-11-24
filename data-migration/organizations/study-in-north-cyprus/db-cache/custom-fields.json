@@ -1,0 +1,202 @@
+[
+  {
+    "id": "57GWWZt-1prO_yItU4BGk",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Number Of Lessons",
+    "slug": "number_of_lessons",
+    "fieldType": "number",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:48.000Z",
+    "updatedAt": "2025-11-24T15:14:48.000Z"
+  },
+  {
+    "id": "8hqGUOtERRNeIGMPuy2Vl",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Featured",
+    "slug": "featured",
+    "fieldType": "text",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:48.000Z",
+    "updatedAt": "2025-11-24T15:14:48.000Z"
+  },
+  {
+    "id": "QVLPW8XztLHJb71oFZspk",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Course Description",
+    "slug": "course_description",
+    "fieldType": "textarea",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:47.000Z",
+    "updatedAt": "2025-11-24T15:14:47.000Z"
+  },
+  {
+    "id": "5wAJEVAaRtOV5yUOzBUMl",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Duration",
+    "slug": "duration",
+    "fieldType": "text",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:45.000Z",
+    "updatedAt": "2025-11-24T15:14:45.000Z"
+  },
+  {
+    "id": "vu9va73gtVIMZKNs_JX_U",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Course Credit",
+    "slug": "course_credit",
+    "fieldType": "text",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:44.000Z",
+    "updatedAt": "2025-11-24T15:14:44.000Z"
+  },
+  {
+    "id": "91r6MWN-r6QmLwpH71XfU",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Language Options",
+    "slug": "language_options",
+    "fieldType": "text",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:44.000Z",
+    "updatedAt": "2025-11-24T15:14:44.000Z"
+  },
+  {
+    "id": "CHlCiLHDI5Ddedzl0zT5u",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Course Outcomes",
+    "slug": "course_outcomes",
+    "fieldType": "textarea",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:43.000Z",
+    "updatedAt": "2025-11-24T15:14:43.000Z"
+  },
+  {
+    "id": "UUYHEz05zTpPGbGVJ036t",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Course Curriculum",
+    "slug": "course_curriculum",
+    "fieldType": "rich_text",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:43.000Z",
+    "updatedAt": "2025-11-24T15:14:43.000Z"
+  },
+  {
+    "id": "qgI6seGrrqoOoOL8SggWo",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Tuition Fee With Discount",
+    "slug": "tuition_fee_with_discount",
+    "fieldType": "text",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:42.000Z",
+    "updatedAt": "2025-11-24T15:14:42.000Z"
+  },
+  {
+    "id": "X_hpGT5AYWi5kcfrA95pz",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Price Eur",
+    "slug": "price_eur",
+    "fieldType": "text",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:41.000Z",
+    "updatedAt": "2025-11-24T15:14:41.000Z"
+  },
+  {
+    "id": "xgl9vCP1wUP8iVwKfYOac",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Image",
+    "slug": "image",
+    "fieldType": "media",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:40.000Z",
+    "updatedAt": "2025-11-24T15:14:40.000Z"
+  },
+  {
+    "id": "sUndoe4xnTMbZepxcfjFP",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Langlong",
+    "slug": "langlong",
+    "fieldType": "text",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:05.000Z",
+    "updatedAt": "2025-11-24T15:14:05.000Z"
+  },
+  {
+    "id": "bULMMKl5ddxWC-a0GdmGv",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Price Range Eur",
+    "slug": "price_range_eur",
+    "fieldType": "text",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:05.000Z",
+    "updatedAt": "2025-11-24T15:14:05.000Z"
+  },
+  {
+    "id": "3ParDlSo55R5MFN4WSESb",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Website",
+    "slug": "website",
+    "fieldType": "text",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:04.000Z",
+    "updatedAt": "2025-11-24T15:14:04.000Z"
+  },
+  {
+    "id": "pgy16Z0_5XOJaEGaDyI-s",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Capacity",
+    "slug": "capacity",
+    "fieldType": "number",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:04.000Z",
+    "updatedAt": "2025-11-24T15:14:04.000Z"
+  },
+  {
+    "id": "pR_m5cxkQwCmHjG4jXiP1",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Gallery",
+    "slug": "gallery",
+    "fieldType": "media",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:04.000Z",
+    "updatedAt": "2025-11-24T15:14:04.000Z"
+  },
+  {
+    "id": "vnKJ7wu4hE_-yFIvDiNrt",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "University Street Address",
+    "slug": "university_street_address",
+    "fieldType": "text",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:03.000Z",
+    "updatedAt": "2025-11-24T15:14:03.000Z"
+  },
+  {
+    "id": "qK5p9RB7lrnkMk9Bn99dY",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "University Phone Number",
+    "slug": "university_phone_number",
+    "fieldType": "text",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:03.000Z",
+    "updatedAt": "2025-11-24T15:14:03.000Z"
+  },
+  {
+    "id": "5Gfh4A1E3kGi9pVZSlBJy",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Google Map Gallery",
+    "slug": "google_map_gallery",
+    "fieldType": "multi_select",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:02.000Z",
+    "updatedAt": "2025-11-24T15:14:02.000Z"
+  },
+  {
+    "id": "XMp3Axa6x-Kh9hGkQpWPK",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "name": "Google Map Profile Link",
+    "slug": "google_map_profile_link",
+    "fieldType": "text",
+    "settings": "{}",
+    "createdAt": "2025-11-24T15:14:02.000Z",
+    "updatedAt": "2025-11-24T15:14:02.000Z"
+  }
+]

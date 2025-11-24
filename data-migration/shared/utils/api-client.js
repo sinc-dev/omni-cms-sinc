@@ -186,16 +186,40 @@ export async function createCustomField(baseUrl, orgId, fieldData) {
 
 /**
  * Get existing posts for a post type
+ * Handles pagination to fetch all posts
  */
-export async function getExistingPosts(baseUrl, orgId, postTypeId, apiKey = null) {
-  const url = `${baseUrl}/api/admin/v1/organizations/${orgId}/posts?postTypeId=${postTypeId}`;
-  const data = await apiRequest(url, { apiKey });
-  
-  if (!data.success || !data.data) {
-    return [];
+export async function getExistingPosts(baseUrl, orgId, postTypeId, apiKey = null, perPage = 100) {
+  const allPosts = [];
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    const url = `${baseUrl}/api/admin/v1/organizations/${orgId}/posts?postTypeId=${postTypeId}&page=${page}&per_page=${perPage}`;
+    const data = await apiRequest(url, { apiKey });
+    
+    if (!data.success || !data.data) {
+      break;
+    }
+
+    const posts = Array.isArray(data.data) ? data.data : [data.data];
+    allPosts.push(...posts);
+
+    // Check if there are more pages
+    // The API returns pagination info in meta object
+    const total = data.meta?.total || data.pagination?.total || data.total || posts.length;
+    const currentTotal = allPosts.length;
+    hasMore = currentTotal < total && posts.length === perPage;
+    
+    // Safety limit to prevent infinite loops
+    if (page > 1000) {
+      console.warn(`Warning: Stopped pagination after 1000 pages for postTypeId ${postTypeId}`);
+      break;
+    }
+    
+    page++;
   }
 
-  return Array.isArray(data.data) ? data.data : [data.data];
+  return allPosts;
 }
 
 /**

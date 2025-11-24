@@ -71,10 +71,12 @@ function mapTaxonomyIds(customTaxonomyIds, termMap) {
   if (!customTaxonomyIds) return taxonomies;
 
   for (const [taxonomySlug, termPlaceholders] of Object.entries(customTaxonomyIds)) {
+    // CRITICAL: Only map terms that exist in termMap, filter out invalid IDs
     const mappedTerms = termPlaceholders
       .map(placeholder => termMap.get(placeholder))
-      .filter(id => id); // Remove undefined values
+      .filter(id => id); // Remove undefined/null values - only keep valid term IDs
 
+    // Only add taxonomy if we have valid terms
     if (mappedTerms.length > 0) {
       taxonomies[taxonomySlug] = mappedTerms;
     }
@@ -130,7 +132,7 @@ function mapCustomFields(customFields, customFieldMap, mediaMap) {
 /**
  * Import posts for a content type
  */
-async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings, testLimit = null, apiKey = null) {
+async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings, testLimit = null, apiKey = null, existingPostsByType = null) {
   const { postTypeMap, termMap, customFieldMap, mediaMap } = mappings;
   const postMap = new Map();
 
@@ -162,9 +164,54 @@ async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings,
 
   console.log(`   Importing ${posts.length} ${contentType}...`);
 
-  // Get existing posts for this post type to avoid duplicates
-  const existingPosts = await getExistingPosts(baseUrl, orgId, postTypeId, apiKey);
-  const existingSlugs = new Set(existingPosts.map(p => p.slug));
+  // Get existing posts - use cached data if available, otherwise fetch from API
+  let existingPosts = [];
+  let existingSlugs = new Set();
+  
+  if (existingPostsByType && existingPostsByType.has(postTypeId)) {
+    // Use cached existing posts slugs (no API call needed for checking!)
+    existingSlugs = existingPostsByType.get(postTypeId);
+    // Still need to fetch posts to get IDs for mapping, but we can skip if all exist
+    // Check if we have any new posts first
+    const hasNewPosts = posts.some(post => !existingSlugs.has(post.slug));
+    if (hasNewPosts) {
+      // Only fetch if we have new posts to import
+      existingPosts = await getExistingPosts(baseUrl, orgId, postTypeId, apiKey);
+    } else {
+      // All posts exist - fetch minimal data just for mapping
+      existingPosts = await getExistingPosts(baseUrl, orgId, postTypeId, apiKey);
+    }
+  } else {
+    // Fallback: fetch from API if cached data not available
+    existingPosts = await getExistingPosts(baseUrl, orgId, postTypeId, apiKey);
+    existingSlugs = new Set(existingPosts.map(p => p.slug));
+  }
+  
+  // Filter posts to only include new ones (reduce API calls)
+  const newPosts = posts.filter(post => !existingSlugs.has(post.slug));
+  const skippedCount = posts.length - newPosts.length;
+  
+  // Map existing posts to postMap
+  if (skippedCount > 0) {
+    posts.forEach(post => {
+      if (existingSlugs.has(post.slug)) {
+        const existingPost = existingPosts.find(p => p.slug === post.slug);
+        if (existingPost) {
+          postMap.set(post.metadata.wordpressId, existingPost.id);
+        }
+      }
+    });
+    console.log(`   ⏭️  ${skippedCount} ${contentType} already exist, skipping`);
+  }
+  
+  // Early exit if all posts already exist
+  if (newPosts.length === 0) {
+    console.log(`   ✓ All ${posts.length} ${contentType} already imported`);
+    return postMap;
+  }
+  
+  // Update posts array to only process new ones
+  posts = newPosts;
 
   const BATCH_SIZE = 20;
   let imported = 0;
@@ -181,7 +228,7 @@ async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings,
       let featuredImageId = null;
       
       try {
-        // Skip if post already exists
+        // Note: Posts are already filtered above, but keep this check as safety net
         if (existingSlugs.has(post.slug)) {
           const existingPost = existingPosts.find(p => p.slug === post.slug);
           if (existingPost) {
@@ -200,12 +247,20 @@ async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings,
           }
         }
 
-        // Map taxonomies
+        // Map taxonomies - CRITICAL: Only include valid term IDs that exist in termMap
+        // Filter out any IDs that don't exist to prevent FOREIGN KEY constraint errors
         taxonomies = {
-          categories: post.categoryIds?.map(id => termMap.get(`categories-${id}`) || id).filter(Boolean) || [],
-          tags: post.tagIds?.map(id => termMap.get(`tags-${id}`) || id).filter(Boolean) || [],
+          categories: post.categoryIds?.map(id => termMap.get(`categories-${id}`)).filter(Boolean) || [],
+          tags: post.tagIds?.map(id => termMap.get(`tags-${id}`)).filter(Boolean) || [],
           ...mapTaxonomyIds(post.customTaxonomyIds, termMap),
         };
+        
+        // Remove empty taxonomy arrays to avoid sending invalid data
+        Object.keys(taxonomies).forEach(key => {
+          if (Array.isArray(taxonomies[key]) && taxonomies[key].length === 0) {
+            delete taxonomies[key];
+          }
+        });
 
         // Map custom fields
         customFields = mapCustomFields(post.customFields, customFieldMap, mediaMap);
@@ -284,7 +339,7 @@ async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings,
 /**
  * Import posts for an organization
  */
-export async function importPosts(baseUrl, orgId, orgSlug, postTypeMap, termMap, customFieldMap, mediaMap, testLimit = null, apiKey = null) {
+export async function importPosts(baseUrl, orgId, orgSlug, postTypeMap, termMap, customFieldMap, mediaMap, testLimit = null, apiKey = null, existingPostsByType = null) {
   const allPostMap = new Map(); // Maps WordPress post ID -> Omni-CMS post ID
 
   // Load all mappings
@@ -300,7 +355,7 @@ export async function importPosts(baseUrl, orgId, orgSlug, postTypeMap, termMap,
   const contentTypes = ['blogs', 'programs', 'universities', 'team-members', 'reviews', 'video-testimonials', 'dormitories', 'academic-staff', 'instructors'];
 
   for (const contentType of contentTypes) {
-    const contentTypeMap = await importContentType(baseUrl, orgId, orgSlug, contentType, mappings, testLimit, apiKey);
+    const contentTypeMap = await importContentType(baseUrl, orgId, orgSlug, contentType, mappings, testLimit, apiKey, existingPostsByType);
     for (const [wpId, omniId] of contentTypeMap) {
       allPostMap.set(wpId, omniId);
     }

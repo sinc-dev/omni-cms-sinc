@@ -1,0 +1,602 @@
+[
+  {
+    "id": "_OkOxzsZFzMjMGSv4ubCL",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "university_of_debrecen_and_astana_it_university_12.jpg",
+    "fileKey": "-3iRu5Y7RtpSXmFEHwfDu.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 381145,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:05.000Z",
+    "updatedAt": "2025-11-24T16:11:05.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/-3iRu5Y7RtpSXmFEHwfDu.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/-3iRu5Y7RtpSXmFEHwfDu.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/-3iRu5Y7RtpSXmFEHwfDu.jpg?variant=large"
+    }
+  },
+  {
+    "id": "e8uTH8wooBnIyMtjLVVQH",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "heriotwatt_university_and_zhubanov_university_1.jpg",
+    "fileKey": "eVQnU_Y1-j4ioh1bBCIXw.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 121024,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:05.000Z",
+    "updatedAt": "2025-11-24T16:11:05.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/eVQnU_Y1-j4ioh1bBCIXw.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/eVQnU_Y1-j4ioh1bBCIXw.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/eVQnU_Y1-j4ioh1bBCIXw.jpg?variant=large"
+    }
+  },
+  {
+    "id": "WTda8Uo8lbxI8k7CMQzNt",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "heriotwatt_university_and_zhubanov_university_3.jpg",
+    "fileKey": "J5Av9GHx-yRKG6Q7UKIUM.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 197615,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:05.000Z",
+    "updatedAt": "2025-11-24T16:11:05.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/J5Av9GHx-yRKG6Q7UKIUM.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/J5Av9GHx-yRKG6Q7UKIUM.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/J5Av9GHx-yRKG6Q7UKIUM.jpg?variant=large"
+    }
+  },
+  {
+    "id": "oZUkeatZOxY25xuwA8Urs",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "university_of_debrecen_and_astana_it_university_14.jpg",
+    "fileKey": "4Aiiti-5lxizE-OGLRXSm.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 523755,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:05.000Z",
+    "updatedAt": "2025-11-24T16:11:05.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/4Aiiti-5lxizE-OGLRXSm.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/4Aiiti-5lxizE-OGLRXSm.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/4Aiiti-5lxizE-OGLRXSm.jpg?variant=large"
+    }
+  },
+  {
+    "id": "5iC0TjE0CIwamhRrqCR84",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "university_of_debrecen_and_astana_it_university-4-2.jpg",
+    "fileKey": "YffyXoXTDXs4odhf_Jo2S.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 774960,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:05.000Z",
+    "updatedAt": "2025-11-24T16:11:05.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/YffyXoXTDXs4odhf_Jo2S.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/YffyXoXTDXs4odhf_Jo2S.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/YffyXoXTDXs4odhf_Jo2S.jpg?variant=large"
+    }
+  },
+  {
+    "id": "QZ1WgQP4y3KCVUs2MMIbM",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "university_of_debrecen_and_astana_it_university_13.jpg",
+    "fileKey": "NFy0rdkrSS3Epna6zzyEG.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 855992,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:05.000Z",
+    "updatedAt": "2025-11-24T16:11:05.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/NFy0rdkrSS3Epna6zzyEG.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/NFy0rdkrSS3Epna6zzyEG.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/NFy0rdkrSS3Epna6zzyEG.jpg?variant=large"
+    }
+  },
+  {
+    "id": "fCD8iqzqD3mdfDLcIypka",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "university_of_debrecen_and_astana_it_university_1.jpg",
+    "fileKey": "RyT5h_Zp8wbpdkafoGsp_.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 149169,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:05.000Z",
+    "updatedAt": "2025-11-24T16:11:05.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/RyT5h_Zp8wbpdkafoGsp_.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/RyT5h_Zp8wbpdkafoGsp_.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/RyT5h_Zp8wbpdkafoGsp_.jpg?variant=large"
+    }
+  },
+  {
+    "id": "AcqZg1Itc9-BttMaaKEzx",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "heriotwatt_university_and_zhubanov_university_4.jpg",
+    "fileKey": "XONrd5HnJFREwQ57ofVdI.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 84550,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:04.000Z",
+    "updatedAt": "2025-11-24T16:11:04.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/XONrd5HnJFREwQ57ofVdI.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/XONrd5HnJFREwQ57ofVdI.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/XONrd5HnJFREwQ57ofVdI.jpg?variant=large"
+    }
+  },
+  {
+    "id": "zva6LcCy6HBpcA1vKMkL1",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "university_of_debrecen_and_astana_it_university_10.jpg",
+    "fileKey": "U4h-WagPWiw3U71H_Yf1Q.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 74436,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:04.000Z",
+    "updatedAt": "2025-11-24T16:11:04.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/U4h-WagPWiw3U71H_Yf1Q.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/U4h-WagPWiw3U71H_Yf1Q.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/U4h-WagPWiw3U71H_Yf1Q.jpg?variant=large"
+    }
+  },
+  {
+    "id": "9ZHX_CoblhAngfhGPN2Il",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "heriotwatt_university_and_zhubanov_university_2.jpg",
+    "fileKey": "lEmhHGGxo9frnyNUXDA6f.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 105317,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:04.000Z",
+    "updatedAt": "2025-11-24T16:11:04.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/lEmhHGGxo9frnyNUXDA6f.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/lEmhHGGxo9frnyNUXDA6f.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/lEmhHGGxo9frnyNUXDA6f.jpg?variant=large"
+    }
+  },
+  {
+    "id": "AJS1CxDEZ0GuMxKSrSJTw",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "cityu_and_satbayev_university_5.jpg",
+    "fileKey": "6XdC8NL9aB8GvwE3EIYQE.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 73737,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:02.000Z",
+    "updatedAt": "2025-11-24T16:11:02.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/6XdC8NL9aB8GvwE3EIYQE.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/6XdC8NL9aB8GvwE3EIYQE.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/6XdC8NL9aB8GvwE3EIYQE.jpg?variant=large"
+    }
+  },
+  {
+    "id": "ph65GCS3rXZg-MVi1UI1m",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "cityu_and_satbayev_university_3.jpg",
+    "fileKey": "WgUTgRN5YJAa-5txdJe6C.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 139024,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:02.000Z",
+    "updatedAt": "2025-11-24T16:11:02.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/WgUTgRN5YJAa-5txdJe6C.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/WgUTgRN5YJAa-5txdJe6C.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/WgUTgRN5YJAa-5txdJe6C.jpg?variant=large"
+    }
+  },
+  {
+    "id": "lA0D1Z6KkQgXbrFLPycE6",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "cityu_and_satbayev_university_2.jpg",
+    "fileKey": "D8GZ7movz1jhPGpGZXK7m.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 69370,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:02.000Z",
+    "updatedAt": "2025-11-24T16:11:02.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/D8GZ7movz1jhPGpGZXK7m.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/D8GZ7movz1jhPGpGZXK7m.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/D8GZ7movz1jhPGpGZXK7m.jpg?variant=large"
+    }
+  },
+  {
+    "id": "SKhU9TWMUsjlsnBBkjSkz",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "cityu_and_satbayev_university_8.jpg",
+    "fileKey": "0Ma3SfzFvaDxMXXvwejwB.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 64141,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:02.000Z",
+    "updatedAt": "2025-11-24T16:11:02.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/0Ma3SfzFvaDxMXXvwejwB.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/0Ma3SfzFvaDxMXXvwejwB.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/0Ma3SfzFvaDxMXXvwejwB.jpg?variant=large"
+    }
+  },
+  {
+    "id": "Frs_9kJXl2zwbutyCIHkt",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "cityu_and_satbayev_university_4.jpg",
+    "fileKey": "3pgWfl5Gun_Wq642Hef0j.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 45449,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:02.000Z",
+    "updatedAt": "2025-11-24T16:11:02.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/3pgWfl5Gun_Wq642Hef0j.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/3pgWfl5Gun_Wq642Hef0j.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/3pgWfl5Gun_Wq642Hef0j.jpg?variant=large"
+    }
+  },
+  {
+    "id": "CqzaRtnM3zoV8ObY0LY6a",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "cityu_and_satbayev_university_13.png",
+    "fileKey": "DSUffm0ox7fQqOKLDQrqw.png",
+    "mimeType": "image/png",
+    "fileSize": 55287,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:02.000Z",
+    "updatedAt": "2025-11-24T16:11:02.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/DSUffm0ox7fQqOKLDQrqw.png",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/DSUffm0ox7fQqOKLDQrqw.png?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/DSUffm0ox7fQqOKLDQrqw.png?variant=large"
+    }
+  },
+  {
+    "id": "pqEj0xRgnUVYleJv3gpvx",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "cityu_and_satbayev_university_6.jpg",
+    "fileKey": "H7N0myaTJp5OuLbZqf0ZS.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 123014,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:02.000Z",
+    "updatedAt": "2025-11-24T16:11:02.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/H7N0myaTJp5OuLbZqf0ZS.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/H7N0myaTJp5OuLbZqf0ZS.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/H7N0myaTJp5OuLbZqf0ZS.jpg?variant=large"
+    }
+  },
+  {
+    "id": "ew1XU6c-qwl6bdXB_DKh8",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "cityu_and_satbayev_university_7.jpg",
+    "fileKey": "MNipG30VHuOy79TbC0fvh.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 91262,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:02.000Z",
+    "updatedAt": "2025-11-24T16:11:02.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/MNipG30VHuOy79TbC0fvh.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/MNipG30VHuOy79TbC0fvh.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/MNipG30VHuOy79TbC0fvh.jpg?variant=large"
+    }
+  },
+  {
+    "id": "0AwL2Zqrz0bIfSvGqQj6y",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "cityu_and_satbayev_university_9.jpg",
+    "fileKey": "isXr9B2zVLd0qd-oo6t4g.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 101504,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:02.000Z",
+    "updatedAt": "2025-11-24T16:11:02.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/isXr9B2zVLd0qd-oo6t4g.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/isXr9B2zVLd0qd-oo6t4g.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/isXr9B2zVLd0qd-oo6t4g.jpg?variant=large"
+    }
+  },
+  {
+    "id": "gw5kmJG_7yux5u19fDRpa",
+    "organizationId": "3Kyv3hvrybf_YohTZRgPV",
+    "uploaderId": "system-user-api",
+    "filename": "heriotwatt_university_and_zhubanov_university-9.jpg",
+    "fileKey": "LxsZmzLGQfac1CWR5mBwB.jpg",
+    "mimeType": "image/jpeg",
+    "fileSize": 138108,
+    "width": null,
+    "height": null,
+    "altText": null,
+    "caption": null,
+    "metadata": null,
+    "createdAt": "2025-11-24T16:11:02.000Z",
+    "updatedAt": "2025-11-24T16:11:02.000Z",
+    "uploader": {
+      "id": "system-user-api",
+      "email": "api@system.local",
+      "name": "System API User",
+      "avatarUrl": null,
+      "isSuperAdmin": false,
+      "createdAt": "2025-11-24T14:58:29.000Z",
+      "updatedAt": "2025-11-24T14:58:29.000Z"
+    },
+    "urls": {
+      "url": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/LxsZmzLGQfac1CWR5mBwB.jpg",
+      "thumbnailUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/LxsZmzLGQfac1CWR5mBwB.jpg?variant=thumbnail",
+      "largeUrl": "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com/LxsZmzLGQfac1CWR5mBwB.jpg?variant=large"
+    }
+  }
+]

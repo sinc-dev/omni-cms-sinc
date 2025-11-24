@@ -62,6 +62,7 @@ import publicTaxonomyTermPosts from './routes/public/taxonomy-term-posts';
 import publicSearch from './routes/public/search';
 import publicSitemap from './routes/public/sitemap';
 import publicMcp from './routes/public/mcp';
+import publicMedia from './routes/public/media';
 // More routes will be added as they're migrated
 
 const app = new Hono<{ Bindings: CloudflareBindings; Variables: HonoVariables }>();
@@ -138,6 +139,7 @@ app.route('/api/public/v1', publicTaxonomyTermPosts);
 app.route('/api/public/v1', publicSearch);
 app.route('/api/public/v1', publicSitemap);
 app.route('/api/public/v1', publicMcp);
+app.route('/api/public/v1', publicMedia);
 // More routes will be mounted here as they're migrated
 
 // 404 handler

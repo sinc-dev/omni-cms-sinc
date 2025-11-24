@@ -42,6 +42,8 @@ R2_PUBLIC_URL = "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.c
 CF_ACCESS_AUD = "7291b33d4c255188f0d63a05cf91f9e72e1e6606fb2acb148360886c42e52083"
 CF_ACCESS_TEAM_DOMAIN = "sincdev.cloudflareaccess.com"
 NEXT_PUBLIC_APP_URL = "omni-cms-sinc.joseph-9a2.workers.dev"
+# Workers API base URL for generating media URLs
+APP_URL = "https://omni-cms-api.joseph-9a2.workers.dev"
 
 
 

@@ -153,15 +153,41 @@ export async function importCustomFields(baseUrl, orgId, orgSlug) {
 
   // Create custom fields
   for (const [fieldSlug, definition] of fieldDefinitions) {
-    // Skip if already exists (check by slug, case-insensitive)
+    // Try multiple matching strategies
     const normalizedSlug = definition.slug.toLowerCase();
-    if (existingSlugs.has(normalizedSlug)) {
-      const existingField = existing.find(f => f.slug.toLowerCase() === normalizedSlug);
-      if (existingField) {
-        customFieldMap.set(fieldSlug, existingField.id);
-        console.log(`   ⏭️  Custom field "${definition.name}" already exists (${existingField.id})`);
-        continue;
+    let existingField = null;
+    
+    // Strategy 1: Exact slug match (case-insensitive)
+    existingField = existing.find(f => f.slug.toLowerCase() === normalizedSlug);
+    
+    // Strategy 2: Try original fieldSlug (case-insensitive)
+    if (!existingField) {
+      existingField = existing.find(f => f.slug.toLowerCase() === fieldSlug.toLowerCase());
+    }
+    
+    // Strategy 3: Try name match (case-insensitive)
+    if (!existingField) {
+      existingField = existing.find(f => f.name.toLowerCase() === definition.name.toLowerCase());
+    }
+    
+    // Strategy 4: Try slug with underscores/hyphens variations
+    if (!existingField) {
+      const slugVariations = [
+        normalizedSlug.replace(/_/g, '-'),
+        normalizedSlug.replace(/-/g, '_'),
+        fieldSlug.toLowerCase().replace(/_/g, '-'),
+        fieldSlug.toLowerCase().replace(/-/g, '_'),
+      ];
+      for (const variation of slugVariations) {
+        existingField = existing.find(f => f.slug.toLowerCase() === variation);
+        if (existingField) break;
       }
+    }
+    
+    if (existingField) {
+      customFieldMap.set(fieldSlug, existingField.id);
+      console.log(`   ⏭️  Custom field "${definition.name}" already exists (${existingField.id})`);
+      continue;
     }
 
     try {
@@ -174,22 +200,29 @@ export async function importCustomFields(baseUrl, orgId, orgSlug) {
         // Re-fetch existing fields to get the one that matches
         const updatedExisting = await getExistingCustomFields(baseUrl, orgId);
         const normalizedSlug = definition.slug.toLowerCase();
-        // Try to find by slug (case-insensitive)
-        let matchingField = updatedExisting.find(f => 
-          f.slug.toLowerCase() === normalizedSlug
-        );
-        // If not found, try to find by name (case-insensitive)
+        let matchingField = null;
+        
+        // Try multiple matching strategies (same as above)
+        matchingField = updatedExisting.find(f => f.slug.toLowerCase() === normalizedSlug);
         if (!matchingField) {
-          matchingField = updatedExisting.find(f => 
-            f.name.toLowerCase() === definition.name.toLowerCase()
-          );
+          matchingField = updatedExisting.find(f => f.slug.toLowerCase() === fieldSlug.toLowerCase());
         }
-        // Last resort: try to find by original fieldSlug (case-insensitive)
-        if (!matchingField && fieldSlug) {
-          matchingField = updatedExisting.find(f => 
-            f.slug.toLowerCase() === fieldSlug.toLowerCase()
-          );
+        if (!matchingField) {
+          matchingField = updatedExisting.find(f => f.name.toLowerCase() === definition.name.toLowerCase());
         }
+        if (!matchingField) {
+          const slugVariations = [
+            normalizedSlug.replace(/_/g, '-'),
+            normalizedSlug.replace(/-/g, '_'),
+            fieldSlug.toLowerCase().replace(/_/g, '-'),
+            fieldSlug.toLowerCase().replace(/-/g, '_'),
+          ];
+          for (const variation of slugVariations) {
+            matchingField = updatedExisting.find(f => f.slug.toLowerCase() === variation);
+            if (matchingField) break;
+          }
+        }
+        
         if (matchingField) {
           customFieldMap.set(fieldSlug, matchingField.id);
           console.log(`   ⏭️  Custom field "${definition.name}" already exists (${matchingField.id})`);

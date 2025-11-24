@@ -17,6 +17,7 @@ import { importMedia } from './import-media.js';
 import { importPosts } from './import-posts.js';
 import { importRelationships } from './import-relationships.js';
 import { updateMediaReferences } from './update-media-references.js';
+import { filterExistingData } from './filter-existing-data.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -63,6 +64,11 @@ async function importOrganization(orgSlug, baseUrl, apiKey) {
     const orgId = await getOrganizationId(baseUrl, orgSlug, apiKey);
     console.log(`   ✓ Organization ID: ${orgId}\n`);
 
+    // Pre-filter: Query existing data to avoid duplicate API calls
+    console.log('0. Pre-filtering: Querying existing data from database...');
+    const existingData = await filterExistingData(baseUrl, orgId, apiKey);
+    console.log(`   ✓ Found ${existingData.existingPostsByType.size} post types with existing posts\n`);
+
     // Step 1: Import Post Types
     console.log('2. Importing post types...');
     const postTypeMap = await importPostTypes(baseUrl, orgId, orgSlug);
@@ -106,15 +112,19 @@ async function importOrganization(orgSlug, baseUrl, apiKey) {
       console.log(`   ✓ Uploaded ${mediaMap.size} media files\n`);
     }
 
-    // Step 6: Import Posts
+    // Step 6: Import Posts (using cached existing data to skip duplicates)
     console.log('7. Importing posts...');
     const testLimit = TEST_MODE ? TEST_LIMIT : null;
-    const postMap = await importPosts(baseUrl, orgId, orgSlug, postTypeMap, termMap, customFieldMap, mediaMap, testLimit, apiKey);
-    console.log(`   ✓ Imported posts\n`);
+    // Pass existingPostsByType to skip already-imported posts
+    const postMap = await importPosts(baseUrl, orgId, orgSlug, postTypeMap, termMap, customFieldMap, mediaMap, testLimit, apiKey, existingData.existingPostsByType);
+    
+    // Show summary of what was imported vs skipped
+    const totalPosts = postMap.size;
+    console.log(`   ✓ Imported posts (${totalPosts} total in database)\n`);
 
     // Step 7: Import Relationships
     console.log('8. Importing relationships...');
-    await importRelationships(baseUrl, orgId, orgSlug, postMap);
+    await importRelationships(baseUrl, orgId, orgSlug, postMap, apiKey);
     console.log(`   ✓ Imported relationships\n`);
 
     // Step 8: Update Media References

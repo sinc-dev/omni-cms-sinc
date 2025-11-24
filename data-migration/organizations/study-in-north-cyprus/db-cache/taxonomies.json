@@ -1,0 +1,3090 @@
+[
+  {
+    "id": "xGJvGZDJGZoE24RRxnT1U",
+    "name": "Categories",
+    "slug": "categories",
+    "isHierarchical": true,
+    "terms": [
+      {
+        "id": "MBv4FuYAgEaCo4b5mFpCE",
+        "taxonomyId": "xGJvGZDJGZoE24RRxnT1U",
+        "name": "Academic Life",
+        "slug": "academiclife",
+        "description": "The Academic Life category serves as a comprehensive guide for students, educators, and knowledge enthusiasts, covering a wide range of topics and resources related to the world of academia. This category offers valuable information, recommendations, and resources pertaining to the realm of education.\r\n\r\n&nbsp;",
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:06.000Z",
+        "updatedAt": "2025-11-24T15:00:06.000Z"
+      },
+      {
+        "id": "VK22TUPh1wmVG8QhVLSbp",
+        "taxonomyId": "xGJvGZDJGZoE24RRxnT1U",
+        "name": "Everyday Life",
+        "slug": "everydaylife",
+        "description": "This category covers essential aspects of daily living, providing practical tips, advice, and insights to help you navigate and improve various facets of your everyday life. Explore topics such as health, finance, relationships, productivity, and more to enhance your day-to-day experiences and well-being.",
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:06.000Z",
+        "updatedAt": "2025-11-24T15:00:06.000Z"
+      },
+      {
+        "id": "NzZ0YoiquEZymjnxLBlCg",
+        "taxonomyId": "xGJvGZDJGZoE24RRxnT1U",
+        "name": "How-tos and tips",
+        "slug": "how-tosandtips",
+        "description": "Discover a treasure trove of practical guidance and expert advice in this category. Whether you're seeking step-by-step instructions or valuable tips and tricks, you'll find comprehensive resources to help you master various skills, tackle challenges, and make informed decisions in a wide range of areas.",
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:07.000Z",
+        "updatedAt": "2025-11-24T15:00:07.000Z"
+      },
+      {
+        "id": "HrZ1rxXQlMAuYBNBdBTYi",
+        "taxonomyId": "xGJvGZDJGZoE24RRxnT1U",
+        "name": "Language Courses",
+        "slug": "language-courses",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:08.000Z",
+        "updatedAt": "2025-11-24T15:00:08.000Z"
+      },
+      {
+        "id": "WYFJewKS4Uman86R82uP3",
+        "taxonomyId": "xGJvGZDJGZoE24RRxnT1U",
+        "name": "Moving to kazakhstan",
+        "slug": "moving-to-kazakhstan",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:08.000Z",
+        "updatedAt": "2025-11-24T15:00:08.000Z"
+      },
+      {
+        "id": "os-6ZXJNNs9dHqXBO6O6F",
+        "taxonomyId": "xGJvGZDJGZoE24RRxnT1U",
+        "name": "Moving to North Cyprus",
+        "slug": "movingtonorthcyprus",
+        "description": "Explore essential information, guidance, and resources to simplify your relocation to North Cyprus. Find tips on immigration, housing, cultural integration, and everything you need for a smooth transition to your new life on this Mediterranean island.\r\n",
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:09.000Z",
+        "updatedAt": "2025-11-24T15:00:09.000Z"
+      },
+      {
+        "id": "yJ8Hk6g3jW5c_D5oA8GFN",
+        "taxonomyId": "xGJvGZDJGZoE24RRxnT1U",
+        "name": "Our Vision",
+        "slug": "our-vision",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:09.000Z",
+        "updatedAt": "2025-11-24T15:00:09.000Z"
+      },
+      {
+        "id": "QnkppM0bhTLUb-oClwsBa",
+        "taxonomyId": "xGJvGZDJGZoE24RRxnT1U",
+        "name": "Scholarships &amp; Applications",
+        "slug": "scholarships-applications",
+        "description": "Discover opportunities for financial support and gain insights into the scholarship application process. Get expert tips, find available scholarships, and learn how to craft compelling applications for your educational and career aspirations.",
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:10.000Z",
+        "updatedAt": "2025-11-24T15:00:10.000Z"
+      },
+      {
+        "id": "QcAHRzseBkWB9dXYGnKGT",
+        "taxonomyId": "xGJvGZDJGZoE24RRxnT1U",
+        "name": "The North Cypriot way",
+        "slug": "thenorthcypriotway",
+        "description": "Explore the unique culture, traditions, and lifestyle of North Cyprus in this category. Gain insights into local customs, cuisine, festivals, and the distinctive way of life on this Mediterranean island.",
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:10.000Z",
+        "updatedAt": "2025-11-24T15:00:10.000Z"
+      },
+      {
+        "id": "xd7RVwr_6cKmmm9O9Nt3l",
+        "taxonomyId": "xGJvGZDJGZoE24RRxnT1U",
+        "name": "Travel and holiday",
+        "slug": "travelandholiday",
+        "description": "Your go-to source for travel inspiration, tips, and planning. Discover exciting destinations, travel hacks, packing guides, and everything you need to make your holidays memorable and hassle-free.",
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:11.000Z",
+        "updatedAt": "2025-11-24T15:00:11.000Z"
+      },
+      {
+        "id": "xHRVCrMCI_ySxryjl2SDD",
+        "taxonomyId": "xGJvGZDJGZoE24RRxnT1U",
+        "name": "Uncategorized",
+        "slug": "uncategorized",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:12.000Z",
+        "updatedAt": "2025-11-24T15:00:12.000Z"
+      },
+      {
+        "id": "qCBcwTrdXzkKK-NBAIIbq",
+        "taxonomyId": "xGJvGZDJGZoE24RRxnT1U",
+        "name": "Work &amp; internships",
+        "slug": "work-internships",
+        "description": "Explore opportunities, advice, and resources related to careers and internships. Find job search strategies, resume tips, internship programs, and insights to help you succeed in the professional world.",
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:12.000Z",
+        "updatedAt": "2025-11-24T15:00:12.000Z"
+      },
+      {
+        "id": "HQ44cdxqwvzVvthxADF4S",
+        "taxonomyId": "xGJvGZDJGZoE24RRxnT1U",
+        "name": "Universities",
+        "slug": "universities",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:13.000Z",
+        "updatedAt": "2025-11-24T15:00:13.000Z"
+      },
+      {
+        "id": "HlbStyQ-3jZvOgZw8TCZh",
+        "taxonomyId": "xGJvGZDJGZoE24RRxnT1U",
+        "name": "Events",
+        "slug": "events",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:22.000Z",
+        "updatedAt": "2025-11-24T15:13:22.000Z"
+      }
+    ]
+  },
+  {
+    "id": "oFcmWuuOMnLD4jAAPzwY8",
+    "name": "Currency",
+    "slug": "currency",
+    "isHierarchical": false,
+    "terms": [
+      {
+        "id": "3I4K-yr6nFXEwq5Ysg4M6",
+        "taxonomyId": "oFcmWuuOMnLD4jAAPzwY8",
+        "name": "EURO",
+        "slug": "euro",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:34.000Z",
+        "updatedAt": "2025-11-24T15:13:34.000Z"
+      },
+      {
+        "id": "ycm-c38TPni4PJiUUwY0Q",
+        "taxonomyId": "oFcmWuuOMnLD4jAAPzwY8",
+        "name": "POUNDS",
+        "slug": "pounds",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:35.000Z",
+        "updatedAt": "2025-11-24T15:13:35.000Z"
+      },
+      {
+        "id": "ECaVbJ-QToXokVFDpJrk7",
+        "taxonomyId": "oFcmWuuOMnLD4jAAPzwY8",
+        "name": "TEST-EUR",
+        "slug": "test-eur",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:35.000Z",
+        "updatedAt": "2025-11-24T15:13:35.000Z"
+      },
+      {
+        "id": "P6Qp-9Rj99ZOs8g645Y42",
+        "taxonomyId": "oFcmWuuOMnLD4jAAPzwY8",
+        "name": "TL",
+        "slug": "tl",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:36.000Z",
+        "updatedAt": "2025-11-24T15:13:36.000Z"
+      },
+      {
+        "id": "5CSyUac3iG7as-x9lPzOi",
+        "taxonomyId": "oFcmWuuOMnLD4jAAPzwY8",
+        "name": "USD",
+        "slug": "usd",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:37.000Z",
+        "updatedAt": "2025-11-24T15:13:37.000Z"
+      }
+    ]
+  },
+  {
+    "id": "ZlQdtQo005_mZ1lBWOuTf",
+    "name": "Degree Levels",
+    "slug": "degree-levels",
+    "isHierarchical": false,
+    "terms": [
+      {
+        "id": "7qKcUXqwgm5Bvw4zPjMRW",
+        "taxonomyId": "ZlQdtQo005_mZ1lBWOuTf",
+        "name": "Bachelor",
+        "slug": "bachelor",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:28.000Z",
+        "updatedAt": "2025-11-24T15:14:28.000Z"
+      },
+      {
+        "id": "aTbmjjoiFBxhSACUbi_MJ",
+        "taxonomyId": "ZlQdtQo005_mZ1lBWOuTf",
+        "name": "Certificate Program",
+        "slug": "certificate-program",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:28.000Z",
+        "updatedAt": "2025-11-24T15:14:28.000Z"
+      },
+      {
+        "id": "vWmD7y3RDNLAmK9Uw2CkJ",
+        "taxonomyId": "ZlQdtQo005_mZ1lBWOuTf",
+        "name": "DBA",
+        "slug": "dba",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:29.000Z",
+        "updatedAt": "2025-11-24T15:14:29.000Z"
+      },
+      {
+        "id": "sInbNtN1xaNINtwwy7O4G",
+        "taxonomyId": "ZlQdtQo005_mZ1lBWOuTf",
+        "name": "Integrated Doctorate",
+        "slug": "integrated-doctorate",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:29.000Z",
+        "updatedAt": "2025-11-24T15:14:29.000Z"
+      },
+      {
+        "id": "8w_r6A_N-QD3-VSKE9Vkf",
+        "taxonomyId": "ZlQdtQo005_mZ1lBWOuTf",
+        "name": "Master",
+        "slug": "master",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:30.000Z",
+        "updatedAt": "2025-11-24T15:14:30.000Z"
+      },
+      {
+        "id": "ikZR5t9NRG1mTYk3TgL9J",
+        "taxonomyId": "ZlQdtQo005_mZ1lBWOuTf",
+        "name": "PhD",
+        "slug": "phd",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:31.000Z",
+        "updatedAt": "2025-11-24T15:14:31.000Z"
+      }
+    ]
+  },
+  {
+    "id": "Dx7xMKlql1rdYJoBxa-I5",
+    "name": "Disciplines",
+    "slug": "disciplines",
+    "isHierarchical": false,
+    "terms": [
+      {
+        "id": "iBQTqt3VxjYFSfHTq8FLQ",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Administration",
+        "slug": "administration",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:30.000Z",
+        "updatedAt": "2025-11-24T15:01:30.000Z"
+      },
+      {
+        "id": "bRxgts5OrOj0zYRZ8SpMG",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Agriculture",
+        "slug": "agriculture",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:31.000Z",
+        "updatedAt": "2025-11-24T15:01:31.000Z"
+      },
+      {
+        "id": "wuep93xZR3NApzcKP897d",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Architecture",
+        "slug": "architecture",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:31.000Z",
+        "updatedAt": "2025-11-24T15:01:31.000Z"
+      },
+      {
+        "id": "OzrnItyzuHCC-qFTJ6Qbk",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Arts",
+        "slug": "arts",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:32.000Z",
+        "updatedAt": "2025-11-24T15:01:32.000Z"
+      },
+      {
+        "id": "E80GJef5MwNzB8MGc2Hfs",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Aviation",
+        "slug": "aviation",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:33.000Z",
+        "updatedAt": "2025-11-24T15:01:33.000Z"
+      },
+      {
+        "id": "tO8Bjfu3GhI4H0RVNf95C",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Business",
+        "slug": "business",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:33.000Z",
+        "updatedAt": "2025-11-24T15:01:33.000Z"
+      },
+      {
+        "id": "-MCP_qA2QlDlyiZRYSynC",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Dental",
+        "slug": "dental",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:34.000Z",
+        "updatedAt": "2025-11-24T15:01:34.000Z"
+      },
+      {
+        "id": "otwTNlyX0xwVo25lDpHKb",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Design",
+        "slug": "design",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:34.000Z",
+        "updatedAt": "2025-11-24T15:01:34.000Z"
+      },
+      {
+        "id": "ag8Py7crhjE6kZ1tYr53z",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Economics",
+        "slug": "economics",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:35.000Z",
+        "updatedAt": "2025-11-24T15:01:35.000Z"
+      },
+      {
+        "id": "8Z9Dan2tKR_PriAtO73-6",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Education",
+        "slug": "education",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:35.000Z",
+        "updatedAt": "2025-11-24T15:01:35.000Z"
+      },
+      {
+        "id": "wb_5rlHMu-F-ofcWRRbWi",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Engineering",
+        "slug": "engineering",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:36.000Z",
+        "updatedAt": "2025-11-24T15:01:36.000Z"
+      },
+      {
+        "id": "9zg54i8nezXXFCxaXieNS",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Environment",
+        "slug": "environment",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:37.000Z",
+        "updatedAt": "2025-11-24T15:01:37.000Z"
+      },
+      {
+        "id": "d6Bon-88FCUdwo422OY-S",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Finance",
+        "slug": "finance",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:37.000Z",
+        "updatedAt": "2025-11-24T15:01:37.000Z"
+      },
+      {
+        "id": "aHbJncvwXaWU2MIoUcj3Q",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Food and Beverage",
+        "slug": "food-and-beverage",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:38.000Z",
+        "updatedAt": "2025-11-24T15:01:38.000Z"
+      },
+      {
+        "id": "HhaFZ8Ji4B5ffSVPsf7hs",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Health Care",
+        "slug": "health-care",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:38.000Z",
+        "updatedAt": "2025-11-24T15:01:38.000Z"
+      },
+      {
+        "id": "rz7g9CwekcAWnxoyctA9U",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Humanities",
+        "slug": "humanities",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:39.000Z",
+        "updatedAt": "2025-11-24T15:01:39.000Z"
+      },
+      {
+        "id": "5hvFQQ53OFB7lkCrI51Ha",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Languages",
+        "slug": "languages",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:39.000Z",
+        "updatedAt": "2025-11-24T15:01:39.000Z"
+      },
+      {
+        "id": "2qG4X_Bu9Jg9C2GtBQI2f",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Law",
+        "slug": "law",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:40.000Z",
+        "updatedAt": "2025-11-24T15:01:40.000Z"
+      },
+      {
+        "id": "qwq5p9laZWjAbtcj_tiw9",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Management",
+        "slug": "management",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:41.000Z",
+        "updatedAt": "2025-11-24T15:01:41.000Z"
+      },
+      {
+        "id": "b8yOy0TLpW3Hf9UyZnj79",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Marine Sciences",
+        "slug": "marine-sciences",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:41.000Z",
+        "updatedAt": "2025-11-24T15:01:41.000Z"
+      },
+      {
+        "id": "poFYAqcTY-76KDWXyzlRc",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Maritime Sciences",
+        "slug": "maritime-sciences",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:42.000Z",
+        "updatedAt": "2025-11-24T15:01:42.000Z"
+      },
+      {
+        "id": "FPN6E4B5vk9ZoOgX-F984",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Marketing",
+        "slug": "marketing",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:42.000Z",
+        "updatedAt": "2025-11-24T15:01:42.000Z"
+      },
+      {
+        "id": "wNIoZomDnrAM3NtanyF9A",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Media",
+        "slug": "media",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:43.000Z",
+        "updatedAt": "2025-11-24T15:01:43.000Z"
+      },
+      {
+        "id": "HQsl7nbBcDxIr7Qyrm6uo",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Medical Sciences",
+        "slug": "medical-sciences",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:43.000Z",
+        "updatedAt": "2025-11-24T15:01:43.000Z"
+      },
+      {
+        "id": "kVyrH-8qJcROh6NyfpIlQ",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Medicine",
+        "slug": "medicine",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:44.000Z",
+        "updatedAt": "2025-11-24T15:01:44.000Z"
+      },
+      {
+        "id": "gXzBYt33tSJ74M93o2qM4",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Nursing",
+        "slug": "nursing",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:45.000Z",
+        "updatedAt": "2025-11-24T15:01:45.000Z"
+      },
+      {
+        "id": "RdVDBZ-J9k1Wecv-FmlOU",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Pharmacy",
+        "slug": "pharmacy",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:45.000Z",
+        "updatedAt": "2025-11-24T15:01:45.000Z"
+      },
+      {
+        "id": "vgNKRw4IhujCCFFCi7EPb",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Political Sciences",
+        "slug": "political-sciences",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:46.000Z",
+        "updatedAt": "2025-11-24T15:01:46.000Z"
+      },
+      {
+        "id": "KrtPyNetg4NbrzkcwzW9L",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Psychology",
+        "slug": "psychology",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:47.000Z",
+        "updatedAt": "2025-11-24T15:01:47.000Z"
+      },
+      {
+        "id": "0u3kKTJTXnxIFW83se4-Q",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Sciences",
+        "slug": "sciences",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:47.000Z",
+        "updatedAt": "2025-11-24T15:01:47.000Z"
+      },
+      {
+        "id": "BOwJhGehbhHZ7rdPaSQ6J",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Security",
+        "slug": "security",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:48.000Z",
+        "updatedAt": "2025-11-24T15:01:48.000Z"
+      },
+      {
+        "id": "mbEFslzCJqKlDziFIRLKf",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Social Sciences",
+        "slug": "social-sciences",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:48.000Z",
+        "updatedAt": "2025-11-24T15:01:48.000Z"
+      },
+      {
+        "id": "Q3k2oKWZ2q5YWPmGZJOls",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Sports",
+        "slug": "sports",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:49.000Z",
+        "updatedAt": "2025-11-24T15:01:49.000Z"
+      },
+      {
+        "id": "xVLT_EH5UdwIwG6zp-l7d",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Sustainability",
+        "slug": "sustainability",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:49.000Z",
+        "updatedAt": "2025-11-24T15:01:49.000Z"
+      },
+      {
+        "id": "NYhq6U-p5w--WyP20f229",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Technology",
+        "slug": "technology",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:50.000Z",
+        "updatedAt": "2025-11-24T15:01:50.000Z"
+      },
+      {
+        "id": "D82tnk7loozWFyP6e03ux",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Tourism",
+        "slug": "tourism",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:51.000Z",
+        "updatedAt": "2025-11-24T15:01:51.000Z"
+      },
+      {
+        "id": "PXk7BUPlnACGt2eXRXY6i",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Uncategorized",
+        "slug": "uncategorized",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:51.000Z",
+        "updatedAt": "2025-11-24T15:01:51.000Z"
+      },
+      {
+        "id": "efhNUZiMTyTuvBRYYY9jx",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Veterinary",
+        "slug": "veterinary",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:52.000Z",
+        "updatedAt": "2025-11-24T15:01:52.000Z"
+      },
+      {
+        "id": "KUFo97nlwB4HqRgJozbJX",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Business Administration",
+        "slug": "business-administration",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:36.000Z",
+        "updatedAt": "2025-11-24T15:14:36.000Z"
+      },
+      {
+        "id": "mHVLGfGBW96tIsqjWKv_g",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Cybersecurity",
+        "slug": "cybersecurity",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:37.000Z",
+        "updatedAt": "2025-11-24T15:14:37.000Z"
+      },
+      {
+        "id": "cjGpVm9zKUDUtFf4tKKu7",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "History",
+        "slug": "history",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:37.000Z",
+        "updatedAt": "2025-11-24T15:14:37.000Z"
+      },
+      {
+        "id": "gMXuNig5y8T6VF0bWdfW_",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "International Relations",
+        "slug": "international-relations",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:38.000Z",
+        "updatedAt": "2025-11-24T15:14:38.000Z"
+      },
+      {
+        "id": "doxnbiAuxIJrg5jLpdpGS",
+        "taxonomyId": "Dx7xMKlql1rdYJoBxa-I5",
+        "name": "Teaching English as a Second Language (TESOL)",
+        "slug": "teaching-english-as-a-second-language-tesol",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:39.000Z",
+        "updatedAt": "2025-11-24T15:14:39.000Z"
+      }
+    ]
+  },
+  {
+    "id": "L2hTIAiTgCtoF3lOJXI6f",
+    "name": "Dormitory Category",
+    "slug": "dormitory-category",
+    "isHierarchical": false,
+    "terms": [
+      {
+        "id": "LXmKyU9AU7KzpKrRDhSFG",
+        "taxonomyId": "L2hTIAiTgCtoF3lOJXI6f",
+        "name": "Government Dormitory",
+        "slug": "government-dormitory",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:32.000Z",
+        "updatedAt": "2025-11-24T15:13:32.000Z"
+      },
+      {
+        "id": "zgdsL3aJBvYEMnIWMSZyl",
+        "taxonomyId": "L2hTIAiTgCtoF3lOJXI6f",
+        "name": "Private Dormitory",
+        "slug": "private-dormitory",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:32.000Z",
+        "updatedAt": "2025-11-24T15:13:32.000Z"
+      },
+      {
+        "id": "p-QDexM7x-jAMAwosJEgc",
+        "taxonomyId": "L2hTIAiTgCtoF3lOJXI6f",
+        "name": "University Dormitory",
+        "slug": "university-dormitory",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:33.000Z",
+        "updatedAt": "2025-11-24T15:13:33.000Z"
+      }
+    ]
+  },
+  {
+    "id": "XrXafE_z_VujkIDOxlqwL",
+    "name": "Durations",
+    "slug": "durations",
+    "isHierarchical": false,
+    "terms": [
+      {
+        "id": "HhVK__5DE_a_1NLQ43MrN",
+        "taxonomyId": "XrXafE_z_VujkIDOxlqwL",
+        "name": "2 Years",
+        "slug": "2-years",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:33.000Z",
+        "updatedAt": "2025-11-24T15:14:33.000Z"
+      },
+      {
+        "id": "wcCMcIjWR9U_gITI6RCDl",
+        "taxonomyId": "XrXafE_z_VujkIDOxlqwL",
+        "name": "3 Years",
+        "slug": "3-years",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:34.000Z",
+        "updatedAt": "2025-11-24T15:14:34.000Z"
+      },
+      {
+        "id": "ysGihkBw_tJcwjucbpfft",
+        "taxonomyId": "XrXafE_z_VujkIDOxlqwL",
+        "name": "4 Years",
+        "slug": "4-years",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:35.000Z",
+        "updatedAt": "2025-11-24T15:14:35.000Z"
+      },
+      {
+        "id": "_F3vT5Bu9DnmmTsStA81x",
+        "taxonomyId": "XrXafE_z_VujkIDOxlqwL",
+        "name": "5 Years",
+        "slug": "5-years",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:35.000Z",
+        "updatedAt": "2025-11-24T15:14:35.000Z"
+      }
+    ]
+  },
+  {
+    "id": "9DEFbi_j1WYPvarkGFuxH",
+    "name": "Institution  Residence Name",
+    "slug": "institution--residence-name",
+    "isHierarchical": false,
+    "terms": [
+      {
+        "id": "t2dLb4RY5KPFb00WlTL1O",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "American University of Cyprus",
+        "slug": "american-university-of-cyprus",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:40.000Z",
+        "updatedAt": "2025-11-24T15:13:40.000Z"
+      },
+      {
+        "id": "TgCgFh9GD5BNUvQ4PGEzb",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "Arkın University",
+        "slug": "arkn-university",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:40.000Z",
+        "updatedAt": "2025-11-24T15:13:40.000Z"
+      },
+      {
+        "id": "YA2Qau6flhfLuB2gUlVOD",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "Bahçeşehir Cyprus University",
+        "slug": "baheehir-cyprus-university",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:41.000Z",
+        "updatedAt": "2025-11-24T15:13:41.000Z"
+      },
+      {
+        "id": "FtA8iZznf18vhXzKa5aIJ",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "Campus Cyprus",
+        "slug": "campus-cyprus",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:41.000Z",
+        "updatedAt": "2025-11-24T15:13:41.000Z"
+      },
+      {
+        "id": "0ilKn2uVt1phYx8be4BC7",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "Cyprus College",
+        "slug": "cyprus-college",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:42.000Z",
+        "updatedAt": "2025-11-24T15:13:42.000Z"
+      },
+      {
+        "id": "pIhpf8C2Ogngq31NbCKJ1",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "Cyprus Health and Social Sciences University",
+        "slug": "cyprus-health-and-social-sciences-university",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:42.000Z",
+        "updatedAt": "2025-11-24T15:13:42.000Z"
+      },
+      {
+        "id": "V2MSrrjqks1KwbHx_kCjX",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "Cyprus International University",
+        "slug": "cyprus-international-university",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:43.000Z",
+        "updatedAt": "2025-11-24T15:13:43.000Z"
+      },
+      {
+        "id": "Tk1-NTvuFQ746_nfw7NSL",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "Cyprus Science University",
+        "slug": "cyprus-science-university",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:44.000Z",
+        "updatedAt": "2025-11-24T15:13:44.000Z"
+      },
+      {
+        "id": "DeXz9w0VLRJu0EwgxWFX_",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "Cyprus West University",
+        "slug": "cyprus-west-university",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:44.000Z",
+        "updatedAt": "2025-11-24T15:13:44.000Z"
+      },
+      {
+        "id": "B5jZ6v7UzkEoao1qZxRNb",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "Eastern Mediterranean University",
+        "slug": "eastern-mediterranean-university",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:45.000Z",
+        "updatedAt": "2025-11-24T15:13:45.000Z"
+      },
+      {
+        "id": "HOydkwSw5rYHbDX_GEjrT",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "European University of Lefke",
+        "slug": "european-university-of-lefke",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:46.000Z",
+        "updatedAt": "2025-11-24T15:13:46.000Z"
+      },
+      {
+        "id": "xmOqA5bFNKaUP7bZLPL8M",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "Final International University",
+        "slug": "final-international-university",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:46.000Z",
+        "updatedAt": "2025-11-24T15:13:46.000Z"
+      },
+      {
+        "id": "v1bf8TuplHs-9cop4kGQW",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "Girne American University",
+        "slug": "girne-american-university",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:47.000Z",
+        "updatedAt": "2025-11-24T15:13:47.000Z"
+      },
+      {
+        "id": "fUllH9KnljykWqCIo7kE8",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "METU Northern Cyprus Campus",
+        "slug": "metu-northern-cyprus-campus",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:47.000Z",
+        "updatedAt": "2025-11-24T15:13:47.000Z"
+      },
+      {
+        "id": "rY4QoDbGuv_J1q6hWnn-b",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "Multiple Universities",
+        "slug": "multiple-universities",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:48.000Z",
+        "updatedAt": "2025-11-24T15:13:48.000Z"
+      },
+      {
+        "id": "y27aElLfEsXRj6IoYH8X1",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "Near East University",
+        "slug": "near-east-university",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:49.000Z",
+        "updatedAt": "2025-11-24T15:13:49.000Z"
+      },
+      {
+        "id": "4YKHXWsh884GV9T9x1FCM",
+        "taxonomyId": "9DEFbi_j1WYPvarkGFuxH",
+        "name": "University of Mediterranean Karpasia",
+        "slug": "university-of-mediterranean-karpasia",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:49.000Z",
+        "updatedAt": "2025-11-24T15:13:49.000Z"
+      }
+    ]
+  },
+  {
+    "id": "2SVyxfRfpeD_3cDJGE59p",
+    "name": "Languages",
+    "slug": "languages",
+    "isHierarchical": false,
+    "terms": [
+      {
+        "id": "CHKUTOJIGTXo_dwrEjD1b",
+        "taxonomyId": "2SVyxfRfpeD_3cDJGE59p",
+        "name": "Engl",
+        "slug": "engl",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:31.000Z",
+        "updatedAt": "2025-11-24T15:14:31.000Z"
+      },
+      {
+        "id": "kqDQq7Z9muBgS-NhkJ3YC",
+        "taxonomyId": "2SVyxfRfpeD_3cDJGE59p",
+        "name": "English",
+        "slug": "english",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:32.000Z",
+        "updatedAt": "2025-11-24T15:14:32.000Z"
+      },
+      {
+        "id": "hMWwes52eiuX3pYzpGOP4",
+        "taxonomyId": "2SVyxfRfpeD_3cDJGE59p",
+        "name": "Turkish",
+        "slug": "turkish",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:32.000Z",
+        "updatedAt": "2025-11-24T15:14:32.000Z"
+      }
+    ]
+  },
+  {
+    "id": "eCpnMMr_SgtdlaT8pqO3z",
+    "name": "Location",
+    "slug": "location",
+    "isHierarchical": false,
+    "terms": [
+      {
+        "id": "4ux2s2PC2xujdyiIjiVw-",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Aktau",
+        "slug": "aktau",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:53.000Z",
+        "updatedAt": "2025-11-24T15:01:53.000Z"
+      },
+      {
+        "id": "yM6sQ76EhWU2hyJ-M03oJ",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Aktobe",
+        "slug": "aktobe",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:53.000Z",
+        "updatedAt": "2025-11-24T15:01:53.000Z"
+      },
+      {
+        "id": "mdCHVnJW-8aRz-EBMYCFc",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Almaty",
+        "slug": "almaty",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:54.000Z",
+        "updatedAt": "2025-11-24T15:01:54.000Z"
+      },
+      {
+        "id": "gZVj1P5bDrqlwvADzWLdy",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Almaty/Алматы",
+        "slug": "almaty-d0-b0-d0-bb-d0-bc-d0-b0-d1-82-d1-8b",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:54.000Z",
+        "updatedAt": "2025-11-24T15:01:54.000Z"
+      },
+      {
+        "id": "Y-chGJ_zkxcLLndRgAJkZ",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Arkalyk",
+        "slug": "arkalyk",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:55.000Z",
+        "updatedAt": "2025-11-24T15:01:55.000Z"
+      },
+      {
+        "id": "pj16ht-XDRkzNTm-lUAr-",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Astana",
+        "slug": "astana",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:55.000Z",
+        "updatedAt": "2025-11-24T15:01:55.000Z"
+      },
+      {
+        "id": "1tmnTlPMaCmV0D1NBFi0e",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Atyrau",
+        "slug": "atyrau",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:56.000Z",
+        "updatedAt": "2025-11-24T15:01:56.000Z"
+      },
+      {
+        "id": "WsHOw9xMf4FUBSUd3VNR_",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Ekibastuz",
+        "slug": "ekibastuz",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:57.000Z",
+        "updatedAt": "2025-11-24T15:01:57.000Z"
+      },
+      {
+        "id": "47CGgTZcmIzJRueA4uisq",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Jezqazğan",
+        "slug": "jezqazgan",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:57.000Z",
+        "updatedAt": "2025-11-24T15:01:57.000Z"
+      },
+      {
+        "id": "W7kpFxqTzVIjLap2DnkSb",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Karaganda",
+        "slug": "karaganda",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:58.000Z",
+        "updatedAt": "2025-11-24T15:01:58.000Z"
+      },
+      {
+        "id": "e5X8D5lAiznDqBkzb5MfM",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Kaskelen",
+        "slug": "kaskelen",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:58.000Z",
+        "updatedAt": "2025-11-24T15:01:58.000Z"
+      },
+      {
+        "id": "VaGwcHBbs_mQeicF7CUyf",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Kökşetaw",
+        "slug": "koksetaw",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:59.000Z",
+        "updatedAt": "2025-11-24T15:01:59.000Z"
+      },
+      {
+        "id": "f9JhUoPmpdxagyPIU5pJJ",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Kostanay",
+        "slug": "kostanay",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:59.000Z",
+        "updatedAt": "2025-11-24T15:01:59.000Z"
+      },
+      {
+        "id": "WBu4EscFozvQM37-4heWE",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Köthen (Anhalt)",
+        "slug": "kothen-anhalt",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:00.000Z",
+        "updatedAt": "2025-11-24T15:02:00.000Z"
+      },
+      {
+        "id": "3jVIPvvKVHi6wQCJumcgt",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Moskva",
+        "slug": "moskva",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:00.000Z",
+        "updatedAt": "2025-11-24T15:02:00.000Z"
+      },
+      {
+        "id": "QKszkdoRCorU71A_GEAeW",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Oskemen",
+        "slug": "oskemen",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:01.000Z",
+        "updatedAt": "2025-11-24T15:02:01.000Z"
+      },
+      {
+        "id": "WjoUCD_zo-0wg03EPkO-t",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Pavlodar",
+        "slug": "pavlodar",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:02.000Z",
+        "updatedAt": "2025-11-24T15:02:02.000Z"
+      },
+      {
+        "id": "yW-GHTHEEobtHe5rO5jZj",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Petropavl",
+        "slug": "petropavl",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:02.000Z",
+        "updatedAt": "2025-11-24T15:02:02.000Z"
+      },
+      {
+        "id": "SHOiZN1hVXA6pSs5iOoxO",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Qızılorda",
+        "slug": "qizilorda",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:03.000Z",
+        "updatedAt": "2025-11-24T15:02:03.000Z"
+      },
+      {
+        "id": "X5WhGlrhh8K3vNRhJxsMY",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Qostanaý",
+        "slug": "qostanay",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:03.000Z",
+        "updatedAt": "2025-11-24T15:02:03.000Z"
+      },
+      {
+        "id": "69lu_K1PTUlsxsPQENjBJ",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Rudny",
+        "slug": "rudny",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:04.000Z",
+        "updatedAt": "2025-11-24T15:02:04.000Z"
+      },
+      {
+        "id": "zEwkoWvfnQ_SRSebfW__b",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Semey",
+        "slug": "semey",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:04.000Z",
+        "updatedAt": "2025-11-24T15:02:04.000Z"
+      },
+      {
+        "id": "lqGFjohR0OGf4JjiP1rNh",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Shymkent",
+        "slug": "shymkent",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:05.000Z",
+        "updatedAt": "2025-11-24T15:02:05.000Z"
+      },
+      {
+        "id": "A-f32pnRo1iijFoSM7V41",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Taldıqorğan",
+        "slug": "taldiqorgan",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:06.000Z",
+        "updatedAt": "2025-11-24T15:02:06.000Z"
+      },
+      {
+        "id": "cDOqSCtuK6gFDW2NBoQ-b",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Taraz",
+        "slug": "taraz",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:06.000Z",
+        "updatedAt": "2025-11-24T15:02:06.000Z"
+      },
+      {
+        "id": "l-2vD9xLg7dbGFvsz1qdd",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Temirtaw",
+        "slug": "temirtaw",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:07.000Z",
+        "updatedAt": "2025-11-24T15:02:07.000Z"
+      },
+      {
+        "id": "CG_RPkDciPrNswaoN8fog",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Turkistan",
+        "slug": "turkistan",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:08.000Z",
+        "updatedAt": "2025-11-24T15:02:08.000Z"
+      },
+      {
+        "id": "0Oxf5hLp06iK5A7U5QzVj",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Türkistan qalası",
+        "slug": "turkistan-qalasi",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:08.000Z",
+        "updatedAt": "2025-11-24T15:02:08.000Z"
+      },
+      {
+        "id": "iaum-44Y19YT2WDezOnph",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Uralsk",
+        "slug": "uralsk",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:09.000Z",
+        "updatedAt": "2025-11-24T15:02:09.000Z"
+      },
+      {
+        "id": "y57TAMrJx8DenlQoRz9ku",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Zhetisay",
+        "slug": "zhetisay",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:09.000Z",
+        "updatedAt": "2025-11-24T15:02:09.000Z"
+      },
+      {
+        "id": "1iUsBFICQLvzIPKrp9Bxj",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Ақтөбе",
+        "slug": "d0-b0-d2-9b-d1-82-d3-a9-d0-b1-d0-b5",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:10.000Z",
+        "updatedAt": "2025-11-24T15:02:10.000Z"
+      },
+      {
+        "id": "SNz4JkpL3AZ46QhWlY2sO",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Тоshkent",
+        "slug": "d1-82-d0-beshkent",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:02:11.000Z",
+        "updatedAt": "2025-11-24T15:02:11.000Z"
+      },
+      {
+        "id": "6Gwk_3ybKGXlevqsGUiI2",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Famagusta",
+        "slug": "famagusta",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:27.000Z",
+        "updatedAt": "2025-11-24T15:13:27.000Z"
+      },
+      {
+        "id": "fVqD6vl8-h_bLBpRkbM9D",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Girne (Kyrenia)",
+        "slug": "girne",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:28.000Z",
+        "updatedAt": "2025-11-24T15:13:28.000Z"
+      },
+      {
+        "id": "K7vdMwYo68UMoDesLSc1W",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Guzelyurt",
+        "slug": "guzelyurt",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:28.000Z",
+        "updatedAt": "2025-11-24T15:13:28.000Z"
+      },
+      {
+        "id": "KZz3wNfY1BGgn0vqnddr7",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Iskele",
+        "slug": "iskele",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:29.000Z",
+        "updatedAt": "2025-11-24T15:13:29.000Z"
+      },
+      {
+        "id": "4bn_3RO590ZAY4Dod-nu_",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Kalkanlı",
+        "slug": "kalkanli",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:29.000Z",
+        "updatedAt": "2025-11-24T15:13:29.000Z"
+      },
+      {
+        "id": "imvLuilLpwLYar5yZhF0z",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Lefke",
+        "slug": "lefke",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:30.000Z",
+        "updatedAt": "2025-11-24T15:13:30.000Z"
+      },
+      {
+        "id": "7k4taRpPFrNB0i4FKGZsX",
+        "taxonomyId": "eCpnMMr_SgtdlaT8pqO3z",
+        "name": "Nicosia",
+        "slug": "nicosia",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:31.000Z",
+        "updatedAt": "2025-11-24T15:13:31.000Z"
+      }
+    ]
+  },
+  {
+    "id": "h8Gauu7pQHK_D_7gpLlod",
+    "name": "Price Format",
+    "slug": "price-format",
+    "isHierarchical": false,
+    "terms": [
+      {
+        "id": "2Ol3toEE21d_ytQIfwEK9",
+        "taxonomyId": "h8Gauu7pQHK_D_7gpLlod",
+        "name": "Per Person",
+        "slug": "per-person",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:34.000Z",
+        "updatedAt": "2025-11-24T15:13:34.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TOEDWfyO5scHgRPyc-Owh",
+    "name": "Program Degree Level",
+    "slug": "program-degree-level",
+    "isHierarchical": false,
+    "terms": [
+      {
+        "id": "Kwkyz0PqRg0b0AXEsuBbh",
+        "taxonomyId": "TOEDWfyO5scHgRPyc-Owh",
+        "name": "Associate",
+        "slug": "associate",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:19.000Z",
+        "updatedAt": "2025-11-24T15:01:19.000Z"
+      },
+      {
+        "id": "U0RUd_ZUxibmmeq3-JgFi",
+        "taxonomyId": "TOEDWfyO5scHgRPyc-Owh",
+        "name": "bache",
+        "slug": "bache",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:19.000Z",
+        "updatedAt": "2025-11-24T15:01:19.000Z"
+      },
+      {
+        "id": "e6NEfZ85pon1rRKVmj-Cz",
+        "taxonomyId": "TOEDWfyO5scHgRPyc-Owh",
+        "name": "Bachelor",
+        "slug": "bachelor",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:20.000Z",
+        "updatedAt": "2025-11-24T15:01:20.000Z"
+      },
+      {
+        "id": "m2INDCoVpXPlF5eXz3Se1",
+        "taxonomyId": "TOEDWfyO5scHgRPyc-Owh",
+        "name": "Foundation programmes",
+        "slug": "foundation-programmes",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:20.000Z",
+        "updatedAt": "2025-11-24T15:01:20.000Z"
+      },
+      {
+        "id": "rznufCkzGix_2VmVSvvKZ",
+        "taxonomyId": "TOEDWfyO5scHgRPyc-Owh",
+        "name": "Master",
+        "slug": "master",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:21.000Z",
+        "updatedAt": "2025-11-24T15:01:21.000Z"
+      },
+      {
+        "id": "6vdAlIJdfuWaZsklKJLPl",
+        "taxonomyId": "TOEDWfyO5scHgRPyc-Owh",
+        "name": "Minor Degree",
+        "slug": "minor-degree",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:22.000Z",
+        "updatedAt": "2025-11-24T15:01:22.000Z"
+      },
+      {
+        "id": "xx_T3Bqm70rSelve__eIq",
+        "taxonomyId": "TOEDWfyO5scHgRPyc-Owh",
+        "name": "PhD",
+        "slug": "phd",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:22.000Z",
+        "updatedAt": "2025-11-24T15:01:22.000Z"
+      },
+      {
+        "id": "NC97jksGw3qGWvyhdb7PI",
+        "taxonomyId": "TOEDWfyO5scHgRPyc-Owh",
+        "name": "Postgraduate",
+        "slug": "postgraduate",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:23.000Z",
+        "updatedAt": "2025-11-24T15:01:23.000Z"
+      },
+      {
+        "id": "Hp0Oj4F6jyjRBO152xVUQ",
+        "taxonomyId": "TOEDWfyO5scHgRPyc-Owh",
+        "name": "Prep-School",
+        "slug": "prep-school",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:23.000Z",
+        "updatedAt": "2025-11-24T15:01:23.000Z"
+      },
+      {
+        "id": "XT_ZOGc2dNtiC3ON0IyFU",
+        "taxonomyId": "TOEDWfyO5scHgRPyc-Owh",
+        "name": "Undergraduate",
+        "slug": "undergraduate",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:24.000Z",
+        "updatedAt": "2025-11-24T15:01:24.000Z"
+      }
+    ]
+  },
+  {
+    "id": "tp6ymLsmlmb_K9-2BiZ6e",
+    "name": "Program Durations",
+    "slug": "program-durations",
+    "isHierarchical": false,
+    "terms": [
+      {
+        "id": "mygNzRhwqijl8BXg0Rta0",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "1",
+        "slug": "1",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:44.000Z",
+        "updatedAt": "2025-11-24T15:12:44.000Z"
+      },
+      {
+        "id": "Jhv4PeQ_Sx2_PDjBjh2Ui",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "1 - 1.5",
+        "slug": "1-1-5",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:45.000Z",
+        "updatedAt": "2025-11-24T15:12:45.000Z"
+      },
+      {
+        "id": "z_1blAVmZJic1IoPNd2hg",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "1 (then 3 years bachelor)",
+        "slug": "1-then-3-years-bachelor",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:45.000Z",
+        "updatedAt": "2025-11-24T15:12:45.000Z"
+      },
+      {
+        "id": "QB5nGkYLkgolqhgfeRbUy",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "1.5 - 2",
+        "slug": "1-5-2",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:46.000Z",
+        "updatedAt": "2025-11-24T15:12:46.000Z"
+      },
+      {
+        "id": "Qe_rgesRrxTWF0t6m1bO5",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "2",
+        "slug": "2",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:47.000Z",
+        "updatedAt": "2025-11-24T15:12:47.000Z"
+      },
+      {
+        "id": "hyY_lngcR_6qnJWRE_y9n",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "2 - 3",
+        "slug": "2-3",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:47.000Z",
+        "updatedAt": "2025-11-24T15:12:47.000Z"
+      },
+      {
+        "id": "xvaq5PL-ZiNKmk9nPAiq2",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "3",
+        "slug": "3",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:48.000Z",
+        "updatedAt": "2025-11-24T15:12:48.000Z"
+      },
+      {
+        "id": "BZ3UX9EtO7srGcrNTYwIO",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "3 - 4",
+        "slug": "3-4",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:48.000Z",
+        "updatedAt": "2025-11-24T15:12:48.000Z"
+      },
+      {
+        "id": "iylviBxRxk-Pxq9_6m7L9",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "3 years",
+        "slug": "3-years",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:49.000Z",
+        "updatedAt": "2025-11-24T15:12:49.000Z"
+      },
+      {
+        "id": "1f0OOMoIUl5UPAgdRGJoI",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "4",
+        "slug": "4",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:50.000Z",
+        "updatedAt": "2025-11-24T15:12:50.000Z"
+      },
+      {
+        "id": "AfKgVUxfi53_qYBRI5qcQ",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "4 - 5",
+        "slug": "4-5",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:51.000Z",
+        "updatedAt": "2025-11-24T15:12:51.000Z"
+      },
+      {
+        "id": "UOAD2qS-OaWto7fgHZnhx",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "4 years",
+        "slug": "4-years",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:51.000Z",
+        "updatedAt": "2025-11-24T15:12:51.000Z"
+      },
+      {
+        "id": "L3Zx_JprxcqglJbn8njfG",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "5",
+        "slug": "5",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:52.000Z",
+        "updatedAt": "2025-11-24T15:12:52.000Z"
+      },
+      {
+        "id": "wHun9ED1yn_zIamVWRGDo",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "5 - 6",
+        "slug": "5-6",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:53.000Z",
+        "updatedAt": "2025-11-24T15:12:53.000Z"
+      },
+      {
+        "id": "KQGPKhqd8yTY0at5Znhde",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "5-6 years",
+        "slug": "5-6-years",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:53.000Z",
+        "updatedAt": "2025-11-24T15:12:53.000Z"
+      },
+      {
+        "id": "sbrmLi1NlLuyiM_mriwnb",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "6",
+        "slug": "6",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:54.000Z",
+        "updatedAt": "2025-11-24T15:12:54.000Z"
+      },
+      {
+        "id": "PipCi2w6tpIky7wPfrxz3",
+        "taxonomyId": "tp6ymLsmlmb_K9-2BiZ6e",
+        "name": "1.5",
+        "slug": "1-5",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:25.000Z",
+        "updatedAt": "2025-11-24T15:13:25.000Z"
+      }
+    ]
+  },
+  {
+    "id": "pCV1cdHTvuKRqJiGMZWaa",
+    "name": "Program Languages",
+    "slug": "program-languages",
+    "isHierarchical": false,
+    "terms": [
+      {
+        "id": "r9w7B_J4fRxPl3rkoynyQ",
+        "taxonomyId": "pCV1cdHTvuKRqJiGMZWaa",
+        "name": "70% Turkish - 30% English",
+        "slug": "70-turkish-30-english",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:25.000Z",
+        "updatedAt": "2025-11-24T15:01:25.000Z"
+      },
+      {
+        "id": "ljZ7JGQey6_XJuZkPTrpj",
+        "taxonomyId": "pCV1cdHTvuKRqJiGMZWaa",
+        "name": "Arabic",
+        "slug": "arabic",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:25.000Z",
+        "updatedAt": "2025-11-24T15:01:25.000Z"
+      },
+      {
+        "id": "YyfGCNtxrUvkV2oH__CAf",
+        "taxonomyId": "pCV1cdHTvuKRqJiGMZWaa",
+        "name": "Chinese",
+        "slug": "chinese",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:26.000Z",
+        "updatedAt": "2025-11-24T15:01:26.000Z"
+      },
+      {
+        "id": "EizUkL4F8GI3W9fpK0CtQ",
+        "taxonomyId": "pCV1cdHTvuKRqJiGMZWaa",
+        "name": "English",
+        "slug": "english",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:27.000Z",
+        "updatedAt": "2025-11-24T15:01:27.000Z"
+      },
+      {
+        "id": "SewMy9PhY0UUNKtELP2Aj",
+        "taxonomyId": "pCV1cdHTvuKRqJiGMZWaa",
+        "name": "English &amp; Russian",
+        "slug": "english-russian",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:27.000Z",
+        "updatedAt": "2025-11-24T15:01:27.000Z"
+      },
+      {
+        "id": "8P4vPfhcyVa0zLNe3GiBw",
+        "taxonomyId": "pCV1cdHTvuKRqJiGMZWaa",
+        "name": "Kazakh",
+        "slug": "kazakh",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:28.000Z",
+        "updatedAt": "2025-11-24T15:01:28.000Z"
+      },
+      {
+        "id": "wF-hVab2Y2PVui5dyZ4Yr",
+        "taxonomyId": "pCV1cdHTvuKRqJiGMZWaa",
+        "name": "Kazakh, Russian, English (selected programs)",
+        "slug": "kazakh-russian-english-selected-programs",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:28.000Z",
+        "updatedAt": "2025-11-24T15:01:28.000Z"
+      },
+      {
+        "id": "gKzUrQKDQ31bL3S9tRz1x",
+        "taxonomyId": "pCV1cdHTvuKRqJiGMZWaa",
+        "name": "Russian",
+        "slug": "russian",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:29.000Z",
+        "updatedAt": "2025-11-24T15:01:29.000Z"
+      },
+      {
+        "id": "M1roD9cOfGrLU8Am7X0wd",
+        "taxonomyId": "pCV1cdHTvuKRqJiGMZWaa",
+        "name": "Turkish",
+        "slug": "turkish",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:30.000Z",
+        "updatedAt": "2025-11-24T15:01:30.000Z"
+      }
+    ]
+  },
+  {
+    "id": "zSSUsZNC8puymyhLGPvM5",
+    "name": "Program Study Formats",
+    "slug": "program-study-formats",
+    "isHierarchical": false,
+    "terms": [
+      {
+        "id": "l22XW6zb0UFlBKNmtQQve",
+        "taxonomyId": "zSSUsZNC8puymyhLGPvM5",
+        "name": "Distance Learning",
+        "slug": "distance-learning",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:55.000Z",
+        "updatedAt": "2025-11-24T15:12:55.000Z"
+      },
+      {
+        "id": "PcEKBAyxwLqQzpAVa3PDO",
+        "taxonomyId": "zSSUsZNC8puymyhLGPvM5",
+        "name": "On Campus",
+        "slug": "on-campus",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:12:55.000Z",
+        "updatedAt": "2025-11-24T15:12:55.000Z"
+      }
+    ]
+  },
+  {
+    "id": "ppZNzQelqmSldQCr9moRh",
+    "name": "Room Type",
+    "slug": "room-type",
+    "isHierarchical": false,
+    "terms": [
+      {
+        "id": "11XxIS8DHsWq4Lzyr2JCy",
+        "taxonomyId": "ppZNzQelqmSldQCr9moRh",
+        "name": "Double",
+        "slug": "double",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:38.000Z",
+        "updatedAt": "2025-11-24T15:13:38.000Z"
+      },
+      {
+        "id": "X8lg-QsRyn4ON4nfWmJac",
+        "taxonomyId": "ppZNzQelqmSldQCr9moRh",
+        "name": "Shared",
+        "slug": "shared",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:38.000Z",
+        "updatedAt": "2025-11-24T15:13:38.000Z"
+      },
+      {
+        "id": "lGdMoOvxdJmnjMf80Aaff",
+        "taxonomyId": "ppZNzQelqmSldQCr9moRh",
+        "name": "Single",
+        "slug": "single",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:39.000Z",
+        "updatedAt": "2025-11-24T15:13:39.000Z"
+      }
+    ]
+  },
+  {
+    "id": "-10T-O6xwMjYYJLKDrxH1",
+    "name": "Tags",
+    "slug": "tags",
+    "isHierarchical": false,
+    "terms": [
+      {
+        "id": "yQAxq2b8V6ImzzN11GeKt",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "2023 Trends",
+        "slug": "2023-trends",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:14.000Z",
+        "updatedAt": "2025-11-24T15:00:14.000Z"
+      },
+      {
+        "id": "jiih4wFgl_xy2ZxzMpa2h",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "A Guide to English Preparatory School for North Cyprus Universities",
+        "slug": "a-guide-to-english-preparatory-school-for-north-cyprus-universities",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:14.000Z",
+        "updatedAt": "2025-11-24T15:00:14.000Z"
+      },
+      {
+        "id": "Nr5S81lrFMCeW8KtVBINX",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Academic Assistance",
+        "slug": "academic-assistance",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:15.000Z",
+        "updatedAt": "2025-11-24T15:00:15.000Z"
+      },
+      {
+        "id": "Eyp2sU1oCw4tS_E1X85Jo",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "AccommodationInNorthCyprus",
+        "slug": "accommodationinnorthcyprus",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:15.000Z",
+        "updatedAt": "2025-11-24T15:00:15.000Z"
+      },
+      {
+        "id": "dxwbkWnD6vwE1oPcnwNA1",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Activities",
+        "slug": "activities",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:16.000Z",
+        "updatedAt": "2025-11-24T15:00:16.000Z"
+      },
+      {
+        "id": "aQZax-qTM7Kp7eKIeC4g8",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "AI Tools",
+        "slug": "ai-tools",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:16.000Z",
+        "updatedAt": "2025-11-24T15:00:16.000Z"
+      },
+      {
+        "id": "-HRTXdq99n8lZZz4_mZYH",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "application checklist visa process",
+        "slug": "application-checklist-visa-process",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:17.000Z",
+        "updatedAt": "2025-11-24T15:00:17.000Z"
+      },
+      {
+        "id": "L-aXSh59LUUu0VkyhxB5V",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Bellapais Abbey",
+        "slug": "bellapais-abbey",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:18.000Z",
+        "updatedAt": "2025-11-24T15:00:18.000Z"
+      },
+      {
+        "id": "bZlOoatc7OqTTs7XcF8O4",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "biker",
+        "slug": "biker",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:18.000Z",
+        "updatedAt": "2025-11-24T15:00:18.000Z"
+      },
+      {
+        "id": "xRmIjk7CkXBOWWinDZTod",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Budgeting",
+        "slug": "budgeting",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:19.000Z",
+        "updatedAt": "2025-11-24T15:00:19.000Z"
+      },
+      {
+        "id": "88DLbj-gI7NTMeR7jTH7K",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "BudgetingForStudentHousing.",
+        "slug": "budgetingforstudenthousing",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:19.000Z",
+        "updatedAt": "2025-11-24T15:00:19.000Z"
+      },
+      {
+        "id": "qu1DdMBQCulZHaNggvyMs",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Career Opportunities",
+        "slug": "career-opportunities",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:20.000Z",
+        "updatedAt": "2025-11-24T15:00:20.000Z"
+      },
+      {
+        "id": "zN2JCvYp4bDYqgqj20aKL",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "CatCompanions",
+        "slug": "catcompanions",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:21.000Z",
+        "updatedAt": "2025-11-24T15:00:21.000Z"
+      },
+      {
+        "id": "rimH7mHFaWyl9Q7WIruWg",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "CatLoversParadise",
+        "slug": "catloversparadise",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:21.000Z",
+        "updatedAt": "2025-11-24T15:00:21.000Z"
+      },
+      {
+        "id": "OILyw4WYPjAS462P0sClh",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "CatsOfNorthCyprus",
+        "slug": "catsofnorthcyprus",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:22.000Z",
+        "updatedAt": "2025-11-24T15:00:22.000Z"
+      },
+      {
+        "id": "tDb4XXf27Dd2VWRn58KBA",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "CatsOfNorthCyprusCatCompanions #MagicalCatBond #IslandCats #FelineFriends #CatLoversParadise #CyprusCatTales #CatsoftheMediterranean #GoldenPawsAssociation #CatMagicCyprus",
+        "slug": "catsofnorthcypruscatcompanions-magicalcatbond-islandcats-felinefriends-catloversparadise-cypruscattales-catsofthemediterranean-goldenpawsassociation-catmagiccyprus",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:22.000Z",
+        "updatedAt": "2025-11-24T15:00:22.000Z"
+      },
+      {
+        "id": "k8zvHssIl0fwd4bVGtgk7",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "CatsoftheMediterranean",
+        "slug": "catsofthemediterranean",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:23.000Z",
+        "updatedAt": "2025-11-24T15:00:23.000Z"
+      },
+      {
+        "id": "0iaXExQ9_mrftTpPnHHwD",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Chatgpt",
+        "slug": "chatgpt",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:24.000Z",
+        "updatedAt": "2025-11-24T15:00:24.000Z"
+      },
+      {
+        "id": "JpaKCQRCL5TFH449q5GKc",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Cost of Living",
+        "slug": "cost-of-living",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:24.000Z",
+        "updatedAt": "2025-11-24T15:00:24.000Z"
+      },
+      {
+        "id": "9HCadj9EhwKuF4xRd0P8x",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "cuisine",
+        "slug": "cuisine",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:25.000Z",
+        "updatedAt": "2025-11-24T15:00:25.000Z"
+      },
+      {
+        "id": "EuSb78kPDmwUe3TzXhilY",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "CulturalImmersion",
+        "slug": "culturalimmersion",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:25.000Z",
+        "updatedAt": "2025-11-24T15:00:25.000Z"
+      },
+      {
+        "id": "Yf_3-EpgxgvGvHQkBaxxP",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "CyberEducation",
+        "slug": "cybereducation",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:26.000Z",
+        "updatedAt": "2025-11-24T15:00:26.000Z"
+      },
+      {
+        "id": "HHeZrtrZ4LPJaXfVRz163",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "cyprus",
+        "slug": "cyprus",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:26.000Z",
+        "updatedAt": "2025-11-24T15:00:26.000Z"
+      },
+      {
+        "id": "bCUL5Y1dit-FNP2FrNQdJ",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "CyprusCatTales",
+        "slug": "cypruscattales",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:27.000Z",
+        "updatedAt": "2025-11-24T15:00:27.000Z"
+      },
+      {
+        "id": "NZusn1jMMncdGCKOiAidW",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "DigitalLearning",
+        "slug": "digitallearning",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:28.000Z",
+        "updatedAt": "2025-11-24T15:00:28.000Z"
+      },
+      {
+        "id": "PK5zLtHsJihv8OK9S129o",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "EdTech",
+        "slug": "edtech",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:28.000Z",
+        "updatedAt": "2025-11-24T15:00:28.000Z"
+      },
+      {
+        "id": "kTQiWuylxJXQ5bnng_uAc",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Education Technology",
+        "slug": "education-technology",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:29.000Z",
+        "updatedAt": "2025-11-24T15:00:29.000Z"
+      },
+      {
+        "id": "2D2BseR6R0Is6AYAvXb1w",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "EducationAbroad",
+        "slug": "educationabroad",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:29.000Z",
+        "updatedAt": "2025-11-24T15:00:29.000Z"
+      },
+      {
+        "id": "NTn4IFAG5k1UvnJ-fZ4he",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "EducationalAdventure",
+        "slug": "educationaladventure",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:30.000Z",
+        "updatedAt": "2025-11-24T15:00:30.000Z"
+      },
+      {
+        "id": "LOFxWAW-L5IQxaaf1bWIe",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "EducationalInnovation",
+        "slug": "educationalinnovation",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:30.000Z",
+        "updatedAt": "2025-11-24T15:00:30.000Z"
+      },
+      {
+        "id": "7idBh-r1-Bye3d_BBBy7h",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Elearning",
+        "slug": "elearning",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:31.000Z",
+        "updatedAt": "2025-11-24T15:00:31.000Z"
+      },
+      {
+        "id": "YqXQk6dplDN9A9XciaR-U",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Emerging Professions",
+        "slug": "emerging-professions",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:32.000Z",
+        "updatedAt": "2025-11-24T15:00:32.000Z"
+      },
+      {
+        "id": "3TTUB3wDQndDTkk5lkgY9",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "EMU",
+        "slug": "emu",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:32.000Z",
+        "updatedAt": "2025-11-24T15:00:32.000Z"
+      },
+      {
+        "id": "ZK_Q01MMkoH4Ki6s3xu2m",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "EnrollNow",
+        "slug": "enrollnow",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:33.000Z",
+        "updatedAt": "2025-11-24T15:00:33.000Z"
+      },
+      {
+        "id": "_HotxUo5DQ4kHbowzdWUP",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "famagusta",
+        "slug": "famagusta",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:33.000Z",
+        "updatedAt": "2025-11-24T15:00:33.000Z"
+      },
+      {
+        "id": "XUGKiTTd6fCjgcAyUw905",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "FelineFriends",
+        "slug": "felinefriends",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:34.000Z",
+        "updatedAt": "2025-11-24T15:00:34.000Z"
+      },
+      {
+        "id": "1zjIeIK39qjkb_zsQcpQY",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "fitness",
+        "slug": "fitness",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:34.000Z",
+        "updatedAt": "2025-11-24T15:00:34.000Z"
+      },
+      {
+        "id": "t3htRkrbZ2Lqz6xqba02i",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "food",
+        "slug": "food",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:35.000Z",
+        "updatedAt": "2025-11-24T15:00:35.000Z"
+      },
+      {
+        "id": "w-rFvRyqjUkwTtMcM30CO",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Free AI Tools",
+        "slug": "free-ai-tools",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:36.000Z",
+        "updatedAt": "2025-11-24T15:00:36.000Z"
+      },
+      {
+        "id": "gC_vPgQDdwRJtJSSngI2w",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Future Careers",
+        "slug": "future-careers",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:36.000Z",
+        "updatedAt": "2025-11-24T15:00:36.000Z"
+      },
+      {
+        "id": "PO3q9ceQ0aV5KKmBPSXdL",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "FutureOfLearning",
+        "slug": "futureoflearning",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:37.000Z",
+        "updatedAt": "2025-11-24T15:00:37.000Z"
+      },
+      {
+        "id": "gUvFZi-c2F7RLWDr79L55",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "GlobalLearning",
+        "slug": "globallearning",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:37.000Z",
+        "updatedAt": "2025-11-24T15:00:37.000Z"
+      },
+      {
+        "id": "opZofOKk198vnw23B1Mv2",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "GoldenPawsAssociation",
+        "slug": "goldenpawsassociation",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:38.000Z",
+        "updatedAt": "2025-11-24T15:00:38.000Z"
+      },
+      {
+        "id": "Szxq5Fr56MkfvcHQ1IVJf",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "gym",
+        "slug": "gym",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:38.000Z",
+        "updatedAt": "2025-11-24T15:00:38.000Z"
+      },
+      {
+        "id": "AvY72s4ybAFv0zCLG5-nk",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "health",
+        "slug": "health",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:39.000Z",
+        "updatedAt": "2025-11-24T15:00:39.000Z"
+      },
+      {
+        "id": "ZpvZVGBZi-S82_cQKQoht",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Historical ruins",
+        "slug": "historical-ruins",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:40.000Z",
+        "updatedAt": "2025-11-24T15:00:40.000Z"
+      },
+      {
+        "id": "3nmaRNrj_9i3IVfnS3ZfU",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Housing Trends",
+        "slug": "housing-trends",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:40.000Z",
+        "updatedAt": "2025-11-24T15:00:40.000Z"
+      },
+      {
+        "id": "XuKA9Hew7HLEkyQoGHhTj",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "HousingOptions",
+        "slug": "housingoptions",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:41.000Z",
+        "updatedAt": "2025-11-24T15:00:41.000Z"
+      },
+      {
+        "id": "_vCIwVHx5jh8b3Ah4xdzH",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "InnovativeEducation",
+        "slug": "innovativeeducation",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:41.000Z",
+        "updatedAt": "2025-11-24T15:00:41.000Z"
+      },
+      {
+        "id": "LXHh6BCjie2mpwrxnjwJO",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "International Education",
+        "slug": "international-education",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:42.000Z",
+        "updatedAt": "2025-11-24T15:00:42.000Z"
+      },
+      {
+        "id": "BuFV3_8mmYLXP-7QjqX7c",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "international students",
+        "slug": "international-students",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:42.000Z",
+        "updatedAt": "2025-11-24T15:00:42.000Z"
+      },
+      {
+        "id": "YLr95KPZoP9JNPX-GwEBN",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "InternationalEducation",
+        "slug": "internationaleducation",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:43.000Z",
+        "updatedAt": "2025-11-24T15:00:43.000Z"
+      },
+      {
+        "id": "xjK73_k_GKvPxyPKLEV3N",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "InternationalStudentAccommodation",
+        "slug": "internationalstudentaccommodation",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:44.000Z",
+        "updatedAt": "2025-11-24T15:00:44.000Z"
+      },
+      {
+        "id": "zysXvR1-YZTw1dYJ7gaBN",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "internship",
+        "slug": "internship",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:44.000Z",
+        "updatedAt": "2025-11-24T15:00:44.000Z"
+      },
+      {
+        "id": "WJVEqE1oI1kVfFTO3MivF",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "IslandCats",
+        "slug": "islandcats",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:45.000Z",
+        "updatedAt": "2025-11-24T15:00:45.000Z"
+      },
+      {
+        "id": "XnRexV5KuTQJUyf04-Bxj",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Kyrenia",
+        "slug": "kyrenia",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:45.000Z",
+        "updatedAt": "2025-11-24T15:00:45.000Z"
+      },
+      {
+        "id": "dT1c70hAU35XKXkD6jJkK",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Kyrenia Castle",
+        "slug": "kyrenia-castle",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:46.000Z",
+        "updatedAt": "2025-11-24T15:00:46.000Z"
+      },
+      {
+        "id": "tPHXqvum6cB17zEESLCgG",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Language",
+        "slug": "language",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:46.000Z",
+        "updatedAt": "2025-11-24T15:00:46.000Z"
+      },
+      {
+        "id": "XiyeyPHMU_jI8S0RVS61q",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "LanguageLearning",
+        "slug": "languagelearning",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:47.000Z",
+        "updatedAt": "2025-11-24T15:00:47.000Z"
+      },
+      {
+        "id": "DfYraB1H_hLRvZ6fi72vr",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "LanguageMastery",
+        "slug": "languagemastery",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:48.000Z",
+        "updatedAt": "2025-11-24T15:00:48.000Z"
+      },
+      {
+        "id": "QdPUAjWSS2rwaV7Ugz9Zm",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "LanguageSkills",
+        "slug": "languageskills",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:48.000Z",
+        "updatedAt": "2025-11-24T15:00:48.000Z"
+      },
+      {
+        "id": "D3bqLHFdHAkqdmdZJs5in",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Learning Aids",
+        "slug": "learning-aids",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:49.000Z",
+        "updatedAt": "2025-11-24T15:00:49.000Z"
+      },
+      {
+        "id": "stewzbGGnpjQQ1irzTB5c",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "LearnTurkish",
+        "slug": "learnturkish",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:50.000Z",
+        "updatedAt": "2025-11-24T15:00:50.000Z"
+      },
+      {
+        "id": "tb9j999mtRdA9rdqS7CDt",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "MagicalCatBond",
+        "slug": "magicalcatbond",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:50.000Z",
+        "updatedAt": "2025-11-24T15:00:50.000Z"
+      },
+      {
+        "id": "nNoFD--w-dU-0HQEB9FTC",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Marine Life",
+        "slug": "marine-life",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:51.000Z",
+        "updatedAt": "2025-11-24T15:00:51.000Z"
+      },
+      {
+        "id": "ZF1GiDMm0sb5DMTw5qjyj",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Motorcycle",
+        "slug": "motorcycle",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:51.000Z",
+        "updatedAt": "2025-11-24T15:00:51.000Z"
+      },
+      {
+        "id": "Fe9ZrxBPScTuFqeO6VkvS",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "natural beauties",
+        "slug": "natural-beauties",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:52.000Z",
+        "updatedAt": "2025-11-24T15:00:52.000Z"
+      },
+      {
+        "id": "wgVSXZGHYmNsewF3K5xeQ",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "nature appreciation",
+        "slug": "nature-appreciation",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:53.000Z",
+        "updatedAt": "2025-11-24T15:00:53.000Z"
+      },
+      {
+        "id": "tlcquKDsybGOfizAKP21_",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "nicosia",
+        "slug": "nicosia",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:53.000Z",
+        "updatedAt": "2025-11-24T15:00:53.000Z"
+      },
+      {
+        "id": "FohKQkjAYU90r6XiUT0TW",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "NicosiaExploration",
+        "slug": "nicosiaexploration",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:54.000Z",
+        "updatedAt": "2025-11-24T15:00:54.000Z"
+      },
+      {
+        "id": "e3sNSpBkz5B5QvZ84kukV",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "North Cyprus",
+        "slug": "north-cyprus",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:54.000Z",
+        "updatedAt": "2025-11-24T15:00:54.000Z"
+      },
+      {
+        "id": "Qg3hsJJE5X5h_EMME3NIL",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "NorthCyprus",
+        "slug": "northcyprus",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:55.000Z",
+        "updatedAt": "2025-11-24T15:00:55.000Z"
+      },
+      {
+        "id": "Ihb3NOXUlAhG8T_MO2mHm",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "NorthCyprusHousing",
+        "slug": "northcyprushousing",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:56.000Z",
+        "updatedAt": "2025-11-24T15:00:56.000Z"
+      },
+      {
+        "id": "jOqSK9B3m8H86UdBQLlM0",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "NorthernCyprusEducation",
+        "slug": "northerncypruseducation",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:56.000Z",
+        "updatedAt": "2025-11-24T15:00:56.000Z"
+      },
+      {
+        "id": "0CywqyNkYdZq-WOlE9_iZ",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "October Fest",
+        "slug": "october-fest",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:57.000Z",
+        "updatedAt": "2025-11-24T15:00:57.000Z"
+      },
+      {
+        "id": "SC4dc6j7HYKxeVc2J5hXS",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "openAI",
+        "slug": "openai",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:57.000Z",
+        "updatedAt": "2025-11-24T15:00:57.000Z"
+      },
+      {
+        "id": "2e6deTUfQplnEqKTBlS7H",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "PaddleBoarding",
+        "slug": "paddleboarding",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:58.000Z",
+        "updatedAt": "2025-11-24T15:00:58.000Z"
+      },
+      {
+        "id": "iJ55Mep4V9MM8YGw_in9r",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Preparatory School",
+        "slug": "preparatory-school",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:58.000Z",
+        "updatedAt": "2025-11-24T15:00:58.000Z"
+      },
+      {
+        "id": "kkM-uL7fB9IQiKkOEabgb",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Scholarship",
+        "slug": "scholarship",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:00:59.000Z",
+        "updatedAt": "2025-11-24T15:00:59.000Z"
+      },
+      {
+        "id": "OrRYL_cmhpS9at-4Zi-zf",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Student Housing",
+        "slug": "student-housing",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:00.000Z",
+        "updatedAt": "2025-11-24T15:01:00.000Z"
+      },
+      {
+        "id": "WVQUZ4UHUMizTXUhnmWKj",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "student immigration",
+        "slug": "student-immigration",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:00.000Z",
+        "updatedAt": "2025-11-24T15:01:00.000Z"
+      },
+      {
+        "id": "ENap7bx7rU5t_msC2Oz04",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Student Life",
+        "slug": "student-life",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:01.000Z",
+        "updatedAt": "2025-11-24T15:01:01.000Z"
+      },
+      {
+        "id": "NllnnWX9pOqNHF_j1-5JL",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Student Productivity",
+        "slug": "student-productivity",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:01.000Z",
+        "updatedAt": "2025-11-24T15:01:01.000Z"
+      },
+      {
+        "id": "mTCC3CWb4CF3bmR-xIswx",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Student Resources",
+        "slug": "student-resources",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:02.000Z",
+        "updatedAt": "2025-11-24T15:01:02.000Z"
+      },
+      {
+        "id": "Ya5ZnA4wOS7ObpA3B2AtF",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "student wellbeing",
+        "slug": "student-wellbeing",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:02.000Z",
+        "updatedAt": "2025-11-24T15:01:02.000Z"
+      },
+      {
+        "id": "VAnshzAIW7NFc7LvTpuzH",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "StudentHousingTips",
+        "slug": "studenthousingtips",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:03.000Z",
+        "updatedAt": "2025-11-24T15:01:03.000Z"
+      },
+      {
+        "id": "m2CkdS-Z5LNed_VWYAZUJ",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "StudentLifeAbroad",
+        "slug": "studentlifeabroad",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:03.000Z",
+        "updatedAt": "2025-11-24T15:01:03.000Z"
+      },
+      {
+        "id": "RCJNnInNrScS0a_-Wm0J4",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "StudentTechnology",
+        "slug": "studenttechnology",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:04.000Z",
+        "updatedAt": "2025-11-24T15:01:04.000Z"
+      },
+      {
+        "id": "OFLDViAgrMDct3al_2y81",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Study abroad",
+        "slug": "study-abroad",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:05.000Z",
+        "updatedAt": "2025-11-24T15:01:05.000Z"
+      },
+      {
+        "id": "RfSYrbXO8R04ed79KJqvP",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Study Efficiency",
+        "slug": "study-efficiency",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:05.000Z",
+        "updatedAt": "2025-11-24T15:01:05.000Z"
+      },
+      {
+        "id": "m0Wetql7mrTzyRSnRF0rF",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Study in North Cyprus",
+        "slug": "study-in-north-cyprus",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:06.000Z",
+        "updatedAt": "2025-11-24T15:01:06.000Z"
+      },
+      {
+        "id": "A_xKgIR5i9n0eITW3OzSx",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Study Tools",
+        "slug": "study-tools",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:06.000Z",
+        "updatedAt": "2025-11-24T15:01:06.000Z"
+      },
+      {
+        "id": "ezKewsXhEOf39SUt-TJ4U",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "study visa",
+        "slug": "study-visa",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:07.000Z",
+        "updatedAt": "2025-11-24T15:01:07.000Z"
+      },
+      {
+        "id": "qt1h3fY2BKb8qGsvv_kcY",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "StudyAbroad",
+        "slug": "studyabroad",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:07.000Z",
+        "updatedAt": "2025-11-24T15:01:07.000Z"
+      },
+      {
+        "id": "Hq3ik3JQymgqmvTS1tCsm",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "StudyingInNorthCyprus",
+        "slug": "studyinginnorthcyprus",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:08.000Z",
+        "updatedAt": "2025-11-24T15:01:08.000Z"
+      },
+      {
+        "id": "PoF3ktKSnnW8tKCNUy35l",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Sustainability",
+        "slug": "sustainability",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:09.000Z",
+        "updatedAt": "2025-11-24T15:01:09.000Z"
+      },
+      {
+        "id": "f5wjRN3A_vbVKvlyh4Cin",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Sustainability Careers",
+        "slug": "sustainability-careers",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:09.000Z",
+        "updatedAt": "2025-11-24T15:01:09.000Z"
+      },
+      {
+        "id": "b6QyPdD7hSnPmB0agQLNu",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "TechDrivenLearning",
+        "slug": "techdrivenlearning",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:10.000Z",
+        "updatedAt": "2025-11-24T15:01:10.000Z"
+      },
+      {
+        "id": "DCZvCoHEgF_aHGlhFQLpH",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Technology in Housing",
+        "slug": "technology-in-housing",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:10.000Z",
+        "updatedAt": "2025-11-24T15:01:10.000Z"
+      },
+      {
+        "id": "PJCuiC_EzR3_T0maXUSCM",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Technology Trends",
+        "slug": "technology-trends",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:11.000Z",
+        "updatedAt": "2025-11-24T15:01:11.000Z"
+      },
+      {
+        "id": "jT2_33Y4-ZLQUdf0Tfsw0",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "The Great Inn",
+        "slug": "the-great-inn",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:12.000Z",
+        "updatedAt": "2025-11-24T15:01:12.000Z"
+      },
+      {
+        "id": "hT7ZVbHhnPP9iD2h4VSwL",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "TÖMERClasses",
+        "slug": "tomerclasses",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:12.000Z",
+        "updatedAt": "2025-11-24T15:01:12.000Z"
+      },
+      {
+        "id": "XDlgckik_yp4rKMXPcXSc",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "travel and study",
+        "slug": "travel-and-study",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:13.000Z",
+        "updatedAt": "2025-11-24T15:01:13.000Z"
+      },
+      {
+        "id": "fCdJmuuIpP7lrdEUdnj6E",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "TRNC",
+        "slug": "trnc",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:13.000Z",
+        "updatedAt": "2025-11-24T15:01:13.000Z"
+      },
+      {
+        "id": "Z-67ewkJ3Zrj_lLaiAfWm",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "turkish",
+        "slug": "turkish",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:14.000Z",
+        "updatedAt": "2025-11-24T15:01:14.000Z"
+      },
+      {
+        "id": "8gw0Gl-wNKlYGvza7g9fI",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "TurkishLanguage",
+        "slug": "turkishlanguage",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:14.000Z",
+        "updatedAt": "2025-11-24T15:01:14.000Z"
+      },
+      {
+        "id": "lmNaTfzwIaqoTrpx5nxUw",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "turtle",
+        "slug": "turtle",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:15.000Z",
+        "updatedAt": "2025-11-24T15:01:15.000Z"
+      },
+      {
+        "id": "gmB31j_EZho0HndHn-d8f",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "visa application process",
+        "slug": "visa-application-process",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:16.000Z",
+        "updatedAt": "2025-11-24T15:01:16.000Z"
+      },
+      {
+        "id": "nwmgxeuwh8X4jqgMBQZO4",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "visa process",
+        "slug": "visa-process",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:16.000Z",
+        "updatedAt": "2025-11-24T15:01:16.000Z"
+      },
+      {
+        "id": "KSTpSD1TPcobcYQMxP7Ec",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "visa requirements",
+        "slug": "visa-requirements",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:17.000Z",
+        "updatedAt": "2025-11-24T15:01:17.000Z"
+      },
+      {
+        "id": "o4XswHXJsYA5S8kATrPZB",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "wellness",
+        "slug": "wellness",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:17.000Z",
+        "updatedAt": "2025-11-24T15:01:17.000Z"
+      },
+      {
+        "id": "-GsRIb-h4iWrj66TlxoFJ",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "why",
+        "slug": "why",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:01:18.000Z",
+        "updatedAt": "2025-11-24T15:01:18.000Z"
+      },
+      {
+        "id": "_arNed5-f7zdmsOUwoa61",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "student permit",
+        "slug": "student-permit",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:23.000Z",
+        "updatedAt": "2025-11-24T15:13:23.000Z"
+      },
+      {
+        "id": "Dit7VWdWnB9TGSc9iqaCN",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "student residence permit",
+        "slug": "student-residence-permit",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:23.000Z",
+        "updatedAt": "2025-11-24T15:13:23.000Z"
+      },
+      {
+        "id": "fWcYaZ639uSlo6nc6K-Si",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "student visa",
+        "slug": "student-visa",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:13:24.000Z",
+        "updatedAt": "2025-11-24T15:13:24.000Z"
+      },
+      {
+        "id": "1YQlnWkZwm7A8LQHK4RNf",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "online degree",
+        "slug": "online-degree",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:24.000Z",
+        "updatedAt": "2025-11-24T15:14:24.000Z"
+      },
+      {
+        "id": "VQMaN6CdCPMsXpwJ_uKMS",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "online learning",
+        "slug": "online-learning",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:25.000Z",
+        "updatedAt": "2025-11-24T15:14:25.000Z"
+      },
+      {
+        "id": "9Lxh4IVC3eLJYgtCRCB4a",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "Paris education",
+        "slug": "paris-education",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:25.000Z",
+        "updatedAt": "2025-11-24T15:14:25.000Z"
+      },
+      {
+        "id": "whlQcuFxFZYetXY97QaKy",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "study in europe",
+        "slug": "study-in-europe",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:26.000Z",
+        "updatedAt": "2025-11-24T15:14:26.000Z"
+      },
+      {
+        "id": "yozgOI2yoclz7dX6v3_HX",
+        "taxonomyId": "-10T-O6xwMjYYJLKDrxH1",
+        "name": "study online",
+        "slug": "study-online",
+        "description": null,
+        "parentId": null,
+        "createdAt": "2025-11-24T15:14:27.000Z",
+        "updatedAt": "2025-11-24T15:14:27.000Z"
+      }
+    ]
+  }
+]

@@ -27,9 +27,12 @@ import {
   Trash2,
   MoreVertical,
   Loader2,
+  Download,
+  Upload,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { ExportDialog, ImportDialog } from '@/components/admin/import-export';
 
 interface Organization {
   id: string;
@@ -51,6 +54,9 @@ export default function OrganizationsPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
   const [saving, setSaving] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [selectedOrgForImportExport, setSelectedOrgForImportExport] = useState<Organization | null>(null);
 
   // Form state
   const [name, setName] = useState('');
@@ -410,6 +416,24 @@ export default function OrganizationsPage() {
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedOrgForImportExport(org);
+                                setExportDialogOpen(true);
+                              }}
+                            >
+                              <Download className="mr-2 h-4 w-4" />
+                              Export
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedOrgForImportExport(org);
+                                setImportDialogOpen(true);
+                              }}
+                            >
+                              <Upload className="mr-2 h-4 w-4" />
+                              Import
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
                               onClick={() => handleDelete(org)}
                               className="text-destructive"
                             >
@@ -504,6 +528,62 @@ export default function OrganizationsPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ExportDialog
+        open={exportDialogOpen}
+        onOpenChange={(open) => {
+          setExportDialogOpen(open);
+          if (!open) {
+            setSelectedOrgForImportExport(null);
+          }
+        }}
+        organizationId={selectedOrgForImportExport?.id}
+      />
+
+      <ImportDialog
+        open={importDialogOpen}
+        onOpenChange={(open) => {
+          setImportDialogOpen(open);
+          if (!open) {
+            setSelectedOrgForImportExport(null);
+          }
+        }}
+        organizationId={selectedOrgForImportExport?.id}
+        onImportComplete={() => {
+          // Refresh organizations list after import
+          const fetchOrganizations = withErrorHandling(async () => {
+            setLoading(true);
+            clearError();
+
+            try {
+              const response = (await apiClient.getOrganizations()) as {
+                success: boolean;
+                data: Organization[];
+              };
+
+              if (response.success) {
+                let filtered = response.data;
+                if (debouncedSearch) {
+                  const searchLower = debouncedSearch.toLowerCase();
+                  filtered = response.data.filter(
+                    (org) =>
+                      org.name.toLowerCase().includes(searchLower) ||
+                      org.slug.toLowerCase().includes(searchLower) ||
+                      (org.domain && org.domain.toLowerCase().includes(searchLower))
+                  );
+                }
+                setOrganizations(filtered);
+              }
+            } catch (err) {
+              console.error('Failed to refresh organizations:', err);
+            } finally {
+              setLoading(false);
+            }
+          }, { title: 'Failed to Refresh Organizations' });
+
+          fetchOrganizations();
+        }}
+      />
     </div>
   );
 }
