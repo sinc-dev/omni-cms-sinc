@@ -59,7 +59,7 @@ app.get(
     }
 
     // Build SEO metadata
-    const baseUrl = process.env.APP_URL || c.req.url.split('/api')[0];
+    const baseUrl = c.env.APP_URL || c.req.url.split('/api')[0];
     const postUrl = `${baseUrl}/${orgSlug}/posts/${slug}`;
 
     const seoData = {

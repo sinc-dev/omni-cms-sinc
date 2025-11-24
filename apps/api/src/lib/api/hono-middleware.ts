@@ -25,7 +25,7 @@ export async function authMiddleware(
   next: Next
 ) {
   const db = getDb(c.env.DB);
-  const user = await getAuthenticatedUser(c.req.raw, db);
+        const user = await getAuthenticatedUser(c.req.raw, db, c.env);
   
   c.set('user', user);
   c.set('db', db);

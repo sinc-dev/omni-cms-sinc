@@ -114,7 +114,7 @@ export async function authMiddleware(
   
   // Fall back to Cloudflare Access authentication
   try {
-    const user = await getAuthenticatedUser(c.req.raw, db);
+        const user = await getAuthenticatedUser(c.req.raw, db, c.env);
     c.set('user', user);
     c.set('db', db);
     (c as any).var.authMethod = 'cloudflare-access';

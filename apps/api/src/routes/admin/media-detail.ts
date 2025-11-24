@@ -42,7 +42,7 @@ app.get(
 
     return c.json(successResponse({
       ...file,
-      urls: getMediaVariantUrls(file),
+      urls: getMediaVariantUrls(file, c.env),
     }));
   }
 );
@@ -118,7 +118,7 @@ app.delete(
 
     // Delete from R2 first
     try {
-      await deleteFileFromR2(file.fileKey);
+      await deleteFileFromR2(file.fileKey, c.env);
     } catch (error) {
       console.error('Failed to delete file from R2:', error);
       // Continue with DB deletion even if R2 deletion fails

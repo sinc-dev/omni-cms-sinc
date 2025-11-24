@@ -98,7 +98,7 @@ app.get(
 
     const itemsWithUrls = allMedia.map((item) => ({
       ...item,
-      urls: getMediaVariantUrls(item),
+      urls: getMediaVariantUrls(item, c.env),
     }));
 
     return c.json(paginatedResponse(itemsWithUrls, page, perPage, total));
@@ -122,7 +122,8 @@ app.post(
       // Generate presigned URL and file key
       const { uploadUrl, fileKey, publicUrl } = await generatePresignedUploadUrl(
         mimeType,
-        filename
+        filename,
+        c.env
       );
 
       // Create media record with 'uploading' status

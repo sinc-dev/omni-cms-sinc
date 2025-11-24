@@ -57,7 +57,7 @@ app.post(
   permissionMiddleware('posts:update'),
   async (c) => {
     const action = c.req.query('action') || 'suggest';
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = c.env.OPENAI_API_KEY;
 
     try {
       switch (action) {

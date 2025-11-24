@@ -227,7 +227,7 @@ app.get(
             where: (m, { eq }) => eq(m.id, post.featuredImageId!),
           });
           if (featuredMedia) {
-            const urls = getMediaVariantUrls(featuredMedia);
+            const urls = getMediaVariantUrls(featuredMedia, c.env);
             featuredImage = {
               id: featuredMedia.id,
               ...urls,

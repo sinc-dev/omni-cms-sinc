@@ -10,12 +10,17 @@ import type { User } from '@/db/schema';
  * Auto-provisions the user on first login if they don't exist
  * @param request - The incoming request
  * @param db - The database client
+ * @param env - Environment variables from Cloudflare Workers (c.env)
  * @returns The authenticated user
  * @throws Error if authentication fails
  */
 export async function getAuthenticatedUser(
   request: Request,
-  db: DbClient
+  db: DbClient,
+  env?: {
+    CF_ACCESS_TEAM_DOMAIN?: string;
+    CF_ACCESS_AUD?: string;
+  }
 ): Promise<User> {
   const token = getAccessToken(request);
 
@@ -23,8 +28,8 @@ export async function getAuthenticatedUser(
     throw new Error('Unauthorized: No Cloudflare Access token found');
   }
 
-  const teamDomain = process.env.CF_ACCESS_TEAM_DOMAIN;
-  const aud = process.env.CF_ACCESS_AUD;
+  const teamDomain = env?.CF_ACCESS_TEAM_DOMAIN;
+  const aud = env?.CF_ACCESS_AUD;
 
   if (!teamDomain || !aud) {
     throw new Error('Server configuration error: Cloudflare Access not configured');

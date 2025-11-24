@@ -1,26 +1,41 @@
 import type { Media } from '@/db/schema';
-import { R2_BUCKET_NAME, R2_PUBLIC_URL } from '@/lib/storage/r2-client';
+import { getR2BucketName, getR2PublicUrl } from '@/lib/storage/r2-client';
 
-const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID;
-
-function buildBaseUrl(fileKey: string): string {
+function buildBaseUrl(
+  fileKey: string,
+  env: {
+    R2_ACCOUNT_ID?: string;
+    R2_BUCKET_NAME?: string;
+    R2_PUBLIC_URL?: string;
+  }
+): string {
+  const publicUrl = getR2PublicUrl(env);
+  const bucketName = getR2BucketName(env);
+  
   // Prefer explicitly configured public base URL if available
-  if (R2_PUBLIC_URL) {
-    return `${R2_PUBLIC_URL}/${fileKey}`;
+  if (publicUrl) {
+    return `${publicUrl}/${fileKey}`;
   }
 
   // Fallback to direct R2 URL structure. This might not be public depending on bucket settings,
   // but it provides a stable shape for callers and can be proxied via CDN if needed.
-  if (R2_ACCOUNT_ID) {
-    return `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${R2_BUCKET_NAME}/${fileKey}`;
+  if (env.R2_ACCOUNT_ID) {
+    return `https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${bucketName}/${fileKey}`;
   }
 
   // If env is misconfigured, surface an obviously broken URL rather than crashing callers.
   return `/media/${fileKey}`;
 }
 
-export function getMediaVariantUrls(media: Media) {
-  const baseUrl = buildBaseUrl(media.fileKey);
+export function getMediaVariantUrls(
+  media: Media,
+  env?: {
+    R2_ACCOUNT_ID?: string;
+    R2_BUCKET_NAME?: string;
+    R2_PUBLIC_URL?: string;
+  }
+) {
+  const baseUrl = buildBaseUrl(media.fileKey, env || {});
 
   return {
     url: baseUrl,
