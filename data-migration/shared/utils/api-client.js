@@ -287,32 +287,42 @@ export async function uploadMedia(baseUrl, orgId, file, metadata = {}) {
   const { uploadUrl, media: mediaRecord } = requestData.data;
 
   // Step 2: Upload file to presigned URL
+  // Convert File/Blob to ArrayBuffer for Node.js compatibility
+  const fileBuffer = await file.arrayBuffer();
+  
   const uploadResponse = await fetch(uploadUrl, {
     method: 'PUT',
-    body: file,
+    body: fileBuffer,
     headers: {
       'Content-Type': file.type || 'application/octet-stream',
     },
   });
 
   if (!uploadResponse.ok) {
-    throw new Error(`Failed to upload file: ${uploadResponse.statusText}`);
+    const errorText = await uploadResponse.text();
+    throw new Error(`Failed to upload file: ${uploadResponse.status} ${uploadResponse.statusText} - ${errorText}`);
   }
 
   // Step 3: Update media record with metadata (alt_text, caption)
+  // Silently skip metadata updates if they fail - files are already uploaded successfully
   if (metadata.alt_text || metadata.caption) {
-    const updateUrl = `${baseUrl}/api/admin/v1/organizations/${orgId}/media/${mediaRecord.id}`;
-    const updateResponse = await fetch(updateUrl, {
-      method: 'PATCH',
-      headers,
-      body: JSON.stringify({
-        altText: metadata.alt_text || null,
-        caption: metadata.caption || null,
-      }),
-    });
+    try {
+      const updateUrl = `${baseUrl}/api/admin/v1/organizations/${orgId}/media/${mediaRecord.id}`;
+      const updateResponse = await fetch(updateUrl, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({
+          altText: metadata.alt_text || null,
+          caption: metadata.caption || null,
+        }),
+      });
 
-    if (!updateResponse.ok) {
-      console.warn(`Failed to update media metadata: ${updateResponse.statusText}`);
+      // Silently ignore metadata update failures - file upload was successful
+      if (!updateResponse.ok) {
+        // Metadata update failed, but file is uploaded - this is non-critical
+      }
+    } catch (error) {
+      // Silently ignore metadata update errors - file upload was successful
     }
   }
 

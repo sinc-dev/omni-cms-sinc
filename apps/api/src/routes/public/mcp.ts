@@ -768,14 +768,38 @@ app.get(
         public: {
           basePath: '/api/public/v1',
           description: 'Public endpoints for accessing published content',
+          organizationSlugs: [
+            'study-in-kazakhstan',
+            'study-in-north-cyprus',
+            'paris-american-international-university',
+          ],
           
           posts: {
             list: {
               method: 'GET',
               path: '/:orgSlug/posts',
-              description: 'List published posts',
+              description: 'List published posts with pagination, filtering, and rich data',
               auth: 'optional',
-              queryParams: ['page', 'per_page', 'post_type', 'search'],
+              queryParams: {
+                page: 'Page number (default: 1)',
+                per_page: 'Items per page (default: 20, max: 100)',
+                post_type: 'Filter by post type slug (e.g., "programs", "blogs")',
+                search: 'Search in title, content, and excerpt',
+                published_from: 'Filter posts published after this date (ISO 8601, e.g., "2024-01-01T00:00:00Z")',
+                published_to: 'Filter posts published before this date (ISO 8601, e.g., "2024-12-31T23:59:59Z")',
+                sort: 'Sort order: "field_asc" or "field_desc" (e.g., "publishedAt_desc", "title_asc"). Supported fields: publishedAt, createdAt, updatedAt, title',
+              },
+              response: {
+                success: true,
+                data: 'Array of post objects with author, postType, featuredImage, taxonomies, and customFields',
+                meta: {
+                  page: 'Current page number',
+                  perPage: 'Items per page',
+                  total: 'Total number of posts matching filters',
+                  totalPages: 'Total number of pages',
+                },
+              },
+              example: '/api/public/v1/study-in-kazakhstan/posts?page=1&per_page=20&post_type=programs&search=engineering&sort=publishedAt_desc',
             },
             get: {
               method: 'GET',
@@ -783,6 +807,7 @@ app.get(
               description: 'Get a published post by slug',
               auth: 'optional',
               includes: ['author', 'postType', 'taxonomies', 'customFields', 'featuredImage', 'relatedPosts'],
+              example: '/api/public/v1/study-in-kazakhstan/posts/my-post-slug',
             },
           },
 
@@ -1017,13 +1042,26 @@ app.get(
         ],
       },
 
+      organizations: {
+        slugs: [
+          'study-in-kazakhstan',
+          'study-in-north-cyprus',
+          'paris-american-international-university',
+        ],
+        names: {
+          'study-in-kazakhstan': 'Study In Kazakhstan',
+          'study-in-north-cyprus': 'Study in North Cyprus',
+          'paris-american-international-university': 'Paris American International University',
+        },
+      },
+
       examples: {
         createPost: {
           method: 'POST',
           url: '/api/admin/v1/organizations/{orgId}/posts',
           headers: {
             'Content-Type': 'application/json',
-            'CF-Access-JWT': '{jwt-token',
+            'CF-Access-JWT': '{jwt-token}',
           },
           body: {
             postTypeId: 'pt_123',
@@ -1047,6 +1085,27 @@ app.get(
           headers: {
             'Authorization': 'Bearer {api_key}',
           },
+        },
+        getKazakhstanPosts: {
+          method: 'GET',
+          url: '/api/public/v1/study-in-kazakhstan/posts?page=1&per_page=20',
+          description: 'Fetch published posts from Study In Kazakhstan',
+          queryParams: {
+            page: '1',
+            per_page: '20',
+            post_type: 'programs (optional)',
+            search: 'engineering (optional)',
+          },
+        },
+        getKazakhstanPostBySlug: {
+          method: 'GET',
+          url: '/api/public/v1/study-in-kazakhstan/posts/{slug}',
+          description: 'Get a single published post by slug from Study In Kazakhstan',
+        },
+        getKazakhstanTaxonomy: {
+          method: 'GET',
+          url: '/api/public/v1/study-in-kazakhstan/taxonomies/program-types',
+          description: 'Get program types taxonomy from Study In Kazakhstan',
         },
       },
     };

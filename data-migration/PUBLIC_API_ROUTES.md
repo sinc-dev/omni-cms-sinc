@@ -91,7 +91,7 @@ const data = await response.json();
       }
     }
   ],
-  "pagination": {
+  "meta": {
     "page": 1,
     "perPage": 20,
     "total": 150,

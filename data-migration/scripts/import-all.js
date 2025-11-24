@@ -25,6 +25,7 @@ const __dirname = path.dirname(__filename);
 const OMNI_CMS_BASE_URL = process.env.OMNI_CMS_BASE_URL || 'http://localhost:8787';
 const TEST_MODE = process.env.TEST_MODE === 'true' || process.argv.includes('--test');
 const TEST_LIMIT = parseInt(process.env.TEST_LIMIT || '40'); // Limit records for testing
+const SKIP_MEDIA = process.env.SKIP_MEDIA === 'true' || process.argv.includes('--skip-media');
 
 const ORGANIZATIONS = [
   { 
@@ -82,11 +83,28 @@ async function importOrganization(orgSlug, baseUrl, apiKey) {
     const customFieldMap = await importCustomFields(baseUrl, orgId, orgSlug);
     console.log(`   ✓ Imported ${customFieldMap.size} custom fields\n`);
 
-    // Step 5: Upload Media
-    console.log('6. Uploading media files...');
-    const mediaTestLimit = TEST_MODE ? TEST_LIMIT : null;
-    const mediaMap = await importMedia(baseUrl, orgId, orgSlug, mediaTestLimit);
-    console.log(`   ✓ Uploaded ${mediaMap.size} media files\n`);
+    // Step 5: Upload Media (or load existing mappings)
+    let mediaMap = new Map();
+    if (SKIP_MEDIA) {
+      console.log('6. Loading existing media mappings...');
+      try {
+        const mediaMappingPath = path.join(__dirname, `../organizations/${orgSlug}/import-mappings/media.json`);
+        const mediaMappingData = await fs.readFile(mediaMappingPath, 'utf-8');
+        const mediaMappings = JSON.parse(mediaMappingData);
+        Object.entries(mediaMappings).forEach(([wpId, omniId]) => {
+          mediaMap.set(parseInt(wpId), omniId);
+        });
+        console.log(`   ✓ Loaded ${mediaMap.size} existing media mappings\n`);
+      } catch (error) {
+        console.warn(`   ⚠ Could not load media mappings: ${error.message}`);
+        console.log(`   Continuing without media mappings...\n`);
+      }
+    } else {
+      console.log('6. Uploading media files...');
+      const mediaTestLimit = TEST_MODE ? TEST_LIMIT : null;
+      mediaMap = await importMedia(baseUrl, orgId, orgSlug, mediaTestLimit);
+      console.log(`   ✓ Uploaded ${mediaMap.size} media files\n`);
+    }
 
     // Step 6: Import Posts
     console.log('7. Importing posts...');
@@ -134,6 +152,9 @@ async function main() {
   console.log(`Base URL: ${OMNI_CMS_BASE_URL}`);
   if (TEST_MODE) {
     console.log(`⚠️  TEST MODE: Limiting to ${TEST_LIMIT} records per content type`);
+  }
+  if (SKIP_MEDIA) {
+    console.log(`⏭️  SKIP MEDIA: Loading existing media mappings instead of uploading`);
   }
   console.log('');
 

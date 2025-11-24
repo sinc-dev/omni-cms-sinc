@@ -118,14 +118,13 @@ GET /api/public/:orgSlug/posts
 |-----------|------|-------------|
 | `page` | number | Page number (default: 1) |
 | `per_page` | number | Items per page (default: 20, max: 100) |
-| `post_type` | string | Filter by post type slug |
-| `search` | string | Search posts by title |
-| `taxonomy` | string | Filter by taxonomy slug |
-| `term` | string | Filter by taxonomy term slug |
-| `author_id` | string | Filter posts by author ID |
-| `published_from` | ISO 8601 | Filter posts published after this date |
-| `published_to` | ISO 8601 | Filter posts published before this date |
-| `sort` | string | Sort order (e.g., `publishedAt_desc`, `title_asc`) |
+| `post_type` | string | Filter by post type slug (e.g., `programs`, `blogs`) |
+| `search` | string | Search in title, content, and excerpt |
+| `published_from` | ISO 8601 | Filter posts published after this date (e.g., `2024-01-01T00:00:00Z`) |
+| `published_to` | ISO 8601 | Filter posts published before this date (e.g., `2024-12-31T23:59:59Z`) |
+| `sort` | string | Sort order: `field_asc` or `field_desc` (e.g., `publishedAt_desc`, `title_asc`). Supported fields: `publishedAt`, `createdAt`, `updatedAt`, `title` |
+
+**Note:** To filter by taxonomy term, use the dedicated endpoint: `/api/public/:orgSlug/taxonomies/:taxonomySlug/:termSlug/posts`
 
 **Example Request:**
 
@@ -191,9 +190,9 @@ curl "https://example.com/api/public/my-blog/posts?page=1&per_page=10&post_type=
   ],
   "meta": {
     "page": 1,
-    "per_page": 10,
+    "perPage": 10,
     "total": 42,
-    "total_pages": 5
+    "totalPages": 5
   }
 }
 ```

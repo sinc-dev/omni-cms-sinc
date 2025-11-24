@@ -175,6 +175,11 @@ async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings,
     const batch = posts.slice(i, i + BATCH_SIZE);
 
     await Promise.all(batch.map(async (post) => {
+      // Declare variables outside try block so they're accessible in catch
+      let taxonomies = {};
+      let customFields = {};
+      let featuredImageId = null;
+      
       try {
         // Skip if post already exists
         if (existingSlugs.has(post.slug)) {
@@ -186,7 +191,6 @@ async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings,
           }
         }
         // Map featured image
-        let featuredImageId = null;
         if (post.featuredImageId) {
           if (typeof post.featuredImageId === 'string' && post.featuredImageId.startsWith('wp-media-')) {
             const wpMediaId = parseInt(post.featuredImageId.replace('wp-media-', ''));
@@ -197,14 +201,14 @@ async function importContentType(baseUrl, orgId, orgSlug, contentType, mappings,
         }
 
         // Map taxonomies
-        const taxonomies = {
+        taxonomies = {
           categories: post.categoryIds?.map(id => termMap.get(`categories-${id}`) || id).filter(Boolean) || [],
           tags: post.tagIds?.map(id => termMap.get(`tags-${id}`) || id).filter(Boolean) || [],
           ...mapTaxonomyIds(post.customTaxonomyIds, termMap),
         };
 
         // Map custom fields
-        const customFields = mapCustomFields(post.customFields, customFieldMap, mediaMap);
+        customFields = mapCustomFields(post.customFields, customFieldMap, mediaMap);
 
         // Create post
         const postData = {
