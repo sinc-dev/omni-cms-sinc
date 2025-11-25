@@ -19,3 +19,5 @@ export * from './workflow';
 export * from './presence';
 export * from './webhooks';
 export * from './analytics';
+export * from './otp-codes';
+export * from './sessions';

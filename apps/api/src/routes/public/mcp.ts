@@ -32,10 +32,14 @@ app.get(
           apiKeyScopes: 'API keys must have appropriate scopes (e.g., "posts:create", "posts:read", etc.) matching the required permission for each endpoint',
         },
         public: {
-          method: 'API Key (Optional)',
-          description: 'Public endpoints support optional API key authentication',
+          method: 'API Key (Optional) OR Session Token (OTP)',
+          description: 'Public endpoints support optional API key authentication. OTP authentication endpoints use session tokens returned from /auth/otp/verify. Session tokens are used in Authorization header as "Bearer {token}".',
           headers: {
-            'Authorization': 'Bearer <api-key>',
+            'Authorization': 'Bearer <api-key> OR Bearer <session-token>',
+          },
+          otpAuth: {
+            description: 'OTP authentication flow: 1) Request OTP via /auth/otp/request, 2) Verify OTP via /auth/otp/verify to get session token, 3) Use session token in Authorization header for authenticated requests',
+            sessionToken: 'Session tokens expire after 7 days and can be used for all authenticated endpoints',
           },
         },
       },
@@ -59,6 +63,44 @@ app.get(
               description: 'Get organization details',
               auth: 'required',
               params: ['orgId'],
+            },
+            create: {
+              method: 'POST',
+              path: '/organizations',
+              description: 'Create a new organization (Super Admin only)',
+              auth: 'required',
+              note: 'Only super admins can create organizations',
+              body: {
+                name: 'string (required) - Organization display name',
+                slug: 'string (required) - URL-friendly identifier (lowercase, numbers, hyphens only)',
+                domain: 'string (optional) - Custom domain for the organization',
+                settings: 'object (optional) - JSON settings object',
+              },
+              response: 'Created organization object',
+            },
+            update: {
+              method: 'PATCH',
+              path: '/organizations/:orgId',
+              description: 'Update organization details',
+              auth: 'required',
+              note: 'Requires organizations:update permission or super admin',
+              params: ['orgId'],
+              body: {
+                name: 'string (optional) - Organization display name',
+                slug: 'string (optional) - URL-friendly identifier (must be unique)',
+                domain: 'string (optional) - Custom domain for the organization',
+                settings: 'object (optional) - JSON settings object',
+              },
+              response: 'Updated organization object',
+            },
+            delete: {
+              method: 'DELETE',
+              path: '/organizations/:orgId',
+              description: 'Delete an organization (Super Admin only)',
+              auth: 'required',
+              note: 'Only super admins can delete organizations. This will cascade delete all related data.',
+              params: ['orgId'],
+              response: 'Object with deleted: true',
             },
           },
 
@@ -1210,6 +1252,52 @@ app.get(
             'study-in-north-cyprus',
             'paris-american-international-university',
           ],
+          
+          auth: {
+            otp: {
+              request: {
+                method: 'POST',
+                path: '/auth/otp/request',
+                description: 'Request a one-time password (OTP) code to be sent to an email address',
+                auth: 'none',
+                body: {
+                  email: 'string (required) - Email address to send OTP code to',
+                },
+                response: {
+                  success: true,
+                  data: {
+                    message: 'OTP code sent to your email',
+                  },
+                },
+                rateLimit: 'Maximum 3 requests per email per 15 minutes',
+                note: 'OTP codes expire after 10 minutes. Rate limiting is enforced to prevent abuse.',
+              },
+              verify: {
+                method: 'POST',
+                path: '/auth/otp/verify',
+                description: 'Verify OTP code and authenticate user. Creates a session token if successful.',
+                auth: 'none',
+                body: {
+                  email: 'string (required) - Email address used to request OTP',
+                  code: 'string (required) - 6-digit OTP code',
+                },
+                response: {
+                  success: true,
+                  data: {
+                    token: 'string - Session token (store securely, use in Authorization header)',
+                    user: {
+                      id: 'string',
+                      email: 'string',
+                      name: 'string | null',
+                      isSuperAdmin: 'boolean',
+                    },
+                  },
+                },
+                note: 'If user does not exist, they will be auto-provisioned. Session token expires after 7 days. Use token in Authorization header as "Bearer {token}" for authenticated requests.',
+                maxAttempts: 'Maximum 3 verification attempts per OTP code',
+              },
+            },
+          },
           
           posts: {
             list: {

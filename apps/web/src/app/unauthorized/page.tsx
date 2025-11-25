@@ -1,16 +1,13 @@
 'use client';
 
-export const runtime = 'edge';
+import { usePathname } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, RefreshCw, Home } from 'lucide-react';
+import { AlertCircle, LogIn, Home } from 'lucide-react';
 import Link from 'next/link';
 
 export default function UnauthorizedPage() {
-  const handleRetry = () => {
-    // Reload the page to retry authentication
-    window.location.reload();
-  };
+  const pathname = usePathname();
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-background">
@@ -29,9 +26,11 @@ export default function UnauthorizedPage() {
           </p>
           
           <div className="flex flex-col gap-2">
-            <Button onClick={handleRetry} className="w-full">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Retry Authentication
+            <Button asChild className="w-full">
+              <Link href={`/sign-in?redirect=${encodeURIComponent(pathname)}`}>
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In
+              </Link>
             </Button>
             <Button variant="outline" asChild className="w-full">
               <Link href="/">

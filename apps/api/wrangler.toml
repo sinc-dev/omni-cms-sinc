@@ -3,6 +3,12 @@ main = "src/index.ts"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Local Development:
+# - D1: wrangler dev automatically uses a local SQLite database
+#   Run migrations with: pnpm db:migrate (uses --local flag automatically)
+# - R2: For local dev, create .dev.vars file with R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY
+#   Or use: wrangler secret put R2_ACCESS_KEY_ID (for production)
+
 [[d1_databases]]
 binding = "DB"
 database_name = "omni-cms"

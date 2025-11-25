@@ -1,13 +1,11 @@
 'use client';
 
-export const runtime = 'edge';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import * as React from 'react';
+import { usePathname } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -32,8 +30,9 @@ import {
   Upload,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
+import { ApiError } from '@/lib/api-client/errors';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
-import { ExportDialog, ImportDialog } from '@/components/admin/import-export';
+import { ExportDialog, ImportDialog } from '@/components/import-export';
 import {
   Form,
   FormField,
@@ -44,7 +43,9 @@ import {
   FormMessage,
   FormErrorSummary,
   useFormState,
-} from '@/components/ui/form';
+  Input,
+  Textarea,
+} from '@/components/form-wrappers';
 import { organizationFormDialogSchema } from '@/lib/validations/organization';
 import type { OrganizationFormDialogInput } from '@/lib/validations/organization';
 
@@ -59,7 +60,9 @@ interface Organization {
 }
 
 export default function OrganizationsPage() {
+  const pathname = usePathname();
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
+  const isRedirectingRef = useRef(false);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -81,7 +84,23 @@ export default function OrganizationsPage() {
 
   // Fetch organizations
   useEffect(() => {
-    const fetchOrganizations = withErrorHandling(async () => {
+    // Don't make API calls if we're on an error page
+    if (pathname === '/unauthorized' || pathname === '/forbidden') {
+      setLoading(false);
+      return;
+    }
+
+    // Prevent multiple simultaneous requests if redirecting
+    if (isRedirectingRef.current) {
+      return;
+    }
+
+    // Check sessionStorage for redirect flag
+    if (typeof window !== 'undefined' && sessionStorage.getItem('omni-cms:redirecting') === 'true') {
+      return;
+    }
+
+    const fetchOrganizations = async () => {
       setLoading(true);
       clearError();
 
@@ -107,15 +126,21 @@ export default function OrganizationsPage() {
           handleError('Failed to load organizations', { title: 'Failed to Load Organizations' });
         }
       } catch (err) {
+        // Check if it's a 401 error - redirect will happen in API client
+        if (err instanceof ApiError && err.status === 401) {
+          isRedirectingRef.current = true;
+          // Redirect will happen in API client, just return early
+          return;
+        }
         console.error('Failed to load organizations:', err);
         handleError(err, { title: 'Failed to Load Organizations' });
       } finally {
         setLoading(false);
       }
-    }, { title: 'Failed to Load Organizations' });
+    };
 
-    fetchOrganizations();
-  }, [debouncedSearch, withErrorHandling, clearError, handleError]);
+      fetchOrganizations();
+    }, [debouncedSearch, pathname]);
 
   // Generate slug from name
   const generateSlug = (nameValue: string) => {

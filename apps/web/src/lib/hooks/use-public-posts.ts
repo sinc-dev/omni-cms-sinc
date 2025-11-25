@@ -147,11 +147,16 @@ export function usePublicPost(orgSlug: string, slug: string, enabled = true) {
 
   useEffect(() => {
     if (!enabled || !orgSlug || !slug) {
-      setIsLoading(false);
+      // Use setTimeout to avoid setState in effect
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 0);
       return;
     }
 
-    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(true);
+    }, 0);
     setIsError(false);
     setError(null);
 

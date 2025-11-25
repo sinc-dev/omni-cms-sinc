@@ -1,6 +1,5 @@
 'use client';
 
-export const runtime = 'edge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileQuestion, Home, Search, ArrowLeft } from 'lucide-react';
@@ -25,15 +24,9 @@ export default function NotFound() {
           
           <div className="flex flex-col gap-2">
             <Button variant="outline" asChild className="w-full">
-              <Link href="/admin">
+              <Link href="/select-organization">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Dashboard
-              </Link>
-            </Button>
-            <Button variant="outline" asChild className="w-full">
-              <Link href="/admin/search">
-                <Search className="mr-2 h-4 w-4" />
-                Search Content
+                Select Organization
               </Link>
             </Button>
             <Button variant="outline" asChild className="w-full">

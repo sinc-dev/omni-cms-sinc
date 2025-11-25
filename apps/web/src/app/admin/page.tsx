@@ -1,6 +1,5 @@
 'use client';
 
-export const runtime = 'edge';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Image, Users, Tags, Loader2, Clock } from 'lucide-react';
@@ -323,14 +322,16 @@ function RecentActivity({ api }: { api: ReturnType<typeof useApiClient> }) {
     }
   };
 
-  const getActivityLink = (item: ActivityItem) => {
+      const getActivityLink = (item: ActivityItem) => {
+    // This page is deprecated - redirect to org-scoped dashboard
+    // Links should use orgId from context
     switch (item.type) {
       case 'post':
-        return `/admin/posts/${item.id}`;
+        return `#`; // Will be handled by org-scoped dashboard
       case 'media':
-        return `/admin/media`;
+        return `#`; // Will be handled by org-scoped dashboard
       case 'user':
-        return `/admin/users`;
+        return `#`; // Will be handled by org-scoped dashboard
       default:
         return '#';
     }

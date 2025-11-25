@@ -84,3 +84,175 @@ When adding a new endpoint:
 - Test error cases and edge cases
 - Ensure MCP documentation matches actual behavior
 
+## useEffect Infinite Loop Prevention
+
+**CRITICAL**: When using `useEffect` with API calls or state updates, you MUST prevent infinite loops.
+
+### Common Causes of Infinite Loops
+
+1. **Function dependencies that aren't memoized** - Functions recreated on every render
+2. **Object/array dependencies** - New object/array references on every render
+3. **State updates that trigger the effect** - Setting state inside useEffect that's in dependencies
+4. **Missing cleanup** - Not canceling requests when component unmounts
+
+### Best Practices
+
+#### 1. Dependency Array Guidelines
+
+- **DO**: Only include values that should trigger the effect
+- **DO**: Omit stable functions that are memoized with `useCallback`
+- **DON'T**: Include functions from custom hooks unless they're guaranteed stable
+- **DON'T**: Include object/array literals or inline functions
+
+```typescript
+// ✅ GOOD: Only include pathname that should trigger effect
+useEffect(() => {
+  fetchData();
+}, [pathname]); // handleError is stable via useCallback, omit it
+
+// ❌ BAD: Including function that may be recreated
+useEffect(() => {
+  fetchData();
+}, [pathname, handleError]); // handleError may cause re-renders
+```
+
+#### 2. API Calls in useEffect
+
+**Always use these patterns for API calls:**
+
+```typescript
+// ✅ GOOD: With fetch guards and AbortController
+useEffect(() => {
+  const abortController = new AbortController();
+  const isFetchingRef = useRef(false);
+  const hasFetchedRef = useRef(false);
+
+  // Guard: Prevent multiple simultaneous requests
+  if (isFetchingRef.current) return;
+  
+  // Guard: Early return if already fetched
+  if (hasFetchedRef.current && data.length > 0) return;
+
+  isFetchingRef.current = true;
+
+  const fetchData = async () => {
+    try {
+      const response = await apiClient.getData();
+      if (abortController.signal.aborted) return;
+      
+      setData(response.data);
+      hasFetchedRef.current = true;
+    } catch (error) {
+      if (abortController.signal.aborted) return;
+      handleError(error);
+    } finally {
+      isFetchingRef.current = false;
+    }
+  };
+
+  fetchData();
+
+  // Cleanup: Abort request on unmount or effect re-run
+  return () => {
+    abortController.abort();
+    isFetchingRef.current = false;
+  };
+}, [pathname]); // Minimal dependencies
+```
+
+#### 3. Required Guards for API Calls
+
+**Always include these guards:**
+
+1. **Fetching guard** - Prevent multiple simultaneous requests:
+   ```typescript
+   const isFetchingRef = useRef(false);
+   if (isFetchingRef.current) return;
+   isFetchingRef.current = true;
+   ```
+
+2. **Already fetched guard** - Skip if data already loaded:
+   ```typescript
+   const hasFetchedRef = useRef(false);
+   if (hasFetchedRef.current && data.length > 0) return;
+   ```
+
+3. **AbortController** - Cancel requests on cleanup:
+   ```typescript
+   const abortController = new AbortController();
+   return () => abortController.abort();
+   ```
+
+#### 4. Stable Function Dependencies
+
+**For functions from custom hooks or props:**
+
+```typescript
+// ✅ GOOD: Omit if function is memoized with useCallback
+const { handleError } = useErrorHandler(); // Memoized internally
+useEffect(() => {
+  // Use handleError here, but don't include in deps
+}, [pathname]);
+
+// ✅ GOOD: Use ref to access latest function without dependency
+const handleErrorRef = useRef(handleError);
+handleErrorRef.current = handleError;
+useEffect(() => {
+  // Use handleErrorRef.current
+}, [pathname]);
+```
+
+#### 5. Cleanup Functions
+
+**Always provide cleanup for:**
+- AbortController for API requests
+- Timers (setTimeout, setInterval)
+- Event listeners
+- Subscriptions
+
+```typescript
+useEffect(() => {
+  const abortController = new AbortController();
+  const timer = setTimeout(() => {}, 1000);
+  
+  return () => {
+    abortController.abort();
+    clearTimeout(timer);
+  };
+}, [deps]);
+```
+
+### Verification Checklist
+
+Before committing useEffect changes, verify:
+- [ ] Dependency array only includes values that should trigger re-runs
+- [ ] Functions in dependencies are memoized with useCallback/useMemo
+- [ ] Fetch guards prevent multiple simultaneous requests
+- [ ] AbortController cancels requests on cleanup
+- [ ] Cleanup function aborts requests and clears timers/subscriptions
+- [ ] Early returns prevent unnecessary re-fetches
+
+### Anti-Patterns to Avoid
+
+```typescript
+// ❌ BAD: Function dependency that's not memoized
+useEffect(() => {
+  fetchData();
+}, [fetchData]); // fetchData recreated on every render
+
+// ❌ BAD: Missing fetch guards
+useEffect(() => {
+  fetchData(); // Can trigger infinite loop
+}, [someValue]);
+
+// ❌ BAD: State update that triggers effect
+useEffect(() => {
+  setCount(count + 1); // Infinite loop if count is in deps
+}, [count]);
+
+// ❌ BAD: Object/array literal in dependencies
+useEffect(() => {
+  fetchData(options);
+}, [options]); // New object reference every render
+```
+

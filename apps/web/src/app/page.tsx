@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,6 +10,8 @@ import {
 } from "@/components/ui/card";
 
 export default function Home() {
+  // This is a client component to avoid any server-side rendering issues
+  // No database access or server-side logic here
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">

@@ -4,39 +4,128 @@
 import { ApiError } from './errors';
 import type { ErrorResponse } from '@/lib/api/response';
 
+// Guard to prevent multiple simultaneous redirects (persists across page navigations)
+const REDIRECT_KEY = 'omni-cms:redirecting';
+
+function isRedirecting(): boolean {
+  if (typeof window === 'undefined') return false;
+  return sessionStorage.getItem(REDIRECT_KEY) === 'true';
+}
+
+function setRedirecting(value: boolean): void {
+  if (typeof window === 'undefined') return;
+  if (value) {
+    sessionStorage.setItem(REDIRECT_KEY, 'true');
+  } else {
+    sessionStorage.removeItem(REDIRECT_KEY);
+  }
+}
+
 class ApiClient {
   private baseUrl: string;
 
   constructor() {
-    // Use the new Hono API backend URL, fallback to same origin for development
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_APP_URL || '';
+    // Use the new Hono API backend URL
+    // In development, default to localhost:8787 if not set
+    // In production, NEXT_PUBLIC_API_URL should be set
+    const envApiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (envApiUrl) {
+      this.baseUrl = envApiUrl;
+    } else {
+      // Fallback: check if we're in browser and on localhost for development
+      if (typeof window !== 'undefined') {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          // Development fallback: assume API runs on localhost:8787
+          this.baseUrl = 'http://localhost:8787';
+        } else {
+          // Production: use same origin as fallback (if API is on same domain)
+          this.baseUrl = window.location.origin;
+        }
+      } else {
+        // SSR fallback: use empty string (will be set properly in browser)
+        this.baseUrl = '';
+      }
+    }
+  }
+
+  private getBaseUrl(): string {
+    // Return baseUrl, but if it's empty and we're in browser, use fallback
+    if (!this.baseUrl && typeof window !== 'undefined') {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:8787';
+      }
+      return window.location.origin;
+    }
+    return this.baseUrl;
   }
 
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`;
+    const baseUrl = this.getBaseUrl();
+    const url = `${baseUrl}${endpoint}`;
 
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-    });
+    // Get session token from localStorage if available
+    let sessionToken: string | null = null;
+    if (typeof window !== 'undefined') {
+      sessionToken = localStorage.getItem('omni-cms:session-token');
+    }
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options.headers as Record<string, string> || {}),
+    };
+
+    // Add session token if available (for OTP authentication)
+    if (sessionToken) {
+      headers['Authorization'] = `Bearer ${sessionToken}`;
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        ...options,
+        headers,
+      });
+    } catch (error) {
+      // Handle network errors (failed to fetch, CORS, etc.)
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        const errorMessage = `Network error: Unable to connect to API at ${url}. ` +
+          `Please ensure the API server is running. ` +
+          `If running locally, make sure the API is running on ${baseUrl}`;
+        throw new ApiError(
+          'NETWORK_ERROR',
+          errorMessage,
+          0,
+          { originalError: error.message, url }
+        );
+      }
+      throw error;
+    }
 
     if (!response.ok) {
       // Handle authentication/authorization errors with redirects
       if (response.status === 401) {
-        // Redirect to unauthorized page
-        if (typeof window !== 'undefined') {
-          window.location.href = '/unauthorized';
+        // Redirect to sign-in page (only once, and not if already there)
+        if (typeof window !== 'undefined' && !isRedirecting()) {
+          const currentPath = window.location.pathname;
+          // Don't redirect if already on auth pages
+          if (currentPath !== '/sign-in' && currentPath !== '/sign-up' && currentPath !== '/unauthorized' && currentPath !== '/forbidden') {
+            setRedirecting(true);
+            const redirectUrl = encodeURIComponent(currentPath);
+            window.location.href = `/sign-in?redirect=${redirectUrl}`;
+          }
         }
       } else if (response.status === 403) {
-        // Redirect to forbidden page
-        if (typeof window !== 'undefined') {
-          window.location.href = '/forbidden';
+        // Redirect to forbidden page (only once, and not if already there)
+        if (typeof window !== 'undefined' && !isRedirecting()) {
+          const currentPath = window.location.pathname;
+          // Don't redirect if already on error pages
+          if (currentPath !== '/sign-in' && currentPath !== '/sign-up' && currentPath !== '/unauthorized' && currentPath !== '/forbidden') {
+            setRedirecting(true);
+            window.location.href = '/forbidden';
+          }
         }
       }
 
@@ -105,6 +194,11 @@ class ApiClient {
         errorMessage,
         response.status
       );
+    }
+
+    // Clear redirect flag on successful requests (user is authenticated)
+    if (response.ok && typeof window !== 'undefined') {
+      setRedirecting(false);
     }
 
     return response.json();
@@ -796,6 +890,32 @@ class ApiClient {
     return this.request('/api/admin/v1/profile', {
       method: 'PATCH',
       body: JSON.stringify(data),
+    });
+  }
+
+  // OTP Authentication
+  async requestOTP(email: string) {
+    return this.request<{ success: true; data: { message: string } }>('/api/public/v1/auth/otp/request', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async verifyOTP(email: string, code: string) {
+    return this.request<{
+      success: true;
+      data: {
+        token: string;
+        user: {
+          id: string;
+          email: string;
+          name: string;
+          isSuperAdmin: boolean;
+        };
+      };
+    }>('/api/public/v1/auth/otp/verify', {
+      method: 'POST',
+      body: JSON.stringify({ email, code }),
     });
   }
 }

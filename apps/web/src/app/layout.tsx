@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
-import { Sidebar } from "@/components/sidebar";
-
-export const runtime = 'edge';
+import { LayoutWrapper } from "@/components/layout-wrapper";
+import { OrganizationProvider } from "@/lib/context/organization-context";
+import { ToastProvider } from "@/components/ui/toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,31 +26,25 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Layout is kept simple - no database access here
+  // All database access should happen in page components or API routes
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-muted`}
       >
-        <div className="flex min-h-screen">
-          <Sidebar />
-          <div className="flex min-h-screen flex-1 flex-col">
-            <header className="flex h-16 items-center justify-between border-b bg-background/80 px-4 lg:px-6">
-              <div className="flex flex-col">
-                <span className="text-xs font-medium text-muted-foreground">
-                  SyncUni
-                </span>
-                <span className="text-sm font-semibold tracking-tight">
-                  Omni CMS
-                </span>
-              </div>
-              {/* Placeholder for user menu or environment switcher */}
-              <div className="h-8 w-8 rounded-full bg-muted" />
-            </header>
-            <main className="flex-1 bg-muted/40 px-4 pb-8 pt-6 lg:px-8">
-              {children}
-            </main>
-          </div>
-        </div>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <ToastProvider>
+            <OrganizationProvider>
+              <LayoutWrapper>{children}</LayoutWrapper>
+            </OrganizationProvider>
+          </ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

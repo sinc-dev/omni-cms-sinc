@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
 
 /**
  * Common validation rules and helpers
@@ -90,10 +90,10 @@ export const fileSizeSchema = (maxSizeMB: number) =>
 /**
  * Format validation error messages
  */
-export function formatValidationError(error: z.ZodError): string {
-  if (error.errors.length === 0) return 'Validation error';
+export function formatValidationError(error: ZodError): string {
+  if (error.issues.length === 0) return 'Validation error';
   
-  const firstError = error.errors[0];
+  const firstError = error.issues[0];
   return firstError.message || 'Invalid value';
 }
 
@@ -101,11 +101,11 @@ export function formatValidationError(error: z.ZodError): string {
  * Get field error message from Zod error
  */
 export function getFieldError(
-  errors: z.ZodError | Record<string, { message?: string }>,
+  errors: ZodError | Record<string, { message?: string }>,
   fieldName: string
 ): string | undefined {
-  if (errors instanceof z.ZodError) {
-    const fieldError = errors.errors.find((err) => err.path[0] === fieldName);
+  if (errors instanceof ZodError) {
+    const fieldError = errors.issues.find((err) => err.path[0] === fieldName);
     return fieldError?.message;
   }
   

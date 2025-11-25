@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
 import path from "node:path";
 
-// Monorepo root (one level up from /web) - where pnpm-lock.yaml lives
-const root = path.join(__dirname, "..");
+// Monorepo root (two levels up from /web) - where pnpm-lock.yaml lives
+// From apps/web/next.config.ts -> apps/ -> monorepo root
+const root = path.resolve(__dirname, "..", "..");
 
 const nextConfig: NextConfig = {
   // Set outputFileTracingRoot to monorepo root
@@ -10,8 +11,9 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: root,
   
   // Configure Turbopack for monorepo (Next.js 16 uses Turbopack by default)
+  // Use absolute path to monorepo root where node_modules and pnpm-lock.yaml are
   turbopack: {
-    root: root, // Point to monorepo root where next/package.json is
+    root: root,
   },
   
   // 1. Disable Source Maps (Critical)
@@ -23,9 +25,20 @@ const nextConfig: NextConfig = {
   // 2. Remove 'serverExternalPackages' 
   // Let Webpack bundle and tree-shake @aws-sdk/client-s3 naturally.
   
-  // 3. Force Webpack to drop source maps entirely
-  webpack: (config) => {
+  // 3. Force Webpack to drop source maps entirely and improve pnpm resolution
+  webpack: (config, { isServer }) => {
     config.devtool = false;
+    
+    // Improve module resolution for pnpm workspaces
+    if (!isServer) {
+      config.resolve = config.resolve || {};
+      config.resolve.symlinks = false;
+      config.resolve.modules = [
+        ...(config.resolve.modules || []),
+        path.resolve(root, 'node_modules'),
+      ];
+    }
+    
     return config;
   },
   

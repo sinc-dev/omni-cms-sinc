@@ -12,6 +12,9 @@ export interface CloudflareBindings {
   CF_ACCESS_AUD?: string;
   OPENAI_API_KEY?: string;
   APP_URL?: string;
+  RESEND_API_KEY?: string;
+  EMAIL_FROM?: string;
+  EMAIL_FROM_NAME?: string;
 }
 
 // Hono context variables

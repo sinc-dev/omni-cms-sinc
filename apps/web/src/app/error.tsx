@@ -1,6 +1,5 @@
 'use client';
 
-export const runtime = 'edge';
 import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,6 +33,39 @@ export default function Error({
           <p className="text-sm text-muted-foreground text-center">
             An unexpected error occurred. Our team has been notified and is working on a fix.
           </p>
+
+          {/* Show configuration-specific help */}
+          {error.message?.includes('Database not configured') && (
+            <div className="rounded-md bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-3">
+              <p className="text-xs font-medium mb-2 text-amber-900 dark:text-amber-200">
+                Configuration Issue Detected
+              </p>
+              <p className="text-xs text-amber-800 dark:text-amber-300">
+                The D1 database binding is not configured. Please configure it in Cloudflare Pages:
+              </p>
+              <ol className="text-xs text-amber-800 dark:text-amber-300 mt-2 ml-4 list-decimal space-y-1">
+                <li>Go to Cloudflare Dashboard → Pages → omni-cms-sinc</li>
+                <li>Settings → Functions → D1 Database bindings</li>
+                <li>Add binding: Variable name = DB, Database = omni-cms</li>
+              </ol>
+            </div>
+          )}
+
+          {error.message?.includes('Cloudflare Access not configured') && (
+            <div className="rounded-md bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-3">
+              <p className="text-xs font-medium mb-2 text-amber-900 dark:text-amber-200">
+                Configuration Issue Detected
+              </p>
+              <p className="text-xs text-amber-800 dark:text-amber-300">
+                Cloudflare Access environment variables are missing. Please set them in Cloudflare Pages:
+              </p>
+              <ol className="text-xs text-amber-800 dark:text-amber-300 mt-2 ml-4 list-decimal space-y-1">
+                <li>Go to Cloudflare Dashboard → Pages → omni-cms-sinc</li>
+                <li>Settings → Environment Variables → Production</li>
+                <li>Add CF_ACCESS_TEAM_DOMAIN and CF_ACCESS_AUD</li>
+              </ol>
+            </div>
+          )}
 
           {process.env.NODE_ENV === 'development' && (
             <div className="rounded-md bg-muted p-3">

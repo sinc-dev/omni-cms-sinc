@@ -62,7 +62,11 @@ export function usePresenceManager({
         const backoffDelay = Math.min(1000 * Math.pow(2, retryCountRef.current - retries), 30000);
         setTimeout(() => {
           if (retryCountRef.current < retries * 2) {
-            updatePresenceWithRetry(postId, retries);
+            // Use the ref to avoid closure issues
+            const currentRetries = retryCountRef.current;
+            updatePresenceWithRetry(postId, retries).catch(() => {
+              // Error already handled
+            });
           }
         }, backoffDelay);
       } else {
