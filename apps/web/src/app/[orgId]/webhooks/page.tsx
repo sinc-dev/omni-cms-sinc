@@ -34,6 +34,7 @@ import {
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { useToastHelpers } from '@/lib/hooks/use-toast';
 import { Spinner } from '@/components/ui/spinner';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
@@ -52,6 +53,7 @@ export default function WebhooksPage() {
   const { organization } = useOrganization();
   const api = useApiClient();
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
+  const { success: showSuccess } = useToastHelpers();
   
   const [webhooks, setWebhooks] = useState<Webhook[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,8 +106,10 @@ export default function WebhooksPage() {
   const handleCreate = withErrorHandling(async () => {
     if (editingWebhook) {
       await api.updateWebhook(editingWebhook.id, formData);
+      showSuccess(`Webhook "${formData.name}" updated successfully`, 'Webhook Updated');
     } else {
       await api.createWebhook(formData);
+      showSuccess(`Webhook "${formData.name}" created successfully`, 'Webhook Created');
     }
     setIsDialogOpen(false);
     setEditingWebhook(null);
@@ -118,9 +122,12 @@ export default function WebhooksPage() {
   }, { title: 'Failed to Save Webhook' });
 
   const handleDelete = withErrorHandling(async (id: string) => {
+    const deletedWebhook = webhookToDelete || webhooks.find(w => w.id === id);
+    const deletedName = deletedWebhook?.name || 'Webhook';
     await api.deleteWebhook(id);
     setWebhooks(webhooks.filter(w => w.id !== id));
     setWebhookToDelete(null);
+    showSuccess(`Webhook "${deletedName}" deleted successfully`, 'Webhook Deleted');
   }, { title: 'Failed to Delete Webhook' });
 
   const handleTest = withErrorHandling(async (id: string) => {

@@ -8,9 +8,12 @@ import Link from 'next/link';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { useToastHelpers } from '@/lib/hooks/use-toast';
 import { useSchema } from '@/lib/hooks/use-schema';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FilterBar } from '@/components/filters/filter-bar';
+import { Suspense } from 'react';
+
 import { useFilterParams } from '@/lib/hooks/use-filter-params';
 import type { SortOption } from '@/components/filters/sort-selector';
 import { useOrgUrl } from '@/lib/hooks/use-org-url';
@@ -58,11 +61,12 @@ interface User {
   email: string;
 }
 
-export default function PostsPage() {
+function PostsPageContent() {
   const { getUrl } = useOrgUrl();
   const { organization } = useOrganization();
   const api = useApiClient();
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
+  const { success: showSuccess } = useToastHelpers();
   const { schema: postsSchema } = useSchema('posts');
   const { getFilter, updateFilters } = useFilterParams();
   
@@ -204,15 +208,14 @@ export default function PostsPage() {
         // Error is handled by withErrorHandling wrapper
         // Show user-friendly message but don't block the page
         handleError(err, { 
-          title: 'Failed to Load Filter Options',
-          description: 'Some filter options may not be available. You can still filter by other criteria.'
+          title: 'Failed to Load Filter Options'
         });
       } finally {
         isFetchingFilterDataRef.current = false;
       }
     }, { 
       title: 'Failed to Load Filter Options',
-      silent: true // Don't show toast for filter failures to avoid noise
+      showToast: false // Don't show toast for filter failures to avoid noise
     });
 
     fetchFilterData();
@@ -692,11 +695,13 @@ export default function PostsPage() {
         onOpenChange={setDeleteDialogOpen}
         onConfirm={async () => {
           if (!postToDelete) return;
+          const deletedTitle = postToDelete.title;
           await withErrorHandling(async () => {
             await api.deletePost(postToDelete.id);
             // Refresh posts by triggering a refetch
             setPage(1);
             setPostToDelete(null);
+            showSuccess(`Post "${deletedTitle}" deleted successfully`, 'Post Deleted');
           }, { title: 'Failed to Delete Post' })();
         }}
         title="Delete Post"
@@ -707,6 +712,25 @@ export default function PostsPage() {
         variant="destructive"
       />
     </div>
+  );
+}
+
+export default function PostsPage() {
+  return (
+    // Suspense boundary is required for components that use useSearchParams/usePathname
+    // in statically pre-rendered segments per Next.js guidance.
+    <Suspense
+      fallback={
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Posts</h1>
+            <p className="text-muted-foreground">Loading posts...</p>
+          </div>
+        </div>
+      }
+    >
+      <PostsPageContent />
+    </Suspense>
   );
 }
 

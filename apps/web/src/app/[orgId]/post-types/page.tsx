@@ -31,6 +31,7 @@ import {
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { useToastHelpers } from '@/lib/hooks/use-toast';
 import { useOrgUrl } from '@/lib/hooks/use-org-url';
 import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 
@@ -64,6 +65,7 @@ export default function PostTypesPage() {
   const api = useApiClient();
 
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
+  const { success: showSuccess } = useToastHelpers();
   const [postTypes, setPostTypes] = useState<PostType[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -144,8 +146,10 @@ export default function PostTypesPage() {
 
     if (editingPostType) {
       await api.updatePostType(editingPostType.id, data);
+      showSuccess(`Post type "${data.name}" updated successfully`, 'Post Type Updated');
     } else {
       await api.createPostType(data);
+      showSuccess(`Post type "${data.name}" created successfully`, 'Post Type Created');
     }
 
     // Reset form and close dialog
@@ -159,10 +163,13 @@ export default function PostTypesPage() {
   const handleDelete = withErrorHandling(async (postTypeId: string) => {
     if (!api) return;
 
+    const deletedPostType = postTypeToDelete || postTypes.find(pt => pt.id === postTypeId);
+    const deletedName = deletedPostType?.name || 'Post type';
     await api.deletePostType(postTypeId);
     // Refresh post types list
     setPostTypes([]);
     setPostTypeToDelete(null);
+    showSuccess(`Post type "${deletedName}" deleted successfully`, 'Post Type Deleted');
   }, { title: 'Failed to Delete Post Type' });
 
   const openEditDialog = (postType: PostType) => {

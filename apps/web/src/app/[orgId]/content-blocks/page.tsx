@@ -34,6 +34,7 @@ import {
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { useToastHelpers } from '@/lib/hooks/use-toast';
 import { Spinner } from '@/components/ui/spinner';
 import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 
@@ -61,6 +62,7 @@ export default function ContentBlocksPage() {
   const { organization } = useOrganization();
   const api = useApiClient();
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
+  const { success: showSuccess } = useToastHelpers();
   
   const [blocks, setBlocks] = useState<ContentBlock[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,8 +109,10 @@ export default function ContentBlocksPage() {
   const handleCreate = withErrorHandling(async () => {
     if (editingBlock) {
       await api.updateContentBlock(editingBlock.id, formData);
+      showSuccess(`Content block "${formData.name}" updated successfully`, 'Content Block Updated');
     } else {
       await api.createContentBlock(formData);
+      showSuccess(`Content block "${formData.name}" created successfully`, 'Content Block Created');
     }
     setIsDialogOpen(false);
     setEditingBlock(null);
@@ -121,9 +125,12 @@ export default function ContentBlocksPage() {
   }, { title: 'Failed to Save Content Block' });
 
   const handleDelete = withErrorHandling(async (id: string) => {
+    const deletedBlock = blockToDelete || blocks.find(b => b.id === id);
+    const deletedName = deletedBlock?.name || 'Content block';
     await api.deleteContentBlock(id);
     setBlocks(blocks.filter(b => b.id !== id));
     setBlockToDelete(null);
+    showSuccess(`Content block "${deletedName}" deleted successfully`, 'Content Block Deleted');
   }, { title: 'Failed to Delete Content Block' });
 
   const handleEdit = (block: ContentBlock) => {

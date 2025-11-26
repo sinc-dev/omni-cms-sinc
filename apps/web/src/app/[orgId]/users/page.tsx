@@ -32,7 +32,10 @@ import {
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { useToastHelpers } from '@/lib/hooks/use-toast';
 import { FilterBar } from '@/components/filters/filter-bar';
+import { Suspense } from 'react';
+
 import { useFilterParams } from '@/lib/hooks/use-filter-params';
 import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 
@@ -75,10 +78,11 @@ interface PaginatedResponse {
   };
 }
 
-export default function UsersPage() {
+function UsersPageContent() {
   const { organization, isLoading: orgLoading } = useOrganization();
   const api = useApiClient();
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
+  const { success: showSuccess } = useToastHelpers();
   const { getFilter, updateFilters } = useFilterParams();
   const [users, setUsers] = useState<UserMember[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -221,6 +225,7 @@ export default function UsersPage() {
     // Refresh users list
     setPage(1);
     setAdding(false);
+    showSuccess(`User invitation sent to ${email}`, 'User Added');
   }, { title: 'Failed to Add User' });
 
   const handleUpdateRole = withErrorHandling(async () => {
@@ -241,15 +246,19 @@ export default function UsersPage() {
     // Refresh users list
     setPage(1);
     setUpdating(false);
+    const updatedUser = users.find(u => u.userId === selectedUser.userId);
+    showSuccess(updatedUser ? `Role updated for ${updatedUser.user.name}` : 'Role updated successfully', 'Role Updated');
   }, { title: 'Failed to Update Role' });
 
   const handleRemoveUser = withErrorHandling(async (userId: string) => {
     if (!api) return;
 
+    const userName = userToRemove?.userName || users.find(u => u.userId === userId)?.user.name || 'User';
     await api.removeUser(userId);
     // Refresh users list
     setPage(1);
     setUserToRemove(null);
+    showSuccess(`${userName} removed from organization`, 'User Removed');
   }, { title: 'Failed to Remove User' });
 
   const handleEditClick = (user: UserMember) => {
@@ -705,6 +714,25 @@ export default function UsersPage() {
         variant="destructive"
       />
     </div>
+  );
+}
+
+export default function UsersPage() {
+  return (
+    // Suspense boundary is required for components that use useSearchParams/usePathname
+    // in statically pre-rendered segments per Next.js guidance.
+    <Suspense
+      fallback={
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Users</h1>
+            <p className="text-muted-foreground">Loading users...</p>
+          </div>
+        </div>
+      }
+    >
+      <UsersPageContent />
+    </Suspense>
   );
 }
 

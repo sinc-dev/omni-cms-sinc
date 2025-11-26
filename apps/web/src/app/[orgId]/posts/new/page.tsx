@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useOrgUrl } from '@/lib/hooks/use-org-url';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Save, Eye, Loader2, ExternalLink } from 'lucide-react';
 import { TipTapEditor } from '@/components/editor/tiptap-editor';
 import { CustomFieldRenderer } from '@/components/editor/custom-field-renderer';
@@ -59,6 +60,11 @@ export default function NewPostPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [postId, setPostId] = useState<string | null>(null); // Track created post ID for auto-save
+
+  // Fetch guards to prevent infinite loops and redundant API calls
+  const isFetchingRef = useRef(false);
+  const hasFetchedRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Get schema for posts to get status enum values
   const { schema: postsSchema, loading: postsSchemaLoading, error: postsSchemaError } = useSchema('posts');
@@ -137,14 +143,42 @@ export default function NewPostPage() {
       return;
     }
 
-    const fetchData = async () => {
+    // Prevent multiple simultaneous requests
+    if (isFetchingRef.current) {
+      return;
+    }
+
+    // Early return if already fetched
+    if (hasFetchedRef.current && postTypes.length > 0) {
+      return;
+    }
+
+    // Abort previous request if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
+    const fetchData = withErrorHandling(async () => {
+      isFetchingRef.current = true;
       setLoading(true);
+      clearError();
+
       try {
         // Fetch post types
         const postTypesResponse = (await api.getPostTypes()) as {
           success: boolean;
           data: PostType[];
         };
+        
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
+
         if (postTypesResponse.success && postTypesResponse.data.length > 0) {
           setPostTypes(postTypesResponse.data);
           setPostTypeId(postTypesResponse.data[0].id);
@@ -155,6 +189,12 @@ export default function NewPostPage() {
           success: boolean;
           data: Taxonomy[];
         };
+        
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
+
         if (taxonomiesResponse.success) {
           setTaxonomies(taxonomiesResponse.data);
           // Load terms for each taxonomy
@@ -178,15 +218,28 @@ export default function NewPostPage() {
         }
 
         // Custom fields will be loaded from post type schema when postTypeId is selected
+        hasFetchedRef.current = true;
       } catch (err) {
-        console.error('Failed to load data:', err);
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
+        handleError(err, { title: 'Failed to Load Data' });
       } finally {
         setLoading(false);
+        isFetchingRef.current = false;
       }
-    };
+    }, { title: 'Failed to Load Data' });
 
     fetchData();
-  }, [organization, api, orgLoading]);
+
+    // Cleanup: Abort request on unmount or when dependencies change
+    return () => {
+      abortController.abort();
+      isFetchingRef.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organization]);
 
   // Update custom field value
   const updateCustomField = (fieldSlug: string, value: unknown) => {
@@ -375,9 +428,31 @@ export default function NewPostPage() {
   if (loading) {
     return (
       <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-10 w-10" />
+          <Skeleton className="h-9 w-48" />
+        </div>
         <Card>
-          <CardContent className="pt-6 flex items-center justify-center min-h-[400px]">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-24 w-full" />
+            </div>
           </CardContent>
         </Card>
       </div>

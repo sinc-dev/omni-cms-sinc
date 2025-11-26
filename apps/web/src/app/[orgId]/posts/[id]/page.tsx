@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useOrgUrl } from '@/lib/hooks/use-org-url';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Save, Loader2, Eye, ExternalLink } from 'lucide-react';
 import { TipTapEditor } from '@/components/editor/tiptap-editor';
 import { CustomFieldRenderer } from '@/components/editor/custom-field-renderer';
@@ -76,6 +77,11 @@ export default function EditPostPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // Fetch guards to prevent infinite loops and redundant API calls
+  const isFetchingRef = useRef(false);
+  const hasFetchedRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   // Get schema for posts to get status enum values
   const { schema: postsSchema, loading: postsSchemaLoading, error: postsSchemaError } = useSchema('posts');
   
@@ -137,7 +143,27 @@ export default function EditPostPage() {
       return;
     }
 
+    // Prevent multiple simultaneous requests
+    if (isFetchingRef.current) {
+      return;
+    }
+
+    // Early return if already fetched
+    if (hasFetchedRef.current && post) {
+      return;
+    }
+
+    // Abort previous request if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     const fetchPost = withErrorHandling(async () => {
+      isFetchingRef.current = true;
       setLoading(true);
       clearError();
 
@@ -147,6 +173,12 @@ export default function EditPostPage() {
           success: boolean;
           data: PostType[];
         };
+        
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
+
         if (postTypesResponse.success) {
           setPostTypes(postTypesResponse.data);
         }
@@ -156,6 +188,11 @@ export default function EditPostPage() {
           success: boolean;
           data: Post;
         };
+        
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
         
         if (postResponse.success && postResponse.data) {
           const postData = postResponse.data;
@@ -199,19 +236,31 @@ export default function EditPostPage() {
             );
             setTaxonomies(taxonomiesWithTerms);
           }
+          hasFetchedRef.current = true;
         } else {
           handleError('Post not found', { title: 'Not Found' });
         }
       } catch (err) {
-        console.error('Failed to load post:', err);
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
         handleError(err, { title: 'Failed to Load Post' });
       } finally {
         setLoading(false);
+        isFetchingRef.current = false;
       }
     }, { title: 'Failed to Load Post' });
 
     fetchPost();
-  }, [organization, api, orgLoading, postId, withErrorHandling, clearError, handleError]);
+
+    // Cleanup: Abort request on unmount or when dependencies change
+    return () => {
+      abortController.abort();
+      isFetchingRef.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organization, postId]);
 
   // Update custom field value
   const updateCustomField = (fieldSlug: string, value: unknown) => {
@@ -359,9 +408,31 @@ export default function EditPostPage() {
   if (loading) {
     return (
       <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-10 w-10" />
+          <Skeleton className="h-9 w-48" />
+        </div>
         <Card>
-          <CardContent className="pt-6 flex items-center justify-center min-h-[400px]">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-24 w-full" />
+            </div>
           </CardContent>
         </Card>
       </div>

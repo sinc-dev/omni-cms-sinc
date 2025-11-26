@@ -11,6 +11,8 @@ import { useSchema } from '@/lib/context/schema-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { FilterBar } from '@/components/filters/filter-bar';
+import { Suspense } from 'react';
+
 import { useFilterParams } from '@/lib/hooks/use-filter-params';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -38,7 +40,7 @@ interface Relationship {
   toPost?: Post;
 }
 
-export default function RelationshipsPage() {
+function RelationshipsPageContent() {
   const { getUrl } = useOrgUrl();
   const { organization, isLoading: orgLoading } = useOrganization();
   const api = useApiClient();
@@ -382,6 +384,25 @@ export default function RelationshipsPage() {
         </Tabs>
       )}
     </div>
+  );
+}
+
+export default function RelationshipsPage() {
+  return (
+    // Suspense boundary is required for components that use useSearchParams/usePathname
+    // in statically pre-rendered segments per Next.js guidance.
+    <Suspense
+      fallback={
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Relationships</h1>
+            <p className="text-muted-foreground">Loading relationships...</p>
+          </div>
+        </div>
+      }
+    >
+      <RelationshipsPageContent />
+    </Suspense>
   );
 }
 

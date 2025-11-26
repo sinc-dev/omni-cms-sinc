@@ -31,6 +31,7 @@ import {
 import { apiClient } from '@/lib/api-client';
 import { ApiError } from '@/lib/api-client/errors';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { useToastHelpers } from '@/lib/hooks/use-toast';
 import { ExportDialog, ImportDialog } from '@/components/import-export';
 import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 import {
@@ -64,6 +65,7 @@ export default function OrganizationsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
+  const { success: showSuccess } = useToastHelpers();
   const isRedirectingRef = useRef(false);
   const isFetchingRef = useRef(false);
   const hasFetchedRef = useRef(false);
@@ -228,6 +230,7 @@ export default function OrganizationsPage() {
       };
       if (response.success) {
         setOrganizations(response.data);
+        showSuccess(`Organization "${data.name}" created successfully`, 'Organization Created');
       }
     } catch (err) {
       handleError(err, { title: 'Failed to Create Organization' });
@@ -262,6 +265,7 @@ export default function OrganizationsPage() {
       };
       if (response.success) {
         setOrganizations(response.data);
+        showSuccess(`Organization "${data.name}" updated successfully`, 'Organization Updated');
       }
     } catch (err) {
       handleError(err, { title: 'Failed to Update Organization' });
@@ -279,6 +283,8 @@ export default function OrganizationsPage() {
       };
       if (response.success) {
         setOrganizations(response.data);
+        const deletedOrg = organizations.find(org => org.id === orgId);
+        showSuccess(deletedOrg ? `Organization "${deletedOrg.name}" deleted successfully` : 'Organization deleted successfully', 'Organization Deleted');
       }
       setOrgToDelete(null);
     } catch (err) {

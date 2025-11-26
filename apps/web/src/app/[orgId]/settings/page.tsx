@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Save, Loader2, Download, Upload } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Save, Download, Upload } from 'lucide-react';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { useToastHelpers } from '@/lib/hooks/use-toast';
 import { ExportDialog, ImportDialog } from '@/components/import-export';
 import {
   Form,
@@ -31,10 +33,16 @@ export default function SettingsPage() {
   const { organization, isLoading: orgLoading } = useOrganization();
   const api = useApiClient();
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
+  const { success: showSuccess } = useToastHelpers();
   const [loading, setLoading] = useState(true);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [defaultValues, setDefaultValues] = useState<OrganizationSettingsFormInput | null>(null);
+
+  // Fetch guards to prevent infinite loops and redundant requests
+  const isFetchingRef = useRef(false);
+  const hasFetchedRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleSubmit = withErrorHandling(async (data: OrganizationSettingsFormInput) => {
     if (!api || !organization) {
@@ -54,8 +62,9 @@ export default function SettingsPage() {
         settings: settingsObj,
       });
 
-      // Show success (could use toast here)
+      // Show success feedback
       clearError();
+      showSuccess('Settings saved successfully', 'Settings Updated');
     } catch (err) {
       handleError(err, { title: 'Failed to Save Settings' });
     }
@@ -68,7 +77,22 @@ export default function SettingsPage() {
       return;
     }
 
+    // Prevent multiple simultaneous requests
+    if (isFetchingRef.current) {
+      return;
+    }
+
+    // Abort previous request if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     const fetchOrganization = withErrorHandling(async () => {
+      isFetchingRef.current = true;
       setLoading(true);
       clearError();
 
@@ -84,6 +108,11 @@ export default function SettingsPage() {
           };
         };
 
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
+
         if (response.success && response.data) {
           const orgData = response.data;
           setDefaultValues({
@@ -94,17 +123,30 @@ export default function SettingsPage() {
               ? JSON.stringify(JSON.parse(orgData.settings), null, 2)
               : '{}',
           });
+          hasFetchedRef.current = true;
         }
       } catch (err) {
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
         console.error('Failed to load organization:', err);
         handleError(err, { title: 'Failed to Load Settings' });
       } finally {
         setLoading(false);
+        isFetchingRef.current = false;
       }
     }, { title: 'Failed to Load Settings' });
 
     fetchOrganization();
-  }, [organization, api, orgLoading, withErrorHandling, clearError, handleError]);
+
+    // Cleanup: Abort request on unmount or when dependencies change
+    return () => {
+      abortController.abort();
+      isFetchingRef.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organization]);
 
   if (orgLoading || !organization) {
     return (
@@ -123,9 +165,35 @@ export default function SettingsPage() {
   if (loading || !defaultValues) {
     return (
       <div className="space-y-6">
+        <div>
+          <Skeleton className="h-9 w-48 mb-2" />
+          <Skeleton className="h-5 w-64" />
+        </div>
         <Card>
-          <CardContent className="pt-6 flex items-center justify-center min-h-[400px]">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <CardHeader>
+            <Skeleton className="h-6 w-40" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-40" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-32 w-full" />
           </CardContent>
         </Card>
       </div>

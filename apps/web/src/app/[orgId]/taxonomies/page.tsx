@@ -33,6 +33,7 @@ import {
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { useToastHelpers } from '@/lib/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 
@@ -156,6 +157,7 @@ export default function TaxonomiesPage() {
   const api = useApiClient();
 
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
+  const { success: showSuccess } = useToastHelpers();
   const [taxonomies, setTaxonomies] = useState<Taxonomy[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -287,11 +289,14 @@ export default function TaxonomiesPage() {
     // Refresh taxonomies list
     setTaxonomies([]);
     setSaving(false);
+    showSuccess(`Taxonomy "${taxonomyName}" created successfully`, 'Taxonomy Created');
   }, { title: 'Failed to Create Taxonomy' });
 
   const handleDeleteTaxonomy = withErrorHandling(async (taxonomyId: string) => {
     if (!api) return;
 
+    const deletedTaxonomy = taxonomyToDelete || taxonomies.find(t => t.id === taxonomyId);
+    const deletedName = deletedTaxonomy?.name || 'Taxonomy';
     await api.deleteTaxonomy(taxonomyId);
     if (selectedTaxonomy?.id === taxonomyId) {
       setSelectedTaxonomy(null);
@@ -299,6 +304,7 @@ export default function TaxonomiesPage() {
     // Refresh taxonomies list
     setTaxonomies([]);
     setTaxonomyToDelete(null);
+    showSuccess(`Taxonomy "${deletedName}" deleted successfully`, 'Taxonomy Deleted');
   }, { title: 'Failed to Delete Taxonomy' });
 
   const handleCreateTerm = withErrorHandling(async () => {
@@ -325,6 +331,7 @@ export default function TaxonomiesPage() {
     // Refresh terms list
     setTerms([]);
     setSaving(false);
+    showSuccess(`Term "${termName}" created successfully`, 'Term Created');
   }, { title: 'Failed to Create Term' });
 
   const handleEditTerm = withErrorHandling(async () => {
@@ -352,15 +359,19 @@ export default function TaxonomiesPage() {
     // Refresh terms list
     setTerms([]);
     setSaving(false);
+    showSuccess(`Term "${termName}" updated successfully`, 'Term Updated');
   }, { title: 'Failed to Update Term' });
 
   const handleDeleteTerm = withErrorHandling(async (termId: string) => {
     if (!api || !selectedTaxonomy) return;
 
+    const deletedTerm = termToDelete || terms.find(t => t.id === termId);
+    const deletedName = deletedTerm?.name || 'Term';
     await api.deleteTaxonomyTerm(selectedTaxonomy.id, termId);
     // Refresh terms list
     setTerms([]);
     setTermToDelete(null);
+    showSuccess(`Term "${deletedName}" deleted successfully`, 'Term Deleted');
   }, { title: 'Failed to Delete Term' });
 
   const openEditTermDialog = (term: TaxonomyTerm) => {

@@ -30,6 +30,7 @@ import {
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { useToastHelpers } from '@/lib/hooks/use-toast';
 import { Spinner } from '@/components/ui/spinner';
 import { useOrgUrl } from '@/lib/hooks/use-org-url';
 import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
@@ -55,6 +56,7 @@ export default function TemplatesPage() {
   const { organization } = useOrganization();
   const api = useApiClient();
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
+  const { success: showSuccess } = useToastHelpers();
   
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,8 +104,10 @@ export default function TemplatesPage() {
   const handleCreate = withErrorHandling(async () => {
     if (editingTemplate) {
       await api.updateTemplate(editingTemplate.id, formData);
+      showSuccess(`Template "${formData.name}" updated successfully`, 'Template Updated');
     } else {
       await api.createTemplate(formData);
+      showSuccess(`Template "${formData.name}" created successfully`, 'Template Created');
     }
     setIsDialogOpen(false);
     setEditingTemplate(null);
@@ -116,9 +120,12 @@ export default function TemplatesPage() {
   }, { title: 'Failed to Save Template' });
 
   const handleDelete = withErrorHandling(async (id: string) => {
+    const deletedTemplate = templateToDelete || templates.find(t => t.id === id);
+    const deletedName = deletedTemplate?.name || 'Template';
     await api.deleteTemplate(id);
     setTemplates(templates.filter(t => t.id !== id));
     setTemplateToDelete(null);
+    showSuccess(`Template "${deletedName}" deleted successfully`, 'Template Deleted');
   }, { title: 'Failed to Delete Template' });
 
   const handleEdit = (template: Template) => {
@@ -134,9 +141,12 @@ export default function TemplatesPage() {
   };
 
   const handleCreateFromTemplate = withErrorHandling(async (templateId: string) => {
+    const template = templates.find(t => t.id === templateId);
+    const templateName = template?.name || 'template';
     const response = await api.createPostFromTemplate({ templateId });
     if (response && typeof response === 'object' && 'data' in response) {
       const post = (response as { data: { id: string } }).data;
+      showSuccess(`Post created from "${templateName}" template`, 'Post Created');
       window.location.href = getUrl(`posts/${post.id}`);
     }
   }, { title: 'Failed to Create Post from Template' });

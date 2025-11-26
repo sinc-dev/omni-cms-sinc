@@ -3,9 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import * as React from 'react';
 import { usePathname } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -143,7 +142,7 @@ export default function OrganizationsPage() {
     };
 
       fetchOrganizations();
-    }, [debouncedSearch, pathname]);
+    }, [debouncedSearch, pathname, clearError, handleError]);
 
   // Generate slug from name
   const generateSlug = (nameValue: string) => {
@@ -483,6 +482,27 @@ export default function OrganizationsPage() {
           fetchOrganizations();
         }}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) {
+            setOrgToDelete(null);
+          }
+        }}
+        onConfirm={async () => {
+          if (!orgToDelete) return;
+          await handleDelete(orgToDelete.id);
+        }}
+        title="Delete Organization"
+        description="Are you sure you want to delete this organization? This action cannot be undone."
+        itemName={orgToDelete ? `"${orgToDelete.name}"` : undefined}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }
@@ -621,7 +641,7 @@ function CreateOrganizationFormContent({
 
 // Edit Organization Form Content
 function EditOrganizationFormContent({ onCancel }: { onCancel: () => void }) {
-  const { form, isSubmitting, isValid, errors } = useFormState<OrganizationFormDialogInput>();
+  const { isSubmitting, isValid, errors } = useFormState<OrganizationFormDialogInput>();
 
   return (
     <>
@@ -729,22 +749,6 @@ function EditOrganizationFormContent({ onCancel }: { onCancel: () => void }) {
           </Button>
         </div>
       </div>
-
-      {/* Delete Confirmation Dialog */}
-      <DeleteConfirmationDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        onConfirm={async () => {
-          if (!orgToDelete) return;
-          await handleDelete(orgToDelete.id);
-        }}
-        title="Delete Organization"
-        description="Are you sure you want to delete this organization? This action cannot be undone."
-        itemName={orgToDelete ? `"${orgToDelete.name}"` : undefined}
-        confirmText="Delete"
-        cancelText="Cancel"
-        variant="destructive"
-      />
     </>
   );
 }

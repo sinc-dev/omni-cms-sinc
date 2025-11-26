@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Settings, Layers } from 'lucide-react';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
@@ -57,48 +58,97 @@ export default function PostTypeDetailPage() {
   const [postCount, setPostCount] = useState<number | null>(null);
   const [attachmentDialogOpen, setAttachmentDialogOpen] = useState(false);
 
+  // Fetch guards to prevent infinite loops and redundant API calls
+  const isFetchingRef = useRef(false);
+  const hasFetchedRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   // Fetch post type and fields
   useEffect(() => {
     if (!organization || orgLoading) {
       return;
     }
 
+    // Prevent multiple simultaneous requests
+    if (isFetchingRef.current) {
+      return;
+    }
+
+    // Early return if already fetched for this post type
+    if (hasFetchedRef.current && postType?.id === postTypeId) {
+      return;
+    }
+
+    // Abort previous request if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     const fetchData = withErrorHandling(async () => {
+      isFetchingRef.current = true;
       setLoading(true);
       clearError();
 
-      const [postTypeResponse, fieldsResponse] = await Promise.all([
-        api.getPostType(postTypeId),
-        api.getPostTypeFields(postTypeId),
-      ]);
-
-      const postTypeData = postTypeResponse as { success: boolean; data: PostType };
-      const fieldsData = fieldsResponse as { success: boolean; data: PostTypeField[] };
-
-      if (postTypeData.success) {
-        setPostType(postTypeData.data);
-      }
-
-      if (fieldsData.success) {
-        setFields(fieldsData.data);
-      }
-
-      // Fetch post count (optional - you might want to add this endpoint)
       try {
-        const postsResponse = await api.getPosts({ post_type: postTypeId });
-        const postsData = postsResponse as { success: boolean; meta?: { total: number } };
-        if (postsData.success && postsData.meta) {
-          setPostCount(postsData.meta.total);
-        }
-      } catch {
-        // Ignore if endpoint doesn't support this
-      }
+        const [postTypeResponse, fieldsResponse] = await Promise.all([
+          api.getPostType(postTypeId),
+          api.getPostTypeFields(postTypeId),
+        ]);
 
-      setLoading(false);
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
+
+        const postTypeData = postTypeResponse as { success: boolean; data: PostType };
+        const fieldsData = fieldsResponse as { success: boolean; data: PostTypeField[] };
+
+        if (postTypeData.success) {
+          setPostType(postTypeData.data);
+        }
+
+        if (fieldsData.success) {
+          setFields(fieldsData.data);
+        }
+
+        // Fetch post count (optional - you might want to add this endpoint)
+        try {
+          const postsResponse = await api.getPosts({ post_type: postTypeId });
+          const postsData = postsResponse as { success: boolean; meta?: { total: number } };
+          if (postsData.success && postsData.meta) {
+            setPostCount(postsData.meta.total);
+          }
+        } catch {
+          // Ignore if endpoint doesn't support this
+        }
+
+        hasFetchedRef.current = true;
+      } catch (err) {
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
+        // Error is handled by withErrorHandling
+        throw err;
+      } finally {
+        setLoading(false);
+        isFetchingRef.current = false;
+      }
     }, { title: 'Failed to Load Post Type' });
 
     fetchData();
-  }, [organization, api, postTypeId, orgLoading, withErrorHandling, clearError]);
+
+    // Cleanup: Abort request on unmount or when dependencies change
+    return () => {
+      abortController.abort();
+      isFetchingRef.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organization, postTypeId]);
 
   const handleFieldDetach = withErrorHandling(async (fieldId: string) => {
     if (!api) return;
@@ -156,9 +206,36 @@ export default function PostTypeDetailPage() {
   if (loading) {
     return (
       <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-10 w-10" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+        </div>
         <Card>
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Loading post type details...</p>
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-40" />
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Skeleton className="h-12 w-12" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-48" />
+                </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
       </div>

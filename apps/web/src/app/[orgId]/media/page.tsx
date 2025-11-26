@@ -38,6 +38,8 @@ import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { useToastHelpers } from '@/lib/hooks/use-toast';
 import { MediaUploader } from '@/components/media/media-uploader';
 import { FilterBar } from '@/components/filters/filter-bar';
+import { Suspense } from 'react';
+
 import { useFilterParams } from '@/lib/hooks/use-filter-params';
 import type { SortOption } from '@/components/filters/sort-selector';
 import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
@@ -76,7 +78,7 @@ interface PaginatedResponse {
   };
 }
 
-export default function MediaPage() {
+function MediaPageContent() {
   const { organization, isLoading: orgLoading } = useOrganization();
   const api = useApiClient();
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
@@ -225,14 +227,18 @@ export default function MediaPage() {
     async (mediaId: string) => {
       if (!api) return;
 
+      const deletedMedia = mediaToDelete || media.find(m => m.id === mediaId);
+      const deletedFilename = deletedMedia?.filename || 'media file';
+
       await withErrorHandling(async () => {
         await api.deleteMedia(mediaId);
         // Refresh media list
         setPage(1);
         setMediaToDelete(null);
+        toast.success(`"${deletedFilename}" deleted successfully`, 'Media Deleted');
       }, { title: 'Failed to Delete Media' })();
     },
-    [api, withErrorHandling]
+    [api, withErrorHandling, mediaToDelete, media, toast]
   );
 
   const handleCopyUrl = useCallback(
@@ -812,6 +818,25 @@ export default function MediaPage() {
         variant="destructive"
       />
     </div>
+  );
+}
+
+export default function MediaPage() {
+  return (
+    // Suspense boundary is required for components that use useSearchParams/usePathname
+    // in statically pre-rendered segments per Next.js guidance.
+    <Suspense
+      fallback={
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Media Library</h1>
+            <p className="text-muted-foreground">Loading media...</p>
+          </div>
+        </div>
+      }
+    >
+      <MediaPageContent />
+    </Suspense>
   );
 }
 

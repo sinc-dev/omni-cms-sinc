@@ -37,9 +37,12 @@ import {
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { useToastHelpers } from '@/lib/hooks/use-toast';
 import { useSchema } from '@/lib/hooks/use-schema';
 import { Textarea } from '@/components/ui/textarea';
 import { FilterBar } from '@/components/filters/filter-bar';
+import { Suspense } from 'react';
+
 import { useFilterParams } from '@/lib/hooks/use-filter-params';
 import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 
@@ -104,11 +107,12 @@ interface PaginatedResponse {
   };
 }
 
-export default function CustomFieldsPage() {
+function CustomFieldsPageContent() {
   const { organization, isLoading: orgLoading } = useOrganization();
   const api = useApiClient();
 
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
+  const { success: showSuccess } = useToastHelpers();
   const { schema: customFieldsSchema } = useSchema('custom-fields');
   const { getFilter, updateFilters } = useFilterParams();
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
@@ -211,8 +215,10 @@ export default function CustomFieldsPage() {
 
     if (editingField) {
       await api.updateCustomField(editingField.id, data);
+      showSuccess(`Custom field "${data.name}" updated successfully`, 'Custom Field Updated');
     } else {
       await api.createCustomField(data);
+      showSuccess(`Custom field "${data.name}" created successfully`, 'Custom Field Created');
     }
 
     // Reset form and close dialog
@@ -226,9 +232,12 @@ export default function CustomFieldsPage() {
   const handleDelete = withErrorHandling(async (fieldId: string) => {
     if (!api) return;
 
+    const deletedField = fieldToDelete || customFields.find(f => f.id === fieldId);
+    const deletedName = deletedField?.name || 'Custom field';
     await api.deleteCustomField(fieldId);
     // Refresh custom fields list
     setCustomFields([]);
+    showSuccess(`Custom field "${deletedName}" deleted successfully`, 'Custom Field Deleted');
   }, { title: 'Failed to Delete Custom Field' });
 
   const openEditDialog = (field: CustomField) => {
@@ -483,6 +492,25 @@ export default function CustomFieldsPage() {
         variant="destructive"
       />
     </div>
+  );
+}
+
+export default function CustomFieldsPage() {
+  return (
+    // Suspense boundary is required for components that use useSearchParams/usePathname
+    // in statically pre-rendered segments per Next.js guidance.
+    <Suspense
+      fallback={
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Custom Fields</h1>
+            <p className="text-muted-foreground">Loading custom fields...</p>
+          </div>
+        </div>
+      }
+    >
+      <CustomFieldsPageContent />
+    </Suspense>
   );
 }
 

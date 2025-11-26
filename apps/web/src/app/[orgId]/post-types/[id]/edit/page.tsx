@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
@@ -51,35 +52,84 @@ export default function EditPostTypePage() {
   const [loading, setLoading] = useState(true);
   const [defaultValues, setDefaultValues] = useState<EditPostTypeFormInput | null>(null);
 
+  // Fetch guards to prevent infinite loops and redundant API calls
+  const isFetchingRef = useRef(false);
+  const hasFetchedRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   // Fetch post type
   useEffect(() => {
     if (!organization || orgLoading) {
       return;
     }
 
+    // Prevent multiple simultaneous requests
+    if (isFetchingRef.current) {
+      return;
+    }
+
+    // Early return if already fetched for this post type
+    if (hasFetchedRef.current && postType?.id === postTypeId) {
+      return;
+    }
+
+    // Abort previous request if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     const fetchPostType = withErrorHandling(async () => {
+      isFetchingRef.current = true;
       setLoading(true);
       clearError();
 
-      const response = await api.getPostType(postTypeId);
-      const data = response as { success: boolean; data: PostType };
+      try {
+        const response = await api.getPostType(postTypeId);
+        
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
 
-      if (data.success) {
-        setPostType(data.data);
-        setDefaultValues({
-          name: data.data.name,
-          slug: data.data.slug,
-          description: data.data.description || '',
-          icon: data.data.icon || '',
-          isHierarchical: data.data.isHierarchical,
-        });
+        const data = response as { success: boolean; data: PostType };
+
+        if (data.success) {
+          setPostType(data.data);
+          setDefaultValues({
+            name: data.data.name,
+            slug: data.data.slug,
+            description: data.data.description || '',
+            icon: data.data.icon || '',
+            isHierarchical: data.data.isHierarchical,
+          });
+          hasFetchedRef.current = true;
+        }
+      } catch (err) {
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
+        // Error is handled by withErrorHandling
+        throw err;
+      } finally {
+        setLoading(false);
+        isFetchingRef.current = false;
       }
-
-      setLoading(false);
     }, { title: 'Failed to Load Post Type' });
 
     fetchPostType();
-  }, [organization, api, postTypeId, orgLoading, withErrorHandling, clearError]);
+
+    // Cleanup: Abort request on unmount or when dependencies change
+    return () => {
+      abortController.abort();
+      isFetchingRef.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organization, postTypeId]);
 
   const handleSubmit = withErrorHandling(async (data: EditPostTypeFormInput) => {
     clearError();
@@ -117,10 +167,33 @@ export default function EditPostTypePage() {
   if (loading || !defaultValues) {
     return (
       <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-10 w-10" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+        </div>
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <CardHeader>
+            <Skeleton className="h-6 w-40" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-10 w-full" />
             </div>
           </CardContent>
         </Card>
