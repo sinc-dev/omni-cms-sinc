@@ -14,6 +14,16 @@ This configuration works with Root Directory `/apps/web` (as used in successful 
 | **Build command** | `pnpm install && pnpm run build:cf` ✅ **KEEP THIS** |
 | **Build output directory** | `/.vercel/output/static` or `.vercel/output/static` |
 
+### Environment Variables
+
+**IMPORTANT**: Add this environment variable in Cloudflare Pages settings to prevent out-of-memory errors:
+
+| Variable | Value |
+|----------|-------|
+| **NODE_OPTIONS** | `--max-old-space-size=4096` |
+
+Go to **Cloudflare Dashboard → Pages → Your Project → Settings → Environment variables** and add `NODE_OPTIONS` with value `--max-old-space-size=4096`.
+
 ## How It Works
 
 The build script (`build-cf.js`) creates symlinks to prevent path duplication:

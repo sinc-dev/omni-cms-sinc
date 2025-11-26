@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "next build --webpack",
-    "build:cf": "next build --webpack && node scripts/build-cf.js",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' next build --webpack",
+    "build:cf": "NODE_OPTIONS='--max-old-space-size=4096' next build --webpack && node scripts/build-cf.js",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",

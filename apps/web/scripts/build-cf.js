@@ -72,11 +72,14 @@ try {
   // Ensure we run from the project root directory
   process.chdir(projectRoot);
   
-  // Set environment variables to prevent path duplication
+  // Set environment variables to prevent path duplication and increase memory
   // Clear any root directory settings that might confuse vercel build
   const env = {
     ...process.env,
     PWD: projectRoot,
+    // Increase Node.js heap size to prevent out of memory errors during vercel build
+    // Use existing NODE_OPTIONS if set, otherwise default to 4GB
+    NODE_OPTIONS: process.env.NODE_OPTIONS || '--max-old-space-size=4096',
   };
   
   // Remove any root directory related env vars that might cause path duplication
