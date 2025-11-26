@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { eq, and, like, or, desc, asc, sql, gte, lte } from 'drizzle-orm';
+import { eq, and, like, or, desc, asc, sql, gte, lte, inArray } from 'drizzle-orm';
 import type { CloudflareBindings } from '../../types';
 import { publicMiddleware, getPublicContext } from '../../lib/api/hono-public-middleware';
 import { paginatedResponse, Errors } from '../../lib/api/hono-response';
@@ -15,6 +15,7 @@ import {
   postFieldValues,
   customFields,
   media,
+  postRelationships,
 } from '../../db/schema';
 import { getMediaVariantUrls } from '../../lib/media/urls';
 
@@ -63,6 +64,10 @@ app.get(
     const search = url.searchParams.get('search') ?? undefined;
     const publishedFrom = url.searchParams.get('published_from') ?? undefined;
     const publishedTo = url.searchParams.get('published_to') ?? undefined;
+    const relatedToSlug = url.searchParams.get('related_to_slug') ?? undefined;
+    const relationshipType = url.searchParams.get('relationship_type') ?? undefined;
+    const taxonomyFilters = url.searchParams.getAll('taxonomy'); // Can be repeated
+    const authorId = url.searchParams.get('author_id') ?? undefined;
     const sort = url.searchParams.get('sort') ?? 'publishedAt_desc';
 
     // Build where conditions - only published posts
@@ -71,22 +76,182 @@ app.get(
       eq(posts.status, 'published'),
     ];
 
-    // Filter by post type
+    // Filter by post type (supports single or comma-separated multiple)
     if (postTypeSlug) {
+      const postTypeSlugs = postTypeSlug.split(',').map(s => s.trim()).filter(Boolean);
+      const postTypeIds: string[] = [];
+
+      for (const slug of postTypeSlugs) {
       const postTypeRecord = await db.query.postTypes.findFirst({
         where: (pt, { eq, and: andFn }) => andFn(
           eq(pt.organizationId, org.id),
-          eq(pt.slug, postTypeSlug)
-        ),
-      });
-      if (postTypeRecord) {
-        conditions.push(eq(posts.postTypeId, postTypeRecord.id));
-      } else {
-        // Post type not found - return empty result
+            eq(pt.slug, slug)
+          ),
+        });
+        if (postTypeRecord) {
+          postTypeIds.push(postTypeRecord.id);
+        }
+      }
+
+      if (postTypeIds.length === 0) {
+        // No valid post types found - return empty result
         return c.json(paginatedResponse([], page, perPage, 0), 200, {
           'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
         });
       }
+
+      if (postTypeIds.length === 1) {
+        conditions.push(eq(posts.postTypeId, postTypeIds[0]));
+      } else {
+        conditions.push(inArray(posts.postTypeId, postTypeIds));
+      }
+    }
+
+    // Filter by relationship (e.g., get programs related to a university)
+    let relatedPostIds: string[] = [];
+    if (relatedToSlug) {
+      // Find the post(s) with the given slug
+      const relatedPosts = await db.query.posts.findMany({
+        where: (p, { eq, and: andFn }) => andFn(
+          eq(p.organizationId, org.id),
+          eq(p.slug, relatedToSlug),
+          eq(p.status, 'published')
+        ),
+      });
+
+      if (relatedPosts.length === 0) {
+        // Related post not found - return empty result
+        return c.json(paginatedResponse([], page, perPage, 0), 200, {
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        });
+      }
+
+      relatedPostIds = relatedPosts.map(p => p.id);
+
+      // Find all posts that have a relationship to the related post(s)
+      let relatedPostIds_filter: string[] = [];
+      if (relationshipType) {
+        // Filter by specific relationship type (e.g., 'university')
+        const relationships = await db.query.postRelationships.findMany({
+          where: (pr, { eq, and: andFn, inArray }) => andFn(
+            inArray(pr.toPostId, relatedPostIds),
+            eq(pr.relationshipType, relationshipType)
+          ),
+        });
+        relatedPostIds_filter = relationships.map(r => r.fromPostId);
+      } else {
+        // Get all relationships regardless of type
+        const relationships = await db.query.postRelationships.findMany({
+          where: (pr, { inArray }) => inArray(pr.toPostId, relatedPostIds),
+        });
+        relatedPostIds_filter = relationships.map(r => r.fromPostId);
+      }
+
+      if (relatedPostIds_filter.length > 0) {
+        conditions.push(inArray(posts.id, relatedPostIds_filter));
+      } else {
+        // No relationships found - return empty result
+        return c.json(paginatedResponse([], page, perPage, 0), 200, {
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        });
+      }
+    }
+
+    // Filter by taxonomy terms (e.g., taxonomy=program-degree-level:bachelor)
+    if (taxonomyFilters.length > 0) {
+      const taxonomyPostIds: string[][] = [];
+
+      for (const taxonomyFilter of taxonomyFilters) {
+        const [taxonomySlug, termSlug] = taxonomyFilter.split(':');
+        
+        if (!taxonomySlug || !termSlug) {
+          // Invalid format - skip this filter
+          continue;
+        }
+
+        // Find taxonomy by slug
+        const taxonomy = await db.query.taxonomies.findFirst({
+          where: (t, { eq, and: andFn }) => andFn(
+            eq(t.organizationId, org.id),
+            eq(t.slug, taxonomySlug)
+          ),
+        });
+
+        if (!taxonomy) {
+          // Taxonomy not found - return empty result
+          return c.json(paginatedResponse([], page, perPage, 0), 200, {
+            'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+          });
+        }
+
+        // Find term by slug
+        const term = await db.query.taxonomyTerms.findFirst({
+          where: (tt, { eq, and: andFn }) => andFn(
+            eq(tt.taxonomyId, taxonomy.id),
+            eq(tt.slug, termSlug)
+          ),
+        });
+
+        if (!term) {
+          // Term not found - return empty result
+          return c.json(paginatedResponse([], page, perPage, 0), 200, {
+            'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+          });
+        }
+
+        // Find all posts with this taxonomy term
+        const postIdsWithTerm = await db.query.postTaxonomies.findMany({
+          where: (pt, { eq }) => eq(pt.taxonomyTermId, term.id),
+          columns: {
+            postId: true,
+          },
+        });
+
+        const postIds = postIdsWithTerm.map((p) => p.postId);
+        
+        if (postIds.length === 0) {
+          // No posts with this term - return empty result
+          return c.json(paginatedResponse([], page, perPage, 0), 200, {
+            'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+          });
+        }
+
+        taxonomyPostIds.push(postIds);
+      }
+
+      // If we have taxonomy filters, posts must be in ALL of the term sets (AND logic)
+      if (taxonomyPostIds.length > 0) {
+        // Find intersection of all post ID sets
+        let intersectionIds = taxonomyPostIds[0];
+        for (let i = 1; i < taxonomyPostIds.length; i++) {
+          intersectionIds = intersectionIds.filter(id => taxonomyPostIds[i].includes(id));
+        }
+
+        if (intersectionIds.length === 0) {
+          // No posts match all taxonomy filters - return empty result
+          return c.json(paginatedResponse([], page, perPage, 0), 200, {
+            'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+          });
+        }
+
+        conditions.push(inArray(posts.id, intersectionIds));
+      }
+    }
+
+    // Filter by author
+    if (authorId) {
+      const author = await db.query.users.findFirst({
+        where: (u, { eq }) => eq(u.id, authorId),
+      });
+
+      if (!author) {
+        // Author not found - return empty result
+        return c.json(paginatedResponse([], page, perPage, 0), 200, {
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        });
+      }
+
+      conditions.push(eq(posts.authorId, author.id));
     }
 
     // Search filter

@@ -74,17 +74,17 @@ app.use('*', async (c, next) => {
   const env = c.env;
   
   // Determine allowed origins based on environment
-  let corsOrigin: string | string[] | ((origin: string) => boolean) = '*';
+  let corsOrigin: string | string[] | ((origin: string, c: any) => string | null | undefined) = '*';
   
   // Check for configured allowed origins (for production)
-  const allowedOriginsEnv = (env as Record<string, string | undefined>)['ALLOWED_ORIGINS'];
+  const allowedOriginsEnv = (env as unknown as Record<string, string | undefined>)['ALLOWED_ORIGINS'];
   
   if (allowedOriginsEnv) {
     // Production with configured origins
     const allowedOrigins = allowedOriginsEnv.split(',').map(o => o.trim()).filter(Boolean);
     if (allowedOrigins.length > 0) {
       corsOrigin = (requestOrigin: string) => {
-        return allowedOrigins.includes(requestOrigin);
+        return allowedOrigins.includes(requestOrigin) ? requestOrigin : undefined;
       };
     }
   } else {

@@ -21,6 +21,53 @@ app.get(
       description: 'Headless CMS API built with Hono on Cloudflare Workers',
       baseUrl: c.req.url.split('/api')[0] + '/api',
       
+      recommendedForLLMs: {
+        primaryEndpoint: 'search',
+        description: 'The search endpoint (POST /api/public/v1/:orgSlug/search) is the RECOMMENDED PRIMARY ENDPOINT for LLMs and AI agents. It provides the most powerful filtering capabilities, supports complex queries, and offers cursor-based pagination ideal for large datasets.',
+        whyUseSearch: [
+          'Supports all filtering types: relationships, taxonomies, custom fields, and standard post properties',
+          'Advanced operators: eq, ne, gt, gte, lt, lte, in, not_in, contains, not_contains, starts_with, ends_with, between, is_null, is_not_null',
+          'Filter groups with AND/OR logic for complex multi-condition queries',
+          'Cursor-based pagination for efficient large dataset handling (no page limits)',
+          'Property selection to reduce payload size and improve performance',
+          'Multi-entity search (posts, media, users, taxonomies, or all)',
+          'Full-text search across title, content, and excerpt',
+          'Date operators: date_eq, date_gt, date_gte, date_lt, date_lte, date_between',
+        ],
+        whenToUsePosts: [
+          'Simple queries with basic filters (post_type, search, date range)',
+          'Public access without API key required',
+          'Page-based pagination preferred',
+          'Simple taxonomy or relationship filtering via query parameters',
+        ],
+        quickStart: {
+          endpoint: 'POST /api/public/v1/:orgSlug/search',
+          auth: 'Requires API key with posts:search scope (Header: Authorization: Bearer <api-key>)',
+          example: {
+            entityType: 'posts',
+            filterGroups: [{
+              filters: [{
+                property: 'relationships.university.slug',
+                operator: 'eq',
+                value: 'coventry-university-kazakhstan'
+              }, {
+                property: 'taxonomies.program-degree-level',
+                operator: 'in',
+                value: ['bachelor', 'master']
+              }, {
+                property: 'customFields.tuition_fee',
+                operator: 'lt',
+                value: 5000
+              }],
+              operator: 'AND'
+            }],
+            limit: 100,
+            properties: ['id', 'title', 'slug', 'excerpt']
+          },
+          note: 'For LLMs, always prefer the search endpoint unless you specifically need public access without authentication or simple page-based pagination.',
+        },
+      },
+      
       authentication: {
         admin: {
           method: 'Cloudflare Access OR API Key',
@@ -1246,7 +1293,9 @@ app.get(
 
         public: {
           basePath: '/api/public/v1',
-          description: 'Public endpoints for accessing published content',
+          description: 'Public endpoints for accessing published content. NOTE: For LLMs and AI agents, the search endpoint is strongly recommended as the primary endpoint due to its advanced filtering capabilities.',
+          primaryEndpoint: 'search',
+          note: 'The search endpoint (POST /:orgSlug/search) is the recommended primary endpoint for LLMs. It supports all filtering types, advanced operators, and cursor-based pagination.',
           organizationSlugs: [
             'study-in-kazakhstan',
             'study-in-north-cyprus',
@@ -1308,10 +1357,14 @@ app.get(
               queryParams: {
                 page: 'Page number (default: 1)',
                 per_page: 'Items per page (default: 20, max: 100)',
-                post_type: 'Filter by post type slug (e.g., "programs", "blogs")',
+                post_type: 'Filter by post type slug(s). Supports single type (e.g., "programs") or comma-separated multiple types (e.g., "programs,blogs")',
                 search: 'Search in title, content, and excerpt',
                 published_from: 'Filter posts published after this date (ISO 8601, e.g., "2024-01-01T00:00:00Z")',
                 published_to: 'Filter posts published before this date (ISO 8601, e.g., "2024-12-31T23:59:59Z")',
+                related_to_slug: 'Filter posts that have a relationship to a post with this slug (e.g., "coventry-university-kazakhstan" to get all programs related to Coventry University)',
+                relationship_type: 'Optional. Filter by relationship type when using related_to_slug (e.g., "university")',
+                taxonomy: 'Filter by taxonomy term. Format: "taxonomy-slug:term-slug" (e.g., "program-degree-level:bachelor"). Can be repeated for multiple taxonomy filters (AND logic). Example: "?taxonomy=program-degree-level:bachelor&taxonomy=program-languages:english"',
+                author_id: 'Filter posts by author ID',
                 sort: 'Sort order: "field_asc" or "field_desc" (e.g., "publishedAt_desc", "title_asc"). Supported fields: publishedAt, createdAt, updatedAt, title',
               },
               response: {
@@ -1325,6 +1378,9 @@ app.get(
                 },
               },
               example: '/api/public/v1/study-in-kazakhstan/posts?page=1&per_page=20&post_type=programs&search=engineering&sort=publishedAt_desc',
+              exampleWithRelationship: '/api/public/v1/study-in-kazakhstan/posts?post_type=programs&related_to_slug=coventry-university-kazakhstan&relationship_type=university&per_page=100',
+              exampleWithTaxonomy: '/api/public/v1/study-in-kazakhstan/posts?post_type=programs&taxonomy=program-degree-level:bachelor&taxonomy=program-languages:english',
+              exampleMultipleTypes: '/api/public/v1/study-in-kazakhstan/posts?post_type=programs,blogs&per_page=20',
             },
             get: {
               method: 'GET',
@@ -1363,7 +1419,7 @@ app.get(
           search: {
             method: 'POST',
             path: '/:orgSlug/search',
-            description: 'Public search endpoint (requires API key with posts:search scope)',
+            description: 'Public search endpoint (requires API key with posts:search scope). Supports advanced filtering including relationships, taxonomies, and custom fields.',
             auth: 'required (API key with posts:search scope)',
             body: {
               entityType: 'posts | media | users | taxonomies | all',
@@ -1376,6 +1432,56 @@ app.get(
             },
             response: 'Cursor-based search results',
             note: 'API key is required. Search analytics are tracked automatically.',
+            filterProperties: {
+              standard: 'Standard post properties: id, title, slug, content, excerpt, status, createdAt, updatedAt, publishedAt, authorId, postTypeId, organizationId',
+              customFields: 'Custom field properties: customFields.{field-slug} (e.g., customFields.tuition_fee). Supports all operators: eq, ne, gt, gte, lt, lte, in, not_in, contains, not_contains, is_null, is_not_null',
+              relationships: 'Relationship properties: relationships.{type}.{field} (e.g., relationships.university.slug, relationships.university.id). Supported types: any relationship type. Supported fields: slug, id. Supports operators: eq, ne, in, not_in',
+              taxonomies: 'Taxonomy properties: taxonomies.{taxonomy-slug} or taxonomies.{taxonomy-slug}.{term-slug} (e.g., taxonomies.program-degree-level, taxonomies.program-degree-level.bachelor). Supports operators: eq, ne, in, not_in. Use "in" operator for multiple terms',
+            },
+            exampleWithRelationship: {
+              entityType: 'posts',
+              filterGroups: [{
+                filters: [{
+                  property: 'relationships.university.slug',
+                  operator: 'eq',
+                  value: 'coventry-university-kazakhstan'
+                }],
+                operator: 'AND'
+              }],
+              limit: 100
+            },
+            exampleWithTaxonomy: {
+              entityType: 'posts',
+              filterGroups: [{
+                filters: [{
+                  property: 'taxonomies.program-degree-level',
+                  operator: 'in',
+                  value: ['bachelor', 'master']
+                }],
+                operator: 'AND'
+              }],
+              limit: 100
+            },
+            exampleCombined: {
+              entityType: 'posts',
+              filterGroups: [{
+                filters: [{
+                  property: 'relationships.university.slug',
+                  operator: 'eq',
+                  value: 'coventry-university-kazakhstan'
+                }, {
+                  property: 'taxonomies.program-degree-level',
+                  operator: 'eq',
+                  value: 'bachelor'
+                }, {
+                  property: 'customFields.tuition_fee',
+                  operator: 'lt',
+                  value: 5000
+                }],
+                operator: 'AND'
+              }],
+              limit: 100
+            },
           },
 
           sitemap: {

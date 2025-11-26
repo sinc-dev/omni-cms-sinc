@@ -1,7 +1,7 @@
 import { eq, ne, gt, gte, lt, lte, inArray, notInArray, like, notLike, isNull, isNotNull, and, or, sql, between } from 'drizzle-orm';
 import type { SQL } from 'drizzle-orm';
 import type { Filter, FilterGroup } from '@/lib/validations/search';
-import { posts, postFieldValues, customFields } from '@/db/schema';
+import { posts, postFieldValues, customFields, postRelationships, postTaxonomies, taxonomyTerms, taxonomies } from '@/db/schema';
 import type { DbClient } from '@/db/client';
 
 /**
@@ -51,7 +51,17 @@ export class FilterBuilder {
       return this.buildCustomFieldCondition(property, operator, value);
     }
 
-    // Handle nested properties (e.g., author.name)
+    // Handle relationship properties (relationships.type.field)
+    if (property.startsWith('relationships.')) {
+      return this.buildRelationshipCondition(property, operator, value);
+    }
+
+    // Handle taxonomy properties (taxonomies.taxonomy-slug or taxonomies.taxonomy-slug.term-slug)
+    if (property.startsWith('taxonomies.')) {
+      return this.buildTaxonomyCondition(property, operator, value);
+    }
+
+    // Handle nested properties (e.g., author.name, postType.slug)
     if (property.includes('.')) {
       // For now, we'll handle these in the query builder
       // Return null to indicate this needs special handling
@@ -286,6 +296,179 @@ export class FilterBuilder {
       
       default:
         return null;
+    }
+  }
+
+  /**
+   * Build condition for relationship property
+   * Supports: relationships.{type}.{field} (e.g., relationships.university.slug)
+   */
+  private async buildRelationshipCondition(
+    property: string,
+    operator: Filter['operator'],
+    value: Filter['value']
+  ): Promise<SQL<unknown> | null> {
+    const parts = property.split('.');
+    if (parts.length < 3) {
+      return null; // Invalid format
+    }
+
+    const relationshipType = parts[1]; // e.g., "university"
+    const relatedField = parts[2]; // e.g., "slug" or "id"
+
+    if (!value || (typeof value !== 'string' && !Array.isArray(value))) {
+      return null;
+    }
+
+    // Find related posts by the specified field
+    let relatedPostIds: string[] = [];
+
+    if (relatedField === 'id') {
+      // Direct ID match
+      const ids = Array.isArray(value) ? value : [value];
+      relatedPostIds = ids.filter((id): id is string => typeof id === 'string');
+    } else if (relatedField === 'slug') {
+      // Find posts by slug
+      const slugs = Array.isArray(value) ? value : [value];
+      const relatedPosts = await Promise.all(
+        slugs.map(slug =>
+          this.db.query.posts.findFirst({
+            where: (p, { eq, and: andFn }) => andFn(
+              eq(p.organizationId, this.organizationId),
+              eq(p.slug, slug as string),
+              eq(p.status, 'published')
+            ),
+            columns: { id: true },
+          })
+        )
+      );
+      relatedPostIds = relatedPosts.filter(Boolean).map(p => p!.id);
+    } else {
+      return null; // Unsupported field
+    }
+
+    if (relatedPostIds.length === 0) {
+      // No related posts found - return condition that matches nothing
+      return sql`1 = 0`;
+    }
+
+    // Find all posts that have relationships to these posts
+    const relationships = await this.db.query.postRelationships.findMany({
+      where: (pr, { eq, and: andFn, inArray }) => andFn(
+        inArray(pr.toPostId, relatedPostIds),
+        eq(pr.relationshipType, relationshipType)
+      ),
+      columns: { fromPostId: true },
+    });
+
+    const postIds = relationships.map(r => r.fromPostId);
+
+    if (postIds.length === 0) {
+      return sql`1 = 0`; // No matches
+    }
+
+    // Build condition based on operator
+    switch (operator) {
+      case 'eq':
+      case 'in':
+        return inArray(posts.id, postIds);
+      case 'ne':
+      case 'not_in':
+        return notInArray(posts.id, postIds);
+      default:
+        return null; // Unsupported operator
+    }
+  }
+
+  /**
+   * Build condition for taxonomy property
+   * Supports: taxonomies.{taxonomy-slug} or taxonomies.{taxonomy-slug}.{term-slug}
+   */
+  private async buildTaxonomyCondition(
+    property: string,
+    operator: Filter['operator'],
+    value: Filter['value']
+  ): Promise<SQL<unknown> | null> {
+    const parts = property.split('.');
+    if (parts.length < 2) {
+      return null; // Invalid format
+    }
+
+    const taxonomySlug = parts[1]; // e.g., "program-degree-level"
+    const termSlug = parts[2]; // Optional, e.g., "bachelor"
+
+    // Find taxonomy
+    const taxonomy = await this.db.query.taxonomies.findFirst({
+      where: (t, { eq, and: andFn }) => andFn(
+        eq(t.organizationId, this.organizationId),
+        eq(t.slug, taxonomySlug)
+      ),
+    });
+
+    if (!taxonomy) {
+      return sql`1 = 0`; // Taxonomy not found
+    }
+
+    let termIds: string[] = [];
+
+    if (termSlug) {
+      // Specific term filter
+      const term = await this.db.query.taxonomyTerms.findFirst({
+        where: (tt, { eq, and: andFn }) => andFn(
+          eq(tt.taxonomyId, taxonomy.id),
+          eq(tt.slug, termSlug)
+        ),
+      });
+      if (term) {
+        termIds = [term.id];
+      } else {
+        return sql`1 = 0`; // Term not found
+      }
+    } else if (value) {
+      // Filter by term slugs provided in value
+      const slugs = Array.isArray(value) ? value : [value];
+      const terms = await Promise.all(
+        slugs.map(slug =>
+          this.db.query.taxonomyTerms.findFirst({
+            where: (tt, { eq, and: andFn }) => andFn(
+              eq(tt.taxonomyId, taxonomy.id),
+              eq(tt.slug, slug as string)
+            ),
+            columns: { id: true },
+          })
+        )
+      );
+      termIds = terms.filter(Boolean).map(t => t!.id);
+    } else {
+      return null; // Need either termSlug in property or value
+    }
+
+    if (termIds.length === 0) {
+      return sql`1 = 0`; // No terms found
+    }
+
+    // Find posts with these taxonomy terms
+    const postTaxonomies = await this.db.query.postTaxonomies.findMany({
+      where: (pt, { inArray }) => inArray(pt.taxonomyTermId, termIds),
+      columns: { postId: true },
+    });
+
+    const postIds = Array.from(new Set(postTaxonomies.map(pt => pt.postId)));
+
+    if (postIds.length === 0) {
+      return sql`1 = 0`; // No posts found
+    }
+
+    // Build condition based on operator
+    switch (operator) {
+      case 'eq':
+      case 'in':
+        return inArray(posts.id, postIds);
+      case 'ne':
+      case 'not_in':
+        return notInArray(posts.id, postIds);
+      default:
+        return null; // Unsupported operator
     }
   }
 
