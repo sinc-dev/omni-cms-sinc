@@ -78,13 +78,17 @@ try {
     ...process.env,
     PWD: projectRoot,
     // Increase Node.js heap size to prevent out of memory errors during vercel build
-    // Use existing NODE_OPTIONS if set, otherwise default to 4GB
-    NODE_OPTIONS: process.env.NODE_OPTIONS || '--max-old-space-size=4096',
+    // This is critical for vercel build which runs inside @cloudflare/next-on-pages
+    // The NODE_OPTIONS from package.json script may not be inherited by child processes
+    // Using 6GB to provide more headroom for the vercel build process
+    NODE_OPTIONS: '--max-old-space-size=6144',
   };
   
   // Remove any root directory related env vars that might cause path duplication
   delete env.VERCEL_ROOT;
   delete env.ROOT_DIR;
+  
+  console.log(`   NODE_OPTIONS: ${env.NODE_OPTIONS}`);
   
   execSync('npx @cloudflare/next-on-pages@1', { 
     stdio: 'inherit',

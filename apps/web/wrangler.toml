@@ -39,3 +39,4 @@ bucket_name = "omni-cms-media"
 # Note: NODE_OPTIONS is already set in package.json scripts for local builds
 [vars]
 R2_BUCKET_NAME = "omni-cms-media"
+NODE_OPTIONS = "--max-old-space-size=4096"
