@@ -20,13 +20,24 @@ if (!fs.existsSync(path.join(projectRoot, '.next'))) {
   process.exit(1);
 }
 
-// Step 1: Create symlink (for @cloudflare/next-on-pages path resolution)
+// Step 1: Create symlinks (for @cloudflare/next-on-pages path resolution)
+// When Root Directory is /apps/web, vercel build looks for apps/web/apps/web/
+// We create symlinks to prevent path duplication
 try {
+  // Create 'web' symlink pointing to current directory (for backward compatibility)
   if (fs.existsSync('web')) {
     fs.unlinkSync('web');
   }
   fs.symlinkSync('.', 'web', 'dir');
-  console.log('✓ Created symlink');
+  console.log('✓ Created symlink: web -> .');
+  
+  // Create 'apps' symlink pointing to parent directory
+  // This allows apps/web/apps/web to resolve to apps/web
+  if (fs.existsSync('apps')) {
+    fs.unlinkSync('apps');
+  }
+  fs.symlinkSync('..', 'apps', 'dir');
+  console.log('✓ Created symlink: apps -> ..');
 } catch (error) {
   console.warn('⚠ Symlink creation failed (may already exist):', error.message);
 }
@@ -80,11 +91,15 @@ try {
   console.log('✓ Cloudflare Pages build complete');
 } catch (error) {
   console.error('✗ Build failed:', error.message);
-  // Clean up symlink even on error
+  // Clean up symlinks even on error
   try {
     if (fs.existsSync('web')) {
       fs.unlinkSync('web');
-      console.log('✓ Cleaned up symlink');
+      console.log('✓ Cleaned up symlink: web');
+    }
+    if (fs.existsSync('apps')) {
+      fs.unlinkSync('apps');
+      console.log('✓ Cleaned up symlink: apps');
     }
   } catch {
     // Ignore cleanup errors
@@ -92,11 +107,15 @@ try {
   process.exit(1);
 }
 
-// Step 4: Clean up symlink
+// Step 4: Clean up symlinks
 try {
   if (fs.existsSync('web')) {
     fs.unlinkSync('web');
-    console.log('✓ Cleaned up symlink');
+    console.log('✓ Cleaned up symlink: web');
+  }
+  if (fs.existsSync('apps')) {
+    fs.unlinkSync('apps');
+    console.log('✓ Cleaned up symlink: apps');
   }
 } catch (error) {
   console.warn('⚠ Failed to remove symlink:', error.message);
