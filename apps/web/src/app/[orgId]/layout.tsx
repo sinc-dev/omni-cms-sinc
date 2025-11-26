@@ -30,14 +30,21 @@ export default function OrgLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const orgId = params.orgId as string;
-  const { setOrganizations, setOrganization } = useOrganization();
+  const { organizations: cachedOrgs, isLoading: orgsLoading, setOrganization } = useOrganization();
   const isRedirectingRef = useRef(false);
+  const hasValidatedRef = useRef(false);
   const [isValidating, setIsValidating] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
 
   useEffect(() => {
-    // Don't make API calls if we're on an error page
+    // Don't validate if on error pages
     if (pathname === '/unauthorized' || pathname === '/forbidden') {
+      setIsValidating(false);
+      return;
+    }
+
+    // Skip if already validated for this org
+    if (hasValidatedRef.current && hasAccess) {
       setIsValidating(false);
       return;
     }
@@ -52,67 +59,51 @@ export default function OrgLayout({ children }: { children: ReactNode }) {
       return;
     }
 
-    const validateOrgAccess = async () => {
-      try {
-        // Fetch user's organizations
-        const response = await apiClient.getOrganizations() as {
-          success: boolean;
-          data: Organization[];
-        };
-
-        if (response.success && response.data) {
-          const orgs = response.data;
-          setOrganizations(orgs);
-
-          // Check if user has access to the orgId in URL
-          const org = orgs.find((o) => o.id === orgId);
-          
-          if (org) {
-            setOrganization(org);
-            setHasAccess(true);
-          } else {
-            // User doesn't have access to this org
-            // Redirect to select-organization or first available org
-            if (orgs.length > 0) {
-              router.replace(`/${orgs[0].id}/dashboard`);
-            } else {
-              router.replace('/select-organization');
-            }
-            return;
-          }
-        } else {
-          // No organizations, redirect to selection
-          router.replace('/select-organization');
-          return;
-        }
-      } catch (error) {
-        // Check if it's a 401 error - redirect will happen in API client
-        if (error instanceof ApiError && error.status === 401) {
-          isRedirectingRef.current = true;
-          // Redirect will happen in API client, just return early
-          return;
-        }
-        console.error('Failed to validate organization access:', error);
-        router.replace('/select-organization');
-        return;
-      } finally {
-        setIsValidating(false);
-      }
-    };
-
-    if (orgId) {
-      validateOrgAccess();
-    } else {
-      router.replace('/select-organization');
+    // Wait for organizations to load from context
+    if (orgsLoading) {
+      setIsValidating(true);
+      return;
     }
-  }, [orgId, pathname, router, setOrganizations, setOrganization]); // Depend on orgId, pathname, and context setters
+
+    // Validate using cached organizations from context
+    if (orgId && cachedOrgs.length >= 0) {
+      setIsValidating(true);
+
+      // Check if user has access to the orgId in URL
+      const org = cachedOrgs.find((o) => o.id === orgId);
+      
+      if (org) {
+        setOrganization(org);
+        setHasAccess(true);
+        hasValidatedRef.current = true;
+        setIsValidating(false);
+      } else {
+        // User doesn't have access to this org
+        // Redirect to select-organization or first available org
+        if (cachedOrgs.length > 0) {
+          router.replace(`/${cachedOrgs[0].id}/dashboard`);
+        } else {
+          router.replace('/select-organization');
+        }
+        setIsValidating(false);
+        return;
+      }
+    } else if (!orgId) {
+      router.replace('/select-organization');
+      setIsValidating(false);
+    } else if (cachedOrgs.length === 0 && !orgsLoading) {
+      // No organizations, redirect to selection
+      router.replace('/select-organization');
+      setIsValidating(false);
+    }
+  }, [orgId, pathname, cachedOrgs, orgsLoading, hasAccess, router, setOrganization]);
 
   if (isValidating) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Loading organization...</p>
+          <p className="text-sm text-muted-foreground">Validating organization access...</p>
         </div>
       </div>
     );

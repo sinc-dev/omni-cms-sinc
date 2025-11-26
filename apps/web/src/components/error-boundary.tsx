@@ -54,6 +54,18 @@ export class ErrorBoundary extends Component<Props, State> {
     });
   };
 
+  getDashboardUrl = () => {
+    if (typeof window !== 'undefined') {
+      const pathParts = window.location.pathname.split('/').filter(Boolean);
+      if (pathParts.length > 0 && pathParts[0] !== 'admin' && pathParts[0] !== 'sign-in' && pathParts[0] !== 'sign-up') {
+        // Check if first part looks like an orgId (UUID or slug)
+        const orgId = pathParts[0];
+        return `/${orgId}/dashboard`;
+      }
+    }
+    return '/select-organization';
+  };
+
   render() {
     if (this.state.hasError) {
       // Use custom fallback if provided
@@ -101,7 +113,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   Refresh Page
                 </Button>
                 <Button variant="outline" asChild className="w-full">
-                  <Link href="/admin">
+                  <Link href={this.getDashboardUrl()}>
                     <Home className="mr-2 h-4 w-4" />
                     Go to Dashboard
                   </Link>

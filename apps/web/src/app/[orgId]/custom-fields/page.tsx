@@ -41,6 +41,7 @@ import { useSchema } from '@/lib/hooks/use-schema';
 import { Textarea } from '@/components/ui/textarea';
 import { FilterBar } from '@/components/filters/filter-bar';
 import { useFilterParams } from '@/lib/hooks/use-filter-params';
+import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 
 interface CustomField {
   id: string;
@@ -117,6 +118,8 @@ export default function CustomFieldsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingField, setEditingField] = useState<CustomField | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [fieldToDelete, setFieldToDelete] = useState<CustomField | null>(null);
   
   // Get filter values from URL
   const filterType = getFilter('field_type') || 'all';
@@ -220,12 +223,10 @@ export default function CustomFieldsPage() {
     setSaving(false);
   }, { title: 'Failed to Save Custom Field' });
 
-  const handleDelete = withErrorHandling(async (field: CustomField) => {
-    if (!api || !confirm(`Are you sure you want to delete "${field.name}"? This will remove this field from all posts.`)) {
-      return;
-    }
+  const handleDelete = withErrorHandling(async (fieldId: string) => {
+    if (!api) return;
 
-    await api.deleteCustomField(field.id);
+    await api.deleteCustomField(fieldId);
     // Refresh custom fields list
     setCustomFields([]);
   }, { title: 'Failed to Delete Custom Field' });
@@ -447,7 +448,10 @@ export default function CustomFieldsPage() {
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleDelete(field)}
+                          onClick={() => {
+                            setFieldToDelete(field);
+                            setDeleteDialogOpen(true);
+                          }}
                           className="text-destructive"
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
@@ -462,6 +466,22 @@ export default function CustomFieldsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={async () => {
+          if (!fieldToDelete) return;
+          await handleDelete(fieldToDelete.id);
+        }}
+        title="Delete Custom Field"
+        description="Are you sure you want to delete this custom field? This will remove this field from all posts. This action cannot be undone."
+        itemName={fieldToDelete ? `"${fieldToDelete.name}"` : undefined}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }

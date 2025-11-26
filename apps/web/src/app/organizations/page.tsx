@@ -32,6 +32,7 @@ import { apiClient } from '@/lib/api-client';
 import { ApiError } from '@/lib/api-client/errors';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { ExportDialog, ImportDialog } from '@/components/import-export';
+import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 import {
   Form,
   FormField,
@@ -64,6 +65,9 @@ export default function OrganizationsPage() {
   const pathname = usePathname();
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
   const isRedirectingRef = useRef(false);
+  const isFetchingRef = useRef(false);
+  const hasFetchedRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -74,6 +78,8 @@ export default function OrganizationsPage() {
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [selectedOrgForImportExport, setSelectedOrgForImportExport] = useState<Organization | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [orgToDelete, setOrgToDelete] = useState<Organization | null>(null);
 
   // Debounce search
   useEffect(() => {
@@ -91,6 +97,11 @@ export default function OrganizationsPage() {
       return;
     }
 
+    // Prevent multiple simultaneous requests
+    if (isFetchingRef.current) {
+      return;
+    }
+
     // Prevent multiple simultaneous requests if redirecting
     if (isRedirectingRef.current) {
       return;
@@ -101,15 +112,36 @@ export default function OrganizationsPage() {
       return;
     }
 
+    // Abort previous request if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     const fetchOrganizations = async () => {
-      setLoading(true);
-      clearError();
+      // Prevent multiple simultaneous requests
+      if (isFetchingRef.current) {
+        return;
+      }
+
+      isFetchingRef.current = true;
 
       try {
+        setLoading(true);
+        clearError();
+
         const response = (await apiClient.getOrganizations()) as {
           success: boolean;
           data: Organization[];
         };
+
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
 
         if (response.success) {
           let filtered = response.data;
@@ -123,25 +155,44 @@ export default function OrganizationsPage() {
             );
           }
           setOrganizations(filtered);
+          hasFetchedRef.current = true;
         } else {
           handleError('Failed to load organizations', { title: 'Failed to Load Organizations' });
         }
       } catch (err) {
+        // Don't handle errors if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
+
         // Check if it's a 401 error - redirect will happen in API client
         if (err instanceof ApiError && err.status === 401) {
           isRedirectingRef.current = true;
+          setLoading(false);
           // Redirect will happen in API client, just return early
           return;
         }
         console.error('Failed to load organizations:', err);
         handleError(err, { title: 'Failed to Load Organizations' });
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
+        isFetchingRef.current = false;
       }
     };
 
-      fetchOrganizations();
-    }, [debouncedSearch, pathname]);
+    fetchOrganizations();
+
+    // Cleanup function to abort request if component unmounts or effect re-runs
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+      isFetchingRef.current = false;
+    };
+  }, [debouncedSearch, pathname]); // handleError and clearError are stable via useCallback
 
   // Generate slug from name
   const generateSlug = (nameValue: string) => {
@@ -215,13 +266,9 @@ export default function OrganizationsPage() {
     }
   }, { title: 'Failed to Update Organization' });
 
-  const handleDelete = withErrorHandling(async (org: Organization) => {
-    if (!confirm(`Are you sure you want to delete "${org.name}"? This action cannot be undone.`)) {
-      return;
-    }
-
+  const handleDelete = withErrorHandling(async (orgId: string) => {
     try {
-      await apiClient.deleteOrganization(org.id);
+      await apiClient.deleteOrganization(orgId);
 
       // Refresh organizations list
       const response = (await apiClient.getOrganizations()) as {
@@ -231,6 +278,7 @@ export default function OrganizationsPage() {
       if (response.success) {
         setOrganizations(response.data);
       }
+      setOrgToDelete(null);
     } catch (err) {
       handleError(err, { title: 'Failed to Delete Organization' });
     }
@@ -379,7 +427,10 @@ export default function OrganizationsPage() {
                               Import
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => handleDelete(org)}
+                              onClick={() => {
+                                setOrgToDelete(org);
+                                setDeleteDialogOpen(true);
+                              }}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -730,6 +781,22 @@ function EditOrganizationFormContent({ onCancel }: { onCancel: () => void }) {
           </Button>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={async () => {
+          if (!orgToDelete) return;
+          await handleDelete(orgToDelete.id);
+        }}
+        title="Delete Organization"
+        description="Are you sure you want to delete this organization? This action cannot be undone."
+        itemName={orgToDelete ? `"${orgToDelete.name}"` : undefined}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </>
   );
 }

@@ -33,6 +33,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# Wrangler dev vars (contains sensitive credentials)
+.dev.vars
+**/.dev.vars
+
 # sensitive API key files
 **/all-organizations-and-api-keys-output.txt
 **/*api-keys*.txt

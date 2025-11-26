@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { FileText, Image, Users, Tags, Loader2, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { useApiClient } from '@/lib/hooks/use-api-client';
@@ -165,10 +166,31 @@ function DashboardContent() {
     fetchStats();
   }, [orgId, api, handleError]);
 
+  // Determine if any stats are loading
+  const isLoadingStats = stats.some((stat) => stat.loading);
+  const allStatsLoaded = stats.every((stat) => !stat.loading);
+
   if (!organization) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-9 w-48 mb-2" />
+          <Skeleton className="h-5 w-64" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-4 rounded" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-32" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
@@ -189,16 +211,25 @@ function DashboardContent() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
               {stat.loading ? (
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <Skeleton className="h-4 w-4 rounded" />
               ) : (
                 <stat.icon className="h-4 w-4 text-muted-foreground" />
               )}
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {stat.loading ? '—' : stat.value.toLocaleString()}
-              </div>
-              <p className="text-xs text-muted-foreground">{stat.description}</p>
+              {stat.loading ? (
+                <>
+                  <Skeleton className="h-8 w-16 mb-2" />
+                  <p className="text-xs text-muted-foreground">{stat.description}</p>
+                </>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">
+                    {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{stat.description}</p>
+                </>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -304,6 +335,8 @@ function RecentActivity({ api, orgId }: { api: ReturnType<typeof useApiClient>; 
         activitiesList.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
         setActivities(activitiesList.slice(0, 10));
       } catch (err) {
+        // Activity is optional - silently fail to avoid disrupting dashboard
+        // Individual API calls already have .catch(() => null) to handle gracefully
         console.error('Failed to load activity:', err);
       } finally {
         setLoading(false);
@@ -354,17 +387,30 @@ function RecentActivity({ api, orgId }: { api: ReturnType<typeof useApiClient>; 
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="space-y-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="flex items-start gap-3 p-2 rounded-lg">
+            <Skeleton className="h-4 w-4 rounded mt-0.5" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-full max-w-xs" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
 
   if (activities.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
-        No recent activity to display
-      </p>
+      <div className="text-center py-8">
+        <p className="text-sm text-muted-foreground mb-2">
+          No recent activity to display
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Activity will appear here as you create and update content.
+        </p>
+      </div>
     );
   }
 

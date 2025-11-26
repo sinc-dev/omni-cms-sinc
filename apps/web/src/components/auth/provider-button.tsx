@@ -78,10 +78,16 @@ export function ProviderButton({ provider, onClick, disabled, className }: Provi
 
   const handleClick = async () => {
     setLoading(true);
+    const timeoutId = setTimeout(() => {
+      setLoading(false); // Reset if redirect takes too long
+    }, 5000);
+    
     try {
       await onClick();
     } finally {
-      // Keep loading state during redirect
+      clearTimeout(timeoutId);
+      // Note: Loading may persist during redirect, which is intentional
+      // but timeout ensures it doesn't persist forever
     }
   };
 

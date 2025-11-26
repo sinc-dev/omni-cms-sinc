@@ -32,6 +32,7 @@ import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { useOrgUrl } from '@/lib/hooks/use-org-url';
+import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 
 interface PostType {
   id: string;
@@ -70,6 +71,8 @@ export default function PostTypesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPostType, setEditingPostType] = useState<PostType | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postTypeToDelete, setPostTypeToDelete] = useState<PostType | null>(null);
 
   // Form state
   const [name, setName] = useState('');
@@ -153,14 +156,13 @@ export default function PostTypesPage() {
     setSaving(false);
   }, { title: 'Failed to Save Post Type' });
 
-  const handleDelete = withErrorHandling(async (postType: PostType) => {
-    if (!api || !confirm(`Are you sure you want to delete "${postType.name}"? This will also delete all posts of this type.`)) {
-      return;
-    }
+  const handleDelete = withErrorHandling(async (postTypeId: string) => {
+    if (!api) return;
 
-    await api.deletePostType(postType.id);
+    await api.deletePostType(postTypeId);
     // Refresh post types list
     setPostTypes([]);
+    setPostTypeToDelete(null);
   }, { title: 'Failed to Delete Post Type' });
 
   const openEditDialog = (postType: PostType) => {
@@ -381,7 +383,10 @@ export default function PostTypesPage() {
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleDelete(postType)}
+                        onClick={() => {
+                          setPostTypeToDelete(postType);
+                          setDeleteDialogOpen(true);
+                        }}
                         className="text-destructive"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
@@ -395,6 +400,22 @@ export default function PostTypesPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={async () => {
+          if (!postTypeToDelete) return;
+          await handleDelete(postTypeToDelete.id);
+        }}
+        title="Delete Post Type"
+        description="Are you sure you want to delete this post type? This will also delete all posts of this type. This action cannot be undone."
+        itemName={postTypeToDelete ? `"${postTypeToDelete.name}"` : undefined}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }

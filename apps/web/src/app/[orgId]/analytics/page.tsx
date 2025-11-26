@@ -2,9 +2,10 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   TrendingUp,
   Eye,
@@ -14,7 +15,6 @@ import {
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
-import { Spinner } from '@/components/ui/spinner';
 
 interface AnalyticsOverview {
   totalViews: number;
@@ -48,13 +48,33 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('7d');
 
+  // Fetch guards to prevent infinite loops and redundant requests
+  const isFetchingRef = useRef(false);
+  const hasFetchedRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   useEffect(() => {
-    if (!organization) {
+    if (!organization || !api) {
       setLoading(false);
       return;
     }
 
+    // Prevent multiple simultaneous requests
+    if (isFetchingRef.current) {
+      return;
+    }
+
+    // Abort previous request if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     const fetchAnalytics = withErrorHandling(async () => {
+      isFetchingRef.current = true;
       setLoading(true);
       clearError();
 
@@ -66,6 +86,11 @@ export default function AnalyticsPage() {
         api.getAnalytics(params) as Promise<{ success: boolean; data: AnalyticsOverview }>,
         api.getPostAnalytics(params) as Promise<{ success: boolean; data: PostAnalytics[] }>,
       ]);
+
+      // Check if request was aborted
+      if (abortController.signal.aborted) {
+        return;
+      }
       
       if (overviewResponse.success) {
         setOverview(overviewResponse.data);
@@ -73,12 +98,20 @@ export default function AnalyticsPage() {
       if (postsResponse.success) {
         setPostAnalytics(postsResponse.data);
       }
+      hasFetchedRef.current = true;
       setLoading(false);
+      isFetchingRef.current = false;
     }, { title: 'Failed to Load Analytics' });
 
     fetchAnalytics();
+
+    // Cleanup: Abort request on unmount or when dependencies change
+    return () => {
+      abortController.abort();
+      isFetchingRef.current = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [organization, dateRange, api]);
+  }, [organization, dateRange]);
 
   if (!organization) {
     return (
@@ -118,8 +151,56 @@ export default function AnalyticsPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-8">
-          <Spinner />
+        <div className="space-y-6">
+          {/* Skeleton loaders for overview stats */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-4 rounded" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-16 mb-2" />
+                  <Skeleton className="h-3 w-32" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          {/* Skeleton loader for top posts */}
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-32" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <div>
+                        <Skeleton className="h-4 w-48 mb-2" />
+                        <Skeleton className="h-3 w-32" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          {/* Skeleton loader for post analytics table */}
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-40" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       ) : error ? (
         <Card>

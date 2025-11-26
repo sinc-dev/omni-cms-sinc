@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
   DialogContent,
@@ -21,7 +22,7 @@ import Link from 'next/link';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
-import { Spinner } from '@/components/ui/spinner';
+import { useToastHelpers } from '@/lib/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useOrgUrl } from '@/lib/hooks/use-org-url';
@@ -53,6 +54,7 @@ export default function ReviewsPage() {
   const { organization } = useOrganization();
   const api = useApiClient();
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
+  const { success: showSuccess } = useToastHelpers();
   
   const [pendingReviews, setPendingReviews] = useState<PendingReview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,35 +63,69 @@ export default function ReviewsPage() {
   const [action, setAction] = useState<'approve' | 'reject' | null>(null);
   const [comment, setComment] = useState('');
 
+  // Fetch guards to prevent infinite loops and redundant requests
+  const isFetchingRef = useRef(false);
+  const hasFetchedRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   useEffect(() => {
-    if (!organization) {
+    if (!organization || !api) {
       setLoading(false);
       return;
     }
 
+    // Prevent multiple simultaneous requests
+    if (isFetchingRef.current) {
+      return;
+    }
+
+    // Abort previous request if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     const fetchPendingReviews = withErrorHandling(async () => {
+      isFetchingRef.current = true;
       setLoading(true);
       clearError();
 
       const response = (await api.getPendingReviews()) as { success: boolean; data: PendingReview[] };
+
+      // Check if request was aborted
+      if (abortController.signal.aborted) {
+        return;
+      }
       
       if (response.success) {
         setPendingReviews(response.data);
+        hasFetchedRef.current = true;
       } else {
         handleError('Failed to load pending reviews', { title: 'Failed to Load Reviews' });
       }
       setLoading(false);
+      isFetchingRef.current = false;
     }, { title: 'Failed to Load Reviews' });
 
     fetchPendingReviews();
+
+    // Cleanup: Abort request on unmount or when dependencies change
+    return () => {
+      abortController.abort();
+      isFetchingRef.current = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [organization, api]);
+  }, [organization]);
 
   const handleApprove = withErrorHandling(async (postId: string) => {
     await api.approvePost(postId, comment ? { comment } : undefined);
     setIsDialogOpen(false);
     setSelectedPost(null);
     setComment('');
+    showSuccess('Post approved successfully', 'Approval Complete');
     // Refresh list
     const response = (await api.getPendingReviews()) as { success: boolean; data: PendingReview[] };
     if (response.success) {
@@ -107,6 +143,7 @@ export default function ReviewsPage() {
     setIsDialogOpen(false);
     setSelectedPost(null);
     setComment('');
+    showSuccess('Post rejected successfully', 'Rejection Complete');
     // Refresh list
     const response = (await api.getPendingReviews()) as { success: boolean; data: PendingReview[] };
     if (response.success) {
@@ -150,8 +187,27 @@ export default function ReviewsPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex justify-center py-8">
-              <Spinner />
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Card key={i}>
+                  <CardContent className="pt-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <Skeleton className="h-5 w-64 mb-2" />
+                        <Skeleton className="h-4 w-48 mb-4" />
+                        <div className="flex gap-2">
+                          <Skeleton className="h-6 w-20" />
+                          <Skeleton className="h-6 w-24" />
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Skeleton className="h-9 w-24" />
+                        <Skeleton className="h-9 w-24" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           ) : error ? (
             <p className="text-sm text-destructive">{error}</p>

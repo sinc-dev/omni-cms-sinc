@@ -32,6 +32,7 @@ import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { Spinner } from '@/components/ui/spinner';
 import { useOrgUrl } from '@/lib/hooks/use-org-url';
+import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 
 interface Template {
   id: string;
@@ -60,6 +61,8 @@ export default function TemplatesPage() {
   const [search, setSearch] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -113,10 +116,9 @@ export default function TemplatesPage() {
   }, { title: 'Failed to Save Template' });
 
   const handleDelete = withErrorHandling(async (id: string) => {
-    if (!confirm('Are you sure you want to delete this template?')) return;
-
     await api.deleteTemplate(id);
     setTemplates(templates.filter(t => t.id !== id));
+    setTemplateToDelete(null);
   }, { title: 'Failed to Delete Template' });
 
   const handleEdit = (template: Template) => {
@@ -267,7 +269,10 @@ export default function TemplatesPage() {
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleDelete(template.id)}
+                          onClick={() => {
+                            setTemplateToDelete(template);
+                            setDeleteDialogOpen(true);
+                          }}
                           className="text-destructive"
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
@@ -282,6 +287,22 @@ export default function TemplatesPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={async () => {
+          if (!templateToDelete) return;
+          await handleDelete(templateToDelete.id);
+        }}
+        title="Delete Template"
+        description="Are you sure you want to delete this template? This action cannot be undone."
+        itemName={templateToDelete ? `"${templateToDelete.name}"` : undefined}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }

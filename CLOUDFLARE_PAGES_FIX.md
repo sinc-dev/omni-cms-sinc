@@ -23,8 +23,8 @@ If you're seeing an "Internal Server Error" after logging in, follow these steps
 Add these variables:
 
 #### Required:
-- **CF_ACCESS_TEAM_DOMAIN** = `sincdev.cloudflareaccess.com`
-- **CF_ACCESS_AUD** = `7291b33d4c255188f0d63a05cf91f9e72e1e6606fb2acb148360886c42e52083`
+- **CF_ACCESS_TEAM_DOMAIN** = `your-team.cloudflareaccess.com` (get from Cloudflare Zero Trust → Access)
+- **CF_ACCESS_AUD** = `your-access-aud-here` (get from Cloudflare Zero Trust → Access → Applications)
 
 #### Recommended:
 - **NEXT_PUBLIC_APP_URL** = `https://omni-cms-sinc.pages.dev`

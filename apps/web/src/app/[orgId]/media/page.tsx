@@ -40,6 +40,7 @@ import { MediaUploader } from '@/components/media/media-uploader';
 import { FilterBar } from '@/components/filters/filter-bar';
 import { useFilterParams } from '@/lib/hooks/use-filter-params';
 import type { SortOption } from '@/components/filters/sort-selector';
+import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 
 interface MediaItem {
   id: string;
@@ -91,6 +92,8 @@ export default function MediaPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [users, setUsers] = useState<Array<{ id: string; name: string; email: string }>>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [mediaToDelete, setMediaToDelete] = useState<{ id: string; filename: string } | null>(null);
   
   // Get filter values from URL
   const typeFilter = getFilter('type') || 'all';
@@ -128,19 +131,27 @@ export default function MediaPage() {
   useEffect(() => {
     if (!organization || !api) return;
 
-    const fetchUsers = async () => {
+    const fetchUsers = withErrorHandling(async () => {
       try {
         const response = (await api.getUsers()) as { success: boolean; data: Array<{ id: string; name: string; email: string }> };
         if (response.success) {
           setUsers(response.data);
         }
       } catch (err) {
-        console.error('Failed to load users:', err);
+        // Error is handled by withErrorHandling wrapper
+        // Silently fail for filter data - don't block the page
+        handleError(err, { 
+          title: 'Failed to Load Filter Options',
+          showToast: false // Don't show toast for filter failures
+        });
       }
-    };
+    }, { 
+      title: 'Failed to Load Filter Options',
+      showToast: false 
+    });
 
     fetchUsers();
-  }, [organization, api]);
+  }, [organization, api, withErrorHandling, handleError]);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -212,14 +223,13 @@ export default function MediaPage() {
 
   const handleDelete = useCallback(
     async (mediaId: string) => {
-      if (!api || !confirm('Are you sure you want to delete this file?')) {
-        return;
-      }
+      if (!api) return;
 
       await withErrorHandling(async () => {
         await api.deleteMedia(mediaId);
         // Refresh media list
         setPage(1);
+        setMediaToDelete(null);
       }, { title: 'Failed to Delete Media' })();
     },
     [api, withErrorHandling]
@@ -522,7 +532,8 @@ export default function MediaPage() {
                                 className="text-destructive focus:text-destructive"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleDelete(item.id);
+                                  setMediaToDelete({ id: item.id, filename: item.filename });
+                                  setDeleteDialogOpen(true);
                                 }}
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
@@ -645,7 +656,10 @@ export default function MediaPage() {
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                     className="text-destructive focus:text-destructive"
-                                    onClick={() => handleDelete(item.id)}
+                                    onClick={() => {
+                                      setMediaToDelete({ id: item.id, filename: item.filename });
+                                      setDeleteDialogOpen(true);
+                                    }}
                                   >
                                     <Trash2 className="mr-2 h-4 w-4" />
                                     Delete
@@ -768,8 +782,9 @@ export default function MediaPage() {
                 <Button
                   variant="destructive"
                   onClick={() => {
-                    handleDelete(selectedMedia.id);
+                    setMediaToDelete({ id: selectedMedia.id, filename: selectedMedia.filename });
                     setPreviewOpen(false);
+                    setDeleteDialogOpen(true);
                   }}
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
@@ -780,6 +795,22 @@ export default function MediaPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={async () => {
+          if (!mediaToDelete) return;
+          await handleDelete(mediaToDelete.id);
+        }}
+        title="Delete Media"
+        description="Are you sure you want to delete this file? This action cannot be undone."
+        itemName={mediaToDelete ? `"${mediaToDelete.filename}"` : undefined}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }

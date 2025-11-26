@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +12,7 @@ import {
   InputOTPSlot,
 } from '@/components/ui/input-otp';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Loader2, Mail, ArrowLeft } from 'lucide-react';
+import { AlertCircle, Loader2, Mail, ArrowLeft, Info } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { getRedirectUrl, storeRedirectUrl } from '@/lib/auth/cloudflare-access-client';
 
@@ -26,6 +27,7 @@ export function OTPSignIn() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +48,9 @@ export function OTPSignIn() {
       setEmail(normalizedEmail);
       setStep('otp');
       setResendCooldown(60); // 60 second cooldown
+      setShowSuccessMessage(true);
+      // Clear success message after 5 seconds
+      setTimeout(() => setShowSuccessMessage(false), 5000);
       
       // Start countdown
       const interval = setInterval(() => {
@@ -57,8 +62,9 @@ export function OTPSignIn() {
           return prev - 1;
         });
       }, 1000);
-    } catch (err: any) {
-      setError(err.message || 'Failed to send OTP code. Please try again.');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to send OTP code. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -90,9 +96,10 @@ export function OTPSignIn() {
       storeRedirectUrl(redirectUrl);
       
       router.push(redirectUrl);
-    } catch (err: any) {
-      setError(err.message || 'Invalid or expired code. Please try again.');
-      setOtp(''); // Clear OTP on error
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Invalid or expired code. Please try again.';
+      setError(errorMessage);
+      // Don't clear OTP on error - let user see what they entered and fix it
     } finally {
       setLoading(false);
     }
@@ -118,22 +125,55 @@ export function OTPSignIn() {
           return prev - 1;
         });
       }, 1000);
-    } catch (err: any) {
-      setError(err.message || 'Failed to resend code. Please try again.');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to resend code. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   const handleOTPChange = (value: string) => {
-    setOtp(value);
+    // Only accept numeric digits
+    const numericValue = value.replace(/\D/g, '');
+    setOtp(numericValue);
     setError(null);
     
     // Auto-submit when 6 digits are entered
-    if (value.length === 6) {
+    if (numericValue.length === 6) {
       handleOTPSubmit();
     }
   };
+
+  // Handle paste event
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData('text');
+    const numericValue = pastedText.replace(/\D/g, '').slice(0, 6);
+    if (numericValue.length === 6) {
+      setOtp(numericValue);
+      setError(null);
+      // Auto-submit after paste
+      setTimeout(() => {
+        handleOTPSubmit();
+      }, 100);
+    } else {
+      setOtp(numericValue);
+    }
+  };
+
+  // Focus OTP input when step changes to 'otp'
+  useEffect(() => {
+    if (step === 'otp') {
+      // Small delay to ensure input is rendered
+      setTimeout(() => {
+        const firstInput = document.querySelector('[data-slot="input-otp"] input') as HTMLInputElement;
+        if (firstInput) {
+          firstInput.focus();
+        }
+      }, 100);
+    }
+  }, [step]);
 
   if (step === 'email') {
     return (
@@ -188,27 +228,63 @@ export function OTPSignIn() {
         </Alert>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="otp">Enter verification code</Label>
-        <p className="text-sm text-muted-foreground">
-          We sent a 6-digit code to <strong>{email}</strong>
-        </p>
-        <div className="flex justify-center">
-          <InputOTP
-            maxLength={6}
-            value={otp}
-            onChange={handleOTPChange}
-            disabled={loading}
-          >
-            <InputOTPGroup>
-              <InputOTPSlot index={0} />
-              <InputOTPSlot index={1} />
-              <InputOTPSlot index={2} />
-              <InputOTPSlot index={3} />
-              <InputOTPSlot index={4} />
-              <InputOTPSlot index={5} />
-            </InputOTPGroup>
-          </InputOTP>
+      <div className="space-y-3">
+        <div>
+          <Label htmlFor="otp">Enter verification code</Label>
+          <p className="text-sm text-muted-foreground mt-1">
+            We sent a 6-digit code to <strong>{email}</strong>
+          </p>
+        </div>
+
+        {showSuccessMessage && (
+          <Alert className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+            <Info className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <AlertDescription className="text-green-800 dark:text-green-200">
+              Code sent! Check your email.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex justify-center" onPaste={handlePaste}>
+            <InputOTP
+              maxLength={6}
+              value={otp}
+              onChange={handleOTPChange}
+              disabled={loading}
+              containerClassName="gap-2 sm:gap-3"
+            >
+              <InputOTPGroup>
+                <InputOTPSlot 
+                  index={0} 
+                  className="h-12 w-12 sm:h-14 sm:w-14 text-lg sm:text-xl font-semibold" 
+                />
+                <InputOTPSlot 
+                  index={1} 
+                  className="h-12 w-12 sm:h-14 sm:w-14 text-lg sm:text-xl font-semibold" 
+                />
+                <InputOTPSlot 
+                  index={2} 
+                  className="h-12 w-12 sm:h-14 sm:w-14 text-lg sm:text-xl font-semibold" 
+                />
+                <InputOTPSlot 
+                  index={3} 
+                  className="h-12 w-12 sm:h-14 sm:w-14 text-lg sm:text-xl font-semibold" 
+                />
+                <InputOTPSlot 
+                  index={4} 
+                  className="h-12 w-12 sm:h-14 sm:w-14 text-lg sm:text-xl font-semibold" 
+                />
+                <InputOTPSlot 
+                  index={5} 
+                  className="h-12 w-12 sm:h-14 sm:w-14 text-lg sm:text-xl font-semibold" 
+                />
+              </InputOTPGroup>
+            </InputOTP>
+          </div>
+          <p className="text-xs text-muted-foreground text-center max-w-sm">
+            Tip: You can paste the 6-digit code here
+          </p>
         </div>
       </div>
 

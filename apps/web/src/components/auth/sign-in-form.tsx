@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ProviderButton } from './provider-button';
 import { OTPSignIn } from './otp-sign-in';
-import { getCloudflareAccessLoginUrl, getRedirectUrl, storeRedirectUrl } from '@/lib/auth/cloudflare-access-client';
+import { getCloudflareAccessLoginUrlWithCleanup, getRedirectUrl, storeRedirectUrl } from '@/lib/auth/cloudflare-access-client';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
@@ -28,8 +28,8 @@ export function SignInForm() {
     try {
       setError(null);
       
-      // Construct Cloudflare Access login URL
-      const loginUrl = getCloudflareAccessLoginUrl(redirectUrl);
+      // Use cleanup function to clear OTP tokens when using Cloudflare Access
+      const loginUrl = getCloudflareAccessLoginUrlWithCleanup(redirectUrl);
       
       // Redirect to Cloudflare Access
       window.location.href = loginUrl;

@@ -21,11 +21,11 @@ cd apps/api
 
 # Set R2 Access Key ID
 wrangler secret put R2_ACCESS_KEY_ID
-# When prompted, paste: 64d3af705113e6b991eb198778080aa7
+# When prompted, paste your R2 Access Key ID from Cloudflare Dashboard
 
 # Set R2 Secret Access Key
 wrangler secret put R2_SECRET_ACCESS_KEY
-# When prompted, paste: 64e1077ead95173a34867a14a2e251a6cd9b824a8ed51d9c9697d45717702bcd
+# When prompted, paste your R2 Secret Access Key from Cloudflare Dashboard
 ```
 
 ## Verify Secrets Are Set

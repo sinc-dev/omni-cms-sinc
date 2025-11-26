@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { SearchBar } from '@/components/search/search-bar';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
-import { Loader2, FileText } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useOrgUrl } from '@/lib/hooks/use-org-url';
 
@@ -43,17 +44,57 @@ export default function SearchPage() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  // Fetch guards to prevent infinite loops and redundant requests
+  const isFetchingRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounce search query (500ms delay)
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 500);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [query]);
 
   useEffect(() => {
-    if (!api || !organization || !query || orgLoading) {
+    if (!api || !organization || !debouncedQuery || orgLoading) {
+      setResults([]);
+      setTotal(0);
       return;
     }
 
+    // Prevent multiple simultaneous requests
+    if (isFetchingRef.current) {
+      return;
+    }
+
+    // Abort previous request if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     const performSearch = withErrorHandling(async () => {
+      isFetchingRef.current = true;
       setLoading(true);
       clearError();
 
-      const response = (await api.searchPosts(query, {
+      const response = (await api.searchPosts(debouncedQuery, {
         page: '1',
         per_page: '20',
       })) as {
@@ -67,6 +108,11 @@ export default function SearchPage() {
         };
       };
 
+      // Check if request was aborted
+      if (abortController.signal.aborted) {
+        return;
+      }
+
       if (response.success) {
         setResults(response.data);
         setTotal(response.meta.total);
@@ -74,10 +120,18 @@ export default function SearchPage() {
         handleError('Search failed', { title: 'Search Failed' });
       }
       setLoading(false);
+      isFetchingRef.current = false;
     }, { title: 'Search Failed' });
 
     performSearch();
-  }, [api, organization, query, orgLoading]);
+
+    // Cleanup: Abort request on unmount or when dependencies change
+    return () => {
+      abortController.abort();
+      isFetchingRef.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [api, organization, debouncedQuery]);
 
   if (orgLoading || !organization) {
     return (
@@ -102,9 +156,25 @@ export default function SearchPage() {
 
       <SearchBar placeholder="Search posts by title, content, or excerpt..." />
 
-      {loading && (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      {loading && debouncedQuery && (
+        <div className="space-y-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Card key={i} className="hover:bg-accent/50">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <Skeleton className="h-6 w-64 mb-2" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <Skeleton className="h-5 w-16 rounded" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-4 w-full mb-1" />
+                <Skeleton className="h-4 w-3/4" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
 
@@ -116,10 +186,10 @@ export default function SearchPage() {
         </Card>
       )}
 
-      {!loading && !error && query && (
+      {!loading && !error && debouncedQuery && (
         <div>
           <p className="text-sm text-muted-foreground mb-4">
-            Found {total} result{total !== 1 ? 's' : ''} for &quot;{query}&quot;
+            Found {total} result{total !== 1 ? 's' : ''} for &quot;{debouncedQuery}&quot;
           </p>
 
           {results.length === 0 ? (

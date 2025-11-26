@@ -1,12 +1,15 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import { useParams, usePathname } from 'next/navigation';
+import { apiClient } from '@/lib/api-client';
+import { ApiError } from '@/lib/api-client/errors';
 
 interface Organization {
   id: string;
   name: string;
   slug: string;
+  domain?: string | null;
 }
 
 interface OrganizationContextType {
@@ -15,6 +18,7 @@ interface OrganizationContextType {
   organizations: Organization[];
   setOrganizations: (orgs: Organization[]) => void;
   isLoading: boolean;
+  refreshOrganizations: () => Promise<void>;
 }
 
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
@@ -29,6 +33,100 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   const [organization, setOrganizationState] = useState<Organization | null>(null);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const isFetchingRef = useRef(false);
+  const hasFetchedRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Fetch organizations once on mount (cached for all components)
+  const fetchOrganizations = useCallback(async (force = false) => {
+    // Skip if already fetching
+    if (isFetchingRef.current && !force) {
+      return;
+    }
+
+    // Skip if already fetched (unless forced refresh)
+    if (hasFetchedRef.current && !force) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Skip if on error pages
+    if (pathname === '/unauthorized' || pathname === '/forbidden' || pathname === '/sign-in' || pathname === '/sign-up') {
+      setIsLoading(false);
+      return;
+    }
+
+    // Abort previous request if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
+    isFetchingRef.current = true;
+
+    try {
+      setIsLoading(true);
+      const response = await apiClient.getOrganizations() as {
+        success: boolean;
+        data: Organization[];
+      };
+
+      // Check if request was aborted
+      if (abortController.signal.aborted) {
+        return;
+      }
+
+      if (response.success && response.data) {
+        setOrganizations(response.data);
+        hasFetchedRef.current = true;
+      } else {
+        setOrganizations([]);
+      }
+    } catch (error) {
+      // Don't handle errors if request was aborted
+      if (abortController.signal.aborted) {
+        return;
+      }
+
+      // Silently fail - let individual components handle errors
+      // If 401, redirect will be handled by API client
+      if (error instanceof ApiError && error.status === 401) {
+        // Redirect will happen in API client
+        setOrganizations([]);
+      } else {
+        console.error('Failed to fetch organizations:', error);
+        setOrganizations([]);
+      }
+    } finally {
+      if (!abortController.signal.aborted) {
+        setIsLoading(false);
+      }
+      isFetchingRef.current = false;
+    }
+  }, [pathname]);
+
+  // Initial fetch on mount
+  useEffect(() => {
+    fetchOrganizations();
+
+    // Cleanup function
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+      isFetchingRef.current = false;
+    };
+  }, [fetchOrganizations]);
+
+  // Refresh function that components can call
+  const refreshOrganizations = useCallback(async () => {
+    hasFetchedRef.current = false;
+    await fetchOrganizations(true);
+  }, [fetchOrganizations]);
 
   // Sync organization from URL params
   useEffect(() => {
@@ -49,21 +147,16 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
 
   // Load organization from localStorage on mount (fallback)
   useEffect(() => {
-    if (!orgIdFromUrl && organizations.length > 0) {
+    if (!orgIdFromUrl && organizations.length > 0 && !organization) {
       const storedOrgId = localStorage.getItem(STORAGE_KEY);
       if (storedOrgId) {
         const org = organizations.find((o) => o.id === storedOrgId);
         if (org) {
-          setTimeout(() => {
-            setOrganizationState(org);
-          }, 0);
+          setOrganizationState(org);
         }
       }
     }
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 0);
-  }, [organizations, orgIdFromUrl]);
+  }, [organizations, orgIdFromUrl, organization]);
 
   const setOrganization = (org: Organization | null) => {
     setOrganizationState(org);
@@ -82,6 +175,7 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         organizations,
         setOrganizations,
         isLoading,
+        refreshOrganizations,
       }}
     >
       {children}

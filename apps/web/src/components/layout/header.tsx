@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,8 +30,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useOrganization } from '@/lib/context/organization-context';
-import { apiClient } from '@/lib/api-client';
-import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { MobileMenu } from '@/components/navigation/mobile-menu';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
@@ -41,17 +38,6 @@ interface Organization {
   id: string;
   name: string;
   slug: string;
-}
-
-interface OrganizationsResponse {
-  success: boolean;
-  data: Organization[];
-  meta?: {
-    page: number;
-    perPage: number;
-    total: number;
-    totalPages: number;
-  };
 }
 
 // Generate flat navigation items for mobile menu
@@ -77,47 +63,9 @@ export function Header() {
   const router = useRouter();
   const currentOrgId = params.orgId as string | undefined;
   
-  const { organization, setOrganization, organizations, setOrganizations, isLoading: orgLoading } = useOrganization();
-  const { handleError } = useErrorHandler();
-  const [loading, setLoading] = useState(false);
-  const fetchingRef = useRef(false);
+  const { organization, setOrganization, organizations, isLoading: orgLoading } = useOrganization();
   
   const mobileNavItems = currentOrgId ? getMobileNavItems(currentOrgId) : [];
-
-  // Load organizations on mount
-  useEffect(() => {
-    if (organizations.length === 0 && !orgLoading && !fetchingRef.current) {
-      fetchingRef.current = true;
-      
-      const fetchOrganizations = async () => {
-        // Defer setState to avoid cascading renders
-        queueMicrotask(() => {
-          setLoading(true);
-        });
-        
-        try {
-          const response = await apiClient.getOrganizations();
-          const orgsResponse = response as OrganizationsResponse;
-          if (orgsResponse.success && orgsResponse.data) {
-            const orgs = orgsResponse.data;
-            setOrganizations(orgs);
-
-            // If no organization is selected but we have organizations, select the first one
-            if (!organization && orgs.length > 0) {
-              setOrganization(orgs[0]);
-            }
-          }
-        } catch (err) {
-          handleError(err, { title: 'Failed to Load Organizations' });
-        } finally {
-          setLoading(false);
-          fetchingRef.current = false;
-        }
-      };
-      
-      fetchOrganizations();
-    }
-  }, [organizations.length, organization, orgLoading, setOrganizations, setOrganization]);
 
   const handleOrgChange = (org: Organization) => {
     setOrganization(org);
@@ -149,18 +97,15 @@ export function Header() {
             <Button
               variant="ghost"
               className="flex items-center gap-2"
-              disabled={loading || organizations.length === 0}
+              disabled={orgLoading || organizations.length === 0}
               aria-label="Select organization"
               aria-haspopup="true"
             >
-              <Building2 className="h-4 w-4" aria-hidden="true" />
-              <span className="font-medium hidden sm:inline">
-                {organization?.name || (loading ? 'Loading...' : 'No organization')}
+              <Building2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="font-medium truncate max-w-[120px] sm:max-w-none">
+                {organization?.name || (orgLoading ? 'Loading...' : 'No organization')}
               </span>
-              <span className="font-medium sm:hidden">
-                {organization?.name?.substring(0, 10) || (loading ? 'Loading...' : 'No org')}
-              </span>
-              <ChevronDown className="h-4 w-4 opacity-50" aria-hidden="true" />
+              <ChevronDown className="h-4 w-4 opacity-50 shrink-0" aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
           {organizations.length > 0 && (
@@ -222,7 +167,18 @@ export function Header() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                // Clear session and redirect to sign-in
+                if (typeof window !== 'undefined') {
+                  localStorage.removeItem('omni-cms:session-token');
+                  localStorage.removeItem('omni-cms:last-used-org-id');
+                  localStorage.removeItem('omni-cms:otp-token');
+                  sessionStorage.clear();
+                }
+                router.push('/sign-in');
+              }}
+            >
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </DropdownMenuItem>

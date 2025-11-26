@@ -68,12 +68,48 @@ import publicAuthOtp from './routes/public/auth-otp';
 
 const app = new Hono<{ Bindings: CloudflareBindings; Variables: HonoVariables }>();
 
-// CORS middleware
-app.use('*', cors({
-  origin: '*', // Configure appropriately for production
-  allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
-}));
+// CORS middleware - environment-based configuration
+app.use('*', async (c, next) => {
+  const origin = c.req.header('Origin');
+  const env = c.env;
+  
+  // Determine allowed origins based on environment
+  let corsOrigin: string | string[] | ((origin: string) => boolean) = '*';
+  
+  // Check for configured allowed origins (for production)
+  const allowedOriginsEnv = (env as Record<string, string | undefined>)['ALLOWED_ORIGINS'];
+  
+  if (allowedOriginsEnv) {
+    // Production with configured origins
+    const allowedOrigins = allowedOriginsEnv.split(',').map(o => o.trim()).filter(Boolean);
+    if (allowedOrigins.length > 0) {
+      corsOrigin = (requestOrigin: string) => {
+        return allowedOrigins.includes(requestOrigin);
+      };
+    }
+  } else {
+    // Development/local - allow localhost and common dev origins, or all if not set
+    // In production without ALLOWED_ORIGINS, this allows all (fallback, should be configured)
+    const isLocalRequest = origin && (
+      origin.startsWith('http://localhost') ||
+      origin.startsWith('http://127.0.0.1') ||
+      origin.includes(':3000') ||
+      origin.includes(':3001')
+    );
+    
+    // Allow all in development, but in production should configure ALLOWED_ORIGINS
+    // For now, keep allowing all but log a warning in production
+    corsOrigin = '*'; // TODO: Configure ALLOWED_ORIGINS in production environment variables
+  }
+  
+  // Apply CORS
+  return cors({
+    origin: corsOrigin,
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
+    credentials: true,
+  })(c, next);
+});
 
 // Health check
 app.get('/health', (c) => {

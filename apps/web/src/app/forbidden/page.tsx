@@ -33,15 +33,15 @@ export default function ForbiddenPage() {
 
           <div className="flex flex-col gap-2">
             <Button variant="outline" asChild className="w-full">
-              <Link href="/admin">
+              <Link href="/select-organization">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Dashboard
+                Select Organization
               </Link>
             </Button>
             <Button variant="outline" asChild className="w-full">
-              <Link href="/">
+              <Link href="/sign-in">
                 <Home className="mr-2 h-4 w-4" />
-                Go to Home
+                Go to Sign In
               </Link>
             </Button>
           </div>

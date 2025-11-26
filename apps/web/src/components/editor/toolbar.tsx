@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { type Editor } from '@tiptap/react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -19,24 +20,89 @@ import {
     Link as LinkIcon,
     Image as ImageIcon,
 } from 'lucide-react';
+import { LinkDialog } from './link-dialog';
+import { ImageDialog } from './image-dialog';
 
 interface EditorToolbarProps {
     editor: Editor;
 }
 
 export function EditorToolbar({ editor }: EditorToolbarProps) {
-    const addLink = () => {
-        const url = window.prompt('Enter URL');
-        if (url) {
-            editor.chain().focus().setLink({ href: url }).run();
+    const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+    const [imageDialogOpen, setImageDialogOpen] = useState(false);
+    const [existingLink, setExistingLink] = useState<{ url?: string; text?: string; openInNewTab?: boolean } | null>(null);
+
+    const handleLinkButtonClick = () => {
+        // Check if there's an existing link at the cursor
+        const attrs = editor.getAttributes('link');
+        const { from, to } = editor.state.selection;
+        const selectedText = editor.state.doc.textBetween(from, to, ' ');
+
+        if (attrs.href) {
+            // Pre-fill with existing link data
+            setExistingLink({
+                url: attrs.href,
+                text: selectedText || attrs.href,
+                openInNewTab: attrs.target === '_blank',
+            });
+        } else if (selectedText) {
+            // Pre-fill with selected text
+            setExistingLink({
+                url: '',
+                text: selectedText,
+                openInNewTab: false,
+            });
+        } else {
+            setExistingLink(null);
         }
+
+        setLinkDialogOpen(true);
     };
 
-    const addImage = () => {
-        const url = window.prompt('Enter image URL');
-        if (url) {
-            editor.chain().focus().setImage({ src: url }).run();
+    const handleInsertLink = (url: string, text?: string, openInNewTab?: boolean) => {
+        // Remove existing link if editing
+        if (existingLink?.url) {
+            editor.chain().focus().unsetLink().run();
         }
+        const linkAttributes: { href: string; target?: string; rel?: string } = { href: url };
+        
+        if (openInNewTab) {
+            linkAttributes.target = '_blank';
+            linkAttributes.rel = 'noopener noreferrer'; // Security best practice
+        }
+
+        // If text is provided, insert a new link with that text
+        if (text) {
+            editor
+                .chain()
+                .focus()
+                .insertContent(`<a href="${url}"${openInNewTab ? ' target="_blank" rel="noopener noreferrer"' : ''}>${text}</a>`)
+                .run();
+        } else {
+            // If text is selected, convert it to a link
+            // Otherwise, just set the link at cursor position
+            const { from, to } = editor.state.selection;
+            const selectedText = editor.state.doc.textBetween(from, to);
+            
+            if (selectedText) {
+                // Replace selected text with link
+                editor
+                    .chain()
+                    .focus()
+                    .deleteRange({ from, to })
+                    .insertContent(`<a href="${url}"${openInNewTab ? ' target="_blank" rel="noopener noreferrer"' : ''}>${selectedText}</a>`)
+                    .run();
+            } else {
+                // Set link at cursor (TipTap will handle this)
+                editor.chain().focus().setLink(linkAttributes).run();
+            }
+        }
+
+        setExistingLink(null);
+    };
+
+    const handleInsertImage = (src: string, alt?: string) => {
+        editor.chain().focus().setImage({ src, alt: alt || '' }).run();
     };
 
     return (
@@ -134,10 +200,15 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
             <Separator orientation="vertical" className="mx-1 h-6" />
 
             {/* Media */}
-            <Button variant="ghost" size="sm" onClick={addLink}>
+            <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleLinkButtonClick}
+                className={editor.isActive('link') ? 'bg-accent' : ''}
+            >
                 <LinkIcon className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={addImage}>
+            <Button variant="ghost" size="sm" onClick={() => setImageDialogOpen(true)}>
                 <ImageIcon className="h-4 w-4" />
             </Button>
 
@@ -160,6 +231,26 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
             >
                 <Redo className="h-4 w-4" />
             </Button>
+            
+            {/* Dialogs */}
+            <LinkDialog
+                open={linkDialogOpen}
+                onOpenChange={(open) => {
+                    setLinkDialogOpen(open);
+                    if (!open) {
+                        setExistingLink(null);
+                    }
+                }}
+                onInsert={handleInsertLink}
+                initialUrl={existingLink?.url}
+                initialText={existingLink?.text}
+                initialOpenInNewTab={existingLink?.openInNewTab}
+            />
+            <ImageDialog
+                open={imageDialogOpen}
+                onOpenChange={setImageDialogOpen}
+                onInsert={handleInsertImage}
+            />
         </div>
     );
 }

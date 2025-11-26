@@ -35,6 +35,7 @@ import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { Spinner } from '@/components/ui/spinner';
+import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 
 interface ContentBlock {
   id: string;
@@ -66,6 +67,8 @@ export default function ContentBlocksPage() {
   const [search, setSearch] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBlock, setEditingBlock] = useState<ContentBlock | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [blockToDelete, setBlockToDelete] = useState<ContentBlock | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -118,10 +121,9 @@ export default function ContentBlocksPage() {
   }, { title: 'Failed to Save Content Block' });
 
   const handleDelete = withErrorHandling(async (id: string) => {
-    if (!confirm('Are you sure you want to delete this content block?')) return;
-
     await api.deleteContentBlock(id);
     setBlocks(blocks.filter(b => b.id !== id));
+    setBlockToDelete(null);
   }, { title: 'Failed to Delete Content Block' });
 
   const handleEdit = (block: ContentBlock) => {
@@ -278,7 +280,10 @@ export default function ContentBlocksPage() {
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleDelete(block.id)}
+                            onClick={() => {
+                              setBlockToDelete(block);
+                              setDeleteDialogOpen(true);
+                            }}
                             className="text-destructive"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
@@ -297,6 +302,22 @@ export default function ContentBlocksPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={async () => {
+          if (!blockToDelete) return;
+          await handleDelete(blockToDelete.id);
+        }}
+        title="Delete Content Block"
+        description="Are you sure you want to delete this content block? This action cannot be undone."
+        itemName={blockToDelete ? `"${blockToDelete.name}"` : undefined}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }

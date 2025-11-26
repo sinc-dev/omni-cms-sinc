@@ -36,6 +36,7 @@ import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { Spinner } from '@/components/ui/spinner';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 
 interface Webhook {
   id: string;
@@ -57,6 +58,8 @@ export default function WebhooksPage() {
   const [search, setSearch] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingWebhook, setEditingWebhook] = useState<Webhook | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [webhookToDelete, setWebhookToDelete] = useState<Webhook | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -115,10 +118,9 @@ export default function WebhooksPage() {
   }, { title: 'Failed to Save Webhook' });
 
   const handleDelete = withErrorHandling(async (id: string) => {
-    if (!confirm('Are you sure you want to delete this webhook?')) return;
-
     await api.deleteWebhook(id);
     setWebhooks(webhooks.filter(w => w.id !== id));
+    setWebhookToDelete(null);
   }, { title: 'Failed to Delete Webhook' });
 
   const handleTest = withErrorHandling(async (id: string) => {
@@ -316,7 +318,10 @@ export default function WebhooksPage() {
                         Test
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleDelete(webhook.id)}
+                        onClick={() => {
+                          setWebhookToDelete(webhook);
+                          setDeleteDialogOpen(true);
+                        }}
                         className="text-destructive"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
@@ -330,6 +335,22 @@ export default function WebhooksPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={async () => {
+          if (!webhookToDelete) return;
+          await handleDelete(webhookToDelete.id);
+        }}
+        title="Delete Webhook"
+        description="Are you sure you want to delete this webhook? This action cannot be undone."
+        itemName={webhookToDelete ? `"${webhookToDelete.name}"` : undefined}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }

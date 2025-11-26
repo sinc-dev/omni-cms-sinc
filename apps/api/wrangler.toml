@@ -42,11 +42,13 @@ head_sampling_rate = 1
 
 [vars]
 # Non-sensitive configuration values
-R2_ACCOUNT_ID = "9a2b6956cc47f63e13beb91af5363970"
+# NOTE: Sensitive values (R2_ACCOUNT_ID, CF_ACCESS_AUD, CF_ACCESS_TEAM_DOMAIN) 
+# should be set via environment variables or wrangler secrets, NOT in this file.
+# See SET_SECRETS.md for instructions.
+
 R2_BUCKET_NAME = "omni-cms-media"
-R2_PUBLIC_URL = "https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com"
-CF_ACCESS_AUD = "7291b33d4c255188f0d63a05cf91f9e72e1e6606fb2acb148360886c42e52083"
-CF_ACCESS_TEAM_DOMAIN = "sincdev.cloudflareaccess.com"
+# R2_PUBLIC_URL can be constructed from R2_ACCOUNT_ID if needed
+# R2_PUBLIC_URL = "https://[R2_ACCOUNT_ID].r2.cloudflarestorage.com"
 NEXT_PUBLIC_APP_URL = "omni-cms-sinc.joseph-9a2.workers.dev"
 # Workers API base URL for generating media URLs
 APP_URL = "https://omni-cms-api.joseph-9a2.workers.dev"

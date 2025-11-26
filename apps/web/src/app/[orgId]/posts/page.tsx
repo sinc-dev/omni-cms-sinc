@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, ChevronLeft, ChevronRight, Edit, Trash2 } from 'lucide-react';
@@ -9,11 +9,12 @@ import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { useSchema } from '@/lib/hooks/use-schema';
-import { Spinner } from '@/components/ui/spinner';
+import { Skeleton } from '@/components/ui/skeleton';
 import { FilterBar } from '@/components/filters/filter-bar';
 import { useFilterParams } from '@/lib/hooks/use-filter-params';
 import type { SortOption } from '@/components/filters/sort-selector';
 import { useOrgUrl } from '@/lib/hooks/use-org-url';
+import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 
 interface Post {
   id: string;
@@ -74,6 +75,11 @@ export default function PostsPage() {
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<Post | null>(null);
+  const filterDataFetchedRef = useRef(false);
+  const isFetchingFilterDataRef = useRef(false);
+  const filterDataAbortControllerRef = useRef<AbortController | null>(null);
   
   // Get filter values from URL
   const statusFilter = getFilter('status') || 'all';
@@ -166,14 +172,25 @@ export default function PostsPage() {
 
   // Fetch post types and users for filters
   useEffect(() => {
+    // Guard: Prevent multiple simultaneous requests
+    if (isFetchingFilterDataRef.current) return;
+    
+    // Guard: Early return if already fetched
+    if (filterDataFetchedRef.current && postTypes.length > 0 && users.length > 0) return;
+    
     if (!organization) return;
 
-    const fetchFilterData = async () => {
+    isFetchingFilterDataRef.current = true;
+    filterDataAbortControllerRef.current = new AbortController();
+
+    const fetchFilterData = withErrorHandling(async () => {
       try {
         const [postTypesResponse, usersResponse] = await Promise.all([
           api.getPostTypes() as Promise<{ success: boolean; data: PostType[] }>,
           api.getUsers() as Promise<{ success: boolean; data: User[] }>,
         ]);
+
+        if (filterDataAbortControllerRef.current?.signal.aborted) return;
 
         if (postTypesResponse.success) {
           setPostTypes(postTypesResponse.data);
@@ -181,13 +198,31 @@ export default function PostsPage() {
         if (usersResponse.success) {
           setUsers(usersResponse.data);
         }
+        filterDataFetchedRef.current = true;
       } catch (err) {
-        console.error('Failed to load filter data:', err);
+        if (filterDataAbortControllerRef.current?.signal.aborted) return;
+        // Error is handled by withErrorHandling wrapper
+        // Show user-friendly message but don't block the page
+        handleError(err, { 
+          title: 'Failed to Load Filter Options',
+          description: 'Some filter options may not be available. You can still filter by other criteria.'
+        });
+      } finally {
+        isFetchingFilterDataRef.current = false;
       }
-    };
+    }, { 
+      title: 'Failed to Load Filter Options',
+      silent: true // Don't show toast for filter failures to avoid noise
+    });
 
     fetchFilterData();
-  }, [organization, api]);
+
+    // Cleanup: Abort request on unmount
+    return () => {
+      filterDataAbortControllerRef.current?.abort();
+      isFetchingFilterDataRef.current = false;
+    };
+  }, [organization, api, postTypes.length, users.length, withErrorHandling, handleError]);
 
   // Debounce search input
   useEffect(() => {
@@ -375,10 +410,70 @@ export default function PostsPage() {
 
         <CardContent>
           {loading && (
-            <div className="text-center py-8 flex items-center justify-center gap-2">
-              <Spinner />
-              <p className="text-sm text-muted-foreground">Loading posts...</p>
-            </div>
+            <>
+              {/* Desktop Table Skeleton */}
+              <div className="hidden md:block rounded-md border">
+                <table className="w-full" role="table">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="h-10 px-4 text-left"><Skeleton className="h-4 w-20" /></th>
+                      <th className="h-10 px-4 text-left"><Skeleton className="h-4 w-16" /></th>
+                      <th className="h-10 px-4 text-left"><Skeleton className="h-4 w-16" /></th>
+                      <th className="h-10 px-4 text-left"><Skeleton className="h-4 w-20" /></th>
+                      <th className="h-10 px-4 text-left"><Skeleton className="h-4 w-24" /></th>
+                      <th className="h-10 px-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <tr key={i} className="border-b">
+                        <td className="p-4">
+                          <Skeleton className="h-5 w-48 mb-1" />
+                          <Skeleton className="h-3 w-32" />
+                        </td>
+                        <td className="p-4"><Skeleton className="h-4 w-24" /></td>
+                        <td className="p-4"><Skeleton className="h-6 w-20 rounded-full" /></td>
+                        <td className="p-4"><Skeleton className="h-4 w-28" /></td>
+                        <td className="p-4"><Skeleton className="h-4 w-24" /></td>
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Skeleton className="h-8 w-8 rounded" />
+                            <Skeleton className="h-8 w-8 rounded" />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card Skeleton */}
+              <div className="md:hidden space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <Card key={i}>
+                    <CardContent className="pt-6">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <Skeleton className="h-5 w-3/4 mb-1" />
+                            <Skeleton className="h-3 w-1/2" />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Skeleton className="h-8 w-8 rounded" />
+                            <Skeleton className="h-8 w-8 rounded" />
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-4">
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-6 w-16 rounded-full" />
+                          <Skeleton className="h-4 w-24" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </>
           )}
 
           {error && (
@@ -470,18 +565,9 @@ export default function PostsPage() {
                               size="icon"
                               className="h-8 w-8 text-destructive hover:text-destructive"
                               aria-label={`Delete post: ${post.title}`}
-                              onClick={async () => {
-                                if (
-                                  confirm(
-                                    `Are you sure you want to delete "${post.title}"?`
-                                  )
-                                ) {
-                                  await withErrorHandling(async () => {
-                                    await api.deletePost(post.id);
-                                    // Refresh posts by triggering a refetch
-                                    setPage(1);
-                                  }, { title: 'Failed to Delete Post' })();
-                                }
+                              onClick={() => {
+                                setPostToDelete(post);
+                                setDeleteDialogOpen(true);
                               }}
                             >
                               <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -516,17 +602,9 @@ export default function PostsPage() {
                               size="icon"
                               className="h-8 w-8 text-destructive hover:text-destructive"
                               aria-label={`Delete post: ${post.title}`}
-                              onClick={async () => {
-                                if (
-                                  confirm(
-                                    `Are you sure you want to delete "${post.title}"?`
-                                  )
-                                ) {
-                                  await withErrorHandling(async () => {
-                                    await api.deletePost(post.id);
-                                    setPage(1);
-                                  }, { title: 'Failed to Delete Post' })();
-                                }
+                              onClick={() => {
+                                setPostToDelete(post);
+                                setDeleteDialogOpen(true);
                               }}
                             >
                               <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -607,6 +685,27 @@ export default function PostsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={async () => {
+          if (!postToDelete) return;
+          await withErrorHandling(async () => {
+            await api.deletePost(postToDelete.id);
+            // Refresh posts by triggering a refetch
+            setPage(1);
+            setPostToDelete(null);
+          }, { title: 'Failed to Delete Post' })();
+        }}
+        title="Delete Post"
+        description="Are you sure you want to delete this post? This action cannot be undone."
+        itemName={postToDelete ? `"${postToDelete.title}"` : undefined}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }

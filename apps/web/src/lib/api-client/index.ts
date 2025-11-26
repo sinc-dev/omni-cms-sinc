@@ -91,14 +91,23 @@ class ApiClient {
     } catch (error) {
       // Handle network errors (failed to fetch, CORS, etc.)
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        const errorMessage = `Network error: Unable to connect to API at ${url}. ` +
-          `Please ensure the API server is running. ` +
-          `If running locally, make sure the API is running on ${baseUrl}`;
+        const isLocalhost = typeof window !== 'undefined' && 
+          (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+        
+        let errorMessage: string;
+        if (isLocalhost) {
+          errorMessage = `Unable to connect to the API server. Please ensure the API is running on ${baseUrl}. ` +
+            `Check that both the API and web servers are started.`;
+        } else {
+          errorMessage = `Unable to connect to the server. Please check your internet connection and try again. ` +
+            `If the problem persists, the server may be temporarily unavailable.`;
+        }
+        
         throw new ApiError(
           'NETWORK_ERROR',
           errorMessage,
           0,
-          { originalError: error.message, url }
+          { originalError: error.message, url, baseUrl }
         );
       }
       throw error;
@@ -107,13 +116,21 @@ class ApiClient {
     if (!response.ok) {
       // Handle authentication/authorization errors with redirects
       if (response.status === 401) {
+        // Clear expired session tokens immediately
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('omni-cms:session-token');
+          // Clear any redirect flags to allow fresh redirect
+          sessionStorage.removeItem('omni-cms:redirecting');
+        }
+
         // Redirect to sign-in page (only once, and not if already there)
         if (typeof window !== 'undefined' && !isRedirecting()) {
           const currentPath = window.location.pathname;
           // Don't redirect if already on auth pages
-          if (currentPath !== '/sign-in' && currentPath !== '/sign-up' && currentPath !== '/unauthorized' && currentPath !== '/forbidden') {
+          if (currentPath !== '/sign-in' && currentPath !== '/sign-up' && currentPath !== '/unauthorized' && currentPath !== '/forbidden' && currentPath !== '/select-organization') {
             setRedirecting(true);
             const redirectUrl = encodeURIComponent(currentPath);
+            // Redirect will happen, but we still need to throw error for caller
             window.location.href = `/sign-in?redirect=${redirectUrl}`;
           }
         }
@@ -152,16 +169,20 @@ class ApiClient {
       ) {
         const apiError = errorData as ErrorResponse;
         
-        // Provide user-friendly error messages
+        // Provide user-friendly error messages with actionable guidance
         let userMessage = apiError.error.message;
         if (response.status === 401) {
-          userMessage = 'Your session has expired. Please sign in again.';
+          userMessage = 'Your session has expired. Please sign in again to continue.';
         } else if (response.status === 403) {
-          userMessage = 'You don\'t have permission to perform this action.';
+          userMessage = 'You don\'t have permission to perform this action. Contact your administrator if you need access.';
         } else if (response.status === 404) {
-          userMessage = 'The requested resource was not found.';
+          userMessage = 'The requested resource was not found. It may have been deleted or moved.';
+        } else if (response.status === 429) {
+          userMessage = 'Too many requests. Please wait a moment and try again.';
         } else if (response.status >= 500) {
-          userMessage = 'A server error occurred. Please try again later.';
+          userMessage = 'A server error occurred. Please try again in a few moments. If the problem persists, contact support.';
+        } else if (response.status === 422) {
+          userMessage = apiError.error.message || 'The request contains invalid data. Please check your input and try again.';
         }
         
         throw new ApiError(
@@ -180,13 +201,15 @@ class ApiClient {
       
       // Provide user-friendly messages for common status codes
       if (response.status === 401) {
-        errorMessage = 'Your session has expired. Please sign in again.';
+        errorMessage = 'Your session has expired. Please sign in again to continue.';
       } else if (response.status === 403) {
-        errorMessage = 'You don\'t have permission to perform this action.';
+        errorMessage = 'You don\'t have permission to perform this action. Contact your administrator if you need access.';
       } else if (response.status === 404) {
-        errorMessage = 'The requested resource was not found.';
+        errorMessage = 'The requested resource was not found. It may have been deleted or moved.';
+      } else if (response.status === 429) {
+        errorMessage = 'Too many requests. Please wait a moment and try again.';
       } else if (response.status >= 500) {
-        errorMessage = 'A server error occurred. Please try again later.';
+        errorMessage = 'A server error occurred. Please try again in a few moments. If the problem persists, contact support.';
       }
       
       throw new ApiError(

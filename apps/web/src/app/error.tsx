@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
@@ -13,10 +14,25 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const pathname = usePathname();
+  
   useEffect(() => {
     // Log error to console for debugging
     console.error('Application error:', error);
   }, [error]);
+
+  // Extract orgId from pathname if it exists (format: /[orgId]/...)
+  const getDashboardUrl = () => {
+    if (typeof pathname === 'string') {
+      const pathParts = pathname.split('/').filter(Boolean);
+      if (pathParts.length > 0 && pathParts[0] !== 'admin' && pathParts[0] !== 'sign-in' && pathParts[0] !== 'sign-up') {
+        // Check if first part looks like an orgId (UUID or slug)
+        const orgId = pathParts[0];
+        return `/${orgId}/dashboard`;
+      }
+    }
+    return '/select-organization';
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-background">
@@ -86,7 +102,7 @@ export default function Error({
               Refresh Page
             </Button>
             <Button variant="outline" asChild className="w-full">
-              <Link href="/admin">
+              <Link href={getDashboardUrl()}>
                 <Home className="mr-2 h-4 w-4" />
                 Go to Dashboard
               </Link>

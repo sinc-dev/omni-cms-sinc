@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DatabaseSchemaViewer } from '@/components/models/database-schema-viewer';
 import { PostTypeSchemaViewer } from '@/components/models/post-type-schema-viewer';
@@ -8,7 +9,7 @@ import { RelationshipGraph } from '@/components/relationships/relationship-graph
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface Post {
   id: string;
@@ -40,22 +41,49 @@ export default function ModelsPage() {
   const [relationships, setRelationships] = useState<Relationship[]>([]);
   const [loadingRelationships, setLoadingRelationships] = useState(false);
 
+  // Fetch guards to prevent infinite loops and redundant requests
+  const isFetchingRef = useRef(false);
+  const hasFetchedRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   // Fetch relationships data when relationships tab is active
   useEffect(() => {
-    if (activeTab !== 'relationships' || !organization || orgLoading) {
+    if (activeTab !== 'relationships' || !organization || !api || orgLoading) {
       return;
     }
 
+    // Prevent multiple simultaneous requests
+    if (isFetchingRef.current) {
+      return;
+    }
+
+    // Abort previous request if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     const fetchRelationships = withErrorHandling(async () => {
+      isFetchingRef.current = true;
       setLoadingRelationships(true);
       clearError();
 
       const postsResponse = await api.getPosts({ per_page: '1000' });
       const postsData = postsResponse as { success: boolean; data: Post[] };
 
+      // Check if request was aborted
+      if (abortController.signal.aborted) {
+        return;
+      }
+
       if (postsData.success) {
         setPosts(postsData.data);
 
+        // NOTE: This is an N+1 query problem - fetches relationships for each post individually
+        // TODO: Backend should provide a batch endpoint for relationships
         // Fetch relationships for all posts
         const relationshipPromises = postsData.data.map(async (post) => {
           try {
@@ -83,13 +111,22 @@ export default function ModelsPage() {
           new Map(allRelationships.map((r) => [r.id, r])).values()
         );
         setRelationships(uniqueRelationships);
+        hasFetchedRef.current = true;
       }
 
       setLoadingRelationships(false);
+      isFetchingRef.current = false;
     }, { title: 'Failed to Load Relationships' });
 
     fetchRelationships();
-  }, [activeTab, organization, api, orgLoading, withErrorHandling, clearError]);
+
+    // Cleanup: Abort request on unmount or when dependencies change
+    return () => {
+      abortController.abort();
+      isFetchingRef.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, organization]);
 
   if (orgLoading || !organization) {
     return (
@@ -132,7 +169,14 @@ export default function ModelsPage() {
           {loadingRelationships ? (
             <Card>
               <CardContent className="pt-6">
-                <p className="text-sm text-muted-foreground">Loading relationships...</p>
+                <div className="space-y-4">
+                  <Skeleton className="h-6 w-48 mb-4" />
+                  <div className="space-y-2">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Skeleton key={i} className="h-16 w-full" />
+                    ))}
+                  </div>
+                </div>
               </CardContent>
             </Card>
           ) : error ? (

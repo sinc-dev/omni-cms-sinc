@@ -33,6 +33,7 @@ import { apiClient } from '@/lib/api-client';
 import { ApiError } from '@/lib/api-client/errors';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { ExportDialog, ImportDialog } from '@/components/import-export';
+import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 import {
   Form,
   FormField,
@@ -73,6 +74,8 @@ export default function OrganizationsPage() {
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [selectedOrgForImportExport, setSelectedOrgForImportExport] = useState<Organization | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [orgToDelete, setOrgToDelete] = useState<Organization | null>(null);
 
   // Debounce search
   useEffect(() => {
@@ -214,13 +217,9 @@ export default function OrganizationsPage() {
     }
   }, { title: 'Failed to Update Organization' });
 
-  const handleDelete = withErrorHandling(async (org: Organization) => {
-    if (!confirm(`Are you sure you want to delete "${org.name}"? This action cannot be undone.`)) {
-      return;
-    }
-
+  const handleDelete = withErrorHandling(async (orgId: string) => {
     try {
-      await apiClient.deleteOrganization(org.id);
+      await apiClient.deleteOrganization(orgId);
 
       // Refresh organizations list
       const response = (await apiClient.getOrganizations()) as {
@@ -230,6 +229,7 @@ export default function OrganizationsPage() {
       if (response.success) {
         setOrganizations(response.data);
       }
+      setOrgToDelete(null);
     } catch (err) {
       handleError(err, { title: 'Failed to Delete Organization' });
     }
@@ -375,7 +375,10 @@ export default function OrganizationsPage() {
                               Import
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => handleDelete(org)}
+                              onClick={() => {
+                                setOrgToDelete(org);
+                                setDeleteDialogOpen(true);
+                              }}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -726,6 +729,22 @@ function EditOrganizationFormContent({ onCancel }: { onCancel: () => void }) {
           </Button>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={async () => {
+          if (!orgToDelete) return;
+          await handleDelete(orgToDelete.id);
+        }}
+        title="Delete Organization"
+        description="Are you sure you want to delete this organization? This action cannot be undone."
+        itemName={orgToDelete ? `"${orgToDelete.name}"` : undefined}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </>
   );
 }

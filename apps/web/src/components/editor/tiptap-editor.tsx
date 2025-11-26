@@ -22,12 +22,14 @@ export function TipTapEditor({ content, onChange, placeholder }: TipTapEditorPro
                 HTMLAttributes: {
                     class: 'text-primary underline',
                 },
+                defaultProtocol: 'https',
             }),
         ],
         content,
         editorProps: {
             attributes: {
                 class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none min-h-[400px] max-w-none p-4',
+                'data-placeholder': placeholder || 'Start typing...',
             },
         },
         onUpdate: ({ editor }) => {

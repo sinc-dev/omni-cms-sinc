@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,6 +34,7 @@ import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { cn } from '@/lib/utils';
+import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 
 interface Taxonomy {
   id: string;
@@ -165,7 +166,6 @@ export default function TaxonomiesPage() {
   const [taxonomyDialogOpen, setTaxonomyDialogOpen] = useState(false);
   const [termDialogOpen, setTermDialogOpen] = useState(false);
   const [editTermDialogOpen, setEditTermDialogOpen] = useState(false);
-  const [editingTaxonomy, setEditingTaxonomy] = useState<Taxonomy | null>(null);
   const [editingTerm, setEditingTerm] = useState<TaxonomyTerm | null>(null);
 
   // Form state for taxonomy
@@ -180,6 +180,10 @@ export default function TaxonomiesPage() {
   const [termParentId, setTermParentId] = useState<string>('');
 
   const [saving, setSaving] = useState(false);
+  const [deleteTaxonomyDialogOpen, setDeleteTaxonomyDialogOpen] = useState(false);
+  const [taxonomyToDelete, setTaxonomyToDelete] = useState<Taxonomy | null>(null);
+  const [deleteTermDialogOpen, setDeleteTermDialogOpen] = useState(false);
+  const [termToDelete, setTermToDelete] = useState<TaxonomyTerm | null>(null);
 
   // Generate slug from name
   const generateSlug = (name: string) => {
@@ -235,7 +239,7 @@ export default function TaxonomiesPage() {
       return;
     }
 
-    const fetchTerms = async () => {
+    const fetchTerms = withErrorHandling(async () => {
       setLoadingTerms(true);
       try {
         const response = (await api.getTaxonomyTerms(selectedTaxonomy.id)) as {
@@ -247,14 +251,19 @@ export default function TaxonomiesPage() {
           setTerms(response.data);
         }
       } catch (err) {
-        console.error('Failed to load terms:', err);
+        // Error is handled by withErrorHandling wrapper
+        handleError(err, { 
+          title: 'Failed to Load Terms'
+        });
       } finally {
         setLoadingTerms(false);
       }
-    };
+    }, { 
+      title: 'Failed to Load Terms'
+    });
 
     fetchTerms();
-  }, [selectedTaxonomy, api]);
+  }, [selectedTaxonomy, api, withErrorHandling, handleError]);
 
   const handleCreateTaxonomy = withErrorHandling(async () => {
     if (!api || !taxonomyName) return;
@@ -280,17 +289,16 @@ export default function TaxonomiesPage() {
     setSaving(false);
   }, { title: 'Failed to Create Taxonomy' });
 
-  const handleDeleteTaxonomy = withErrorHandling(async (taxonomy: Taxonomy) => {
-    if (!api || !confirm(`Are you sure you want to delete "${taxonomy.name}"? All terms will be deleted.`)) {
-      return;
-    }
+  const handleDeleteTaxonomy = withErrorHandling(async (taxonomyId: string) => {
+    if (!api) return;
 
-    await api.deleteTaxonomy(taxonomy.id);
-    if (selectedTaxonomy?.id === taxonomy.id) {
+    await api.deleteTaxonomy(taxonomyId);
+    if (selectedTaxonomy?.id === taxonomyId) {
       setSelectedTaxonomy(null);
     }
     // Refresh taxonomies list
     setTaxonomies([]);
+    setTaxonomyToDelete(null);
   }, { title: 'Failed to Delete Taxonomy' });
 
   const handleCreateTerm = withErrorHandling(async () => {
@@ -346,14 +354,13 @@ export default function TaxonomiesPage() {
     setSaving(false);
   }, { title: 'Failed to Update Term' });
 
-  const handleDeleteTerm = withErrorHandling(async (term: TaxonomyTerm) => {
-    if (!api || !selectedTaxonomy || !confirm(`Are you sure you want to delete "${term.name}"?`)) {
-      return;
-    }
+  const handleDeleteTerm = withErrorHandling(async (termId: string) => {
+    if (!api || !selectedTaxonomy) return;
 
-    await api.deleteTaxonomyTerm(selectedTaxonomy.id, term.id);
+    await api.deleteTaxonomyTerm(selectedTaxonomy.id, termId);
     // Refresh terms list
     setTerms([]);
+    setTermToDelete(null);
   }, { title: 'Failed to Delete Term' });
 
   const openEditTermDialog = (term: TaxonomyTerm) => {
@@ -540,7 +547,8 @@ export default function TaxonomiesPage() {
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDeleteTaxonomy(taxonomy);
+                          setTaxonomyToDelete(taxonomy);
+                          setDeleteTaxonomyDialogOpen(true);
                         }}
                         className="text-destructive"
                       >
@@ -602,6 +610,7 @@ export default function TaxonomiesPage() {
                           <Label htmlFor="term-parent">Parent Term (Optional)</Label>
                           <select
                             id="term-parent"
+                            aria-label="Parent Term"
                             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                             value={termParentId}
                             onChange={(e) => setTermParentId(e.target.value)}
@@ -681,7 +690,10 @@ export default function TaxonomiesPage() {
                       term={term}
                       terms={terms}
                       onEdit={openEditTermDialog}
-                      onDelete={handleDeleteTerm}
+                      onDelete={(term) => {
+                        setTermToDelete(term);
+                        setDeleteTermDialogOpen(true);
+                      }}
                     />
                   ))}
                 </div>
@@ -713,7 +725,10 @@ export default function TaxonomiesPage() {
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleDeleteTerm(term)}
+                            onClick={() => {
+                              setTermToDelete(term);
+                              setDeleteTermDialogOpen(true);
+                            }}
                             className="text-destructive"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
@@ -762,6 +777,7 @@ export default function TaxonomiesPage() {
                 <Label htmlFor="edit-term-parent">Parent Term (Optional)</Label>
                 <select
                   id="edit-term-parent"
+                  aria-label="Parent Term"
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   value={termParentId}
                   onChange={(e) => setTermParentId(e.target.value)}
@@ -806,6 +822,38 @@ export default function TaxonomiesPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Taxonomy Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteTaxonomyDialogOpen}
+        onOpenChange={setDeleteTaxonomyDialogOpen}
+        onConfirm={async () => {
+          if (!taxonomyToDelete) return;
+          await handleDeleteTaxonomy(taxonomyToDelete.id);
+        }}
+        title="Delete Taxonomy"
+        description="Are you sure you want to delete this taxonomy? All terms will be deleted. This action cannot be undone."
+        itemName={taxonomyToDelete ? `"${taxonomyToDelete.name}"` : undefined}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
+
+      {/* Delete Term Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteTermDialogOpen}
+        onOpenChange={setDeleteTermDialogOpen}
+        onConfirm={async () => {
+          if (!termToDelete) return;
+          await handleDeleteTerm(termToDelete.id);
+        }}
+        title="Delete Term"
+        description="Are you sure you want to delete this term? This action cannot be undone."
+        itemName={termToDelete ? `"${termToDelete.name}"` : undefined}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }

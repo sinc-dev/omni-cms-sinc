@@ -78,9 +78,9 @@ R2_ACCOUNT_ID=your-r2-account-id
 R2_ACCESS_KEY_ID=your-r2-access-key-id
 R2_SECRET_ACCESS_KEY=your-r2-secret-access-key
 R2_BUCKET_NAME=omni-cms-media
-R2_PUBLIC_URL=https://9a2b6956cc47f63e13beb91af5363970.r2.cloudflarestorage.com
-CF_ACCESS_TEAM_DOMAIN=sincdev.cloudflareaccess.com
-CF_ACCESS_AUD=7291b33d4c255188f0d63a05cf91f9e72e1e6606fb2acb148360886c42e52083
+R2_PUBLIC_URL=https://[YOUR_R2_ACCOUNT_ID].r2.cloudflarestorage.com
+CF_ACCESS_TEAM_DOMAIN=your-team.cloudflareaccess.com
+CF_ACCESS_AUD=your-access-aud-here
 `;
   fs.writeFileSync(webEnvProdPath, prodContent);
   console.log('✅ Created apps/web/.env.production with production defaults\n');

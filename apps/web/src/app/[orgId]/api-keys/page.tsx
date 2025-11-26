@@ -29,6 +29,7 @@ import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useToastHelpers } from '@/lib/hooks/use-toast';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { Badge } from '@/components/ui/badge';
+import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 
 interface ApiKey {
   id: string;
@@ -65,6 +66,8 @@ export default function ApiKeysPage() {
   const [newKeyName, setNewKeyName] = useState('');
   const [newKeyScopes, setNewKeyScopes] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
+  const [rotateDialogOpen, setRotateDialogOpen] = useState(false);
+  const [keyToRotate, setKeyToRotate] = useState<ApiKey | null>(null);
 
   useEffect(() => {
     if (!organization) return;
@@ -120,10 +123,6 @@ export default function ApiKeysPage() {
 
   const handleRotateKey = withErrorHandling(async (keyId: string) => {
     if (!organization) return;
-    
-    if (!confirm('Are you sure you want to rotate this API key? The old key will be immediately invalidated.')) {
-      return;
-    }
 
     try {
       const response = await api.rotateApiKey(keyId) as { success: boolean; data: { key: string } };
@@ -132,6 +131,7 @@ export default function ApiKeysPage() {
         setShowNewKey(true);
         await fetchKeys();
         toast.success('API key rotated successfully', 'Success');
+        setKeyToRotate(null);
       } else {
         handleError('Failed to rotate API key');
       }
@@ -305,7 +305,10 @@ export default function ApiKeysPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         {!key.revokedAt && (
-                          <DropdownMenuItem onClick={() => handleRotateKey(key.id)}>
+                          <DropdownMenuItem onClick={() => {
+                            setKeyToRotate(key);
+                            setRotateDialogOpen(true);
+                          }}>
                             <RotateCw className="mr-2 h-4 w-4" />
                             Rotate Key
                           </DropdownMenuItem>
@@ -349,6 +352,22 @@ export default function ApiKeysPage() {
           )}
         </div>
       )}
+
+      {/* Rotate Key Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={rotateDialogOpen}
+        onOpenChange={setRotateDialogOpen}
+        onConfirm={async () => {
+          if (!keyToRotate) return;
+          await handleRotateKey(keyToRotate.id);
+        }}
+        title="Rotate API Key"
+        description="Are you sure you want to rotate this API key? The old key will be immediately invalidated and cannot be used anymore. This action cannot be undone."
+        itemName={keyToRotate ? `"${keyToRotate.name}"` : undefined}
+        confirmText="Rotate Key"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }

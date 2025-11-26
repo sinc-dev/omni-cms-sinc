@@ -9,6 +9,7 @@ import { Save, Loader2, User as UserIcon, Upload, X } from 'lucide-react';
 import NextImage from 'next/image';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
+import { useToastHelpers } from '@/lib/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 
 interface UserInfo {
@@ -33,6 +34,7 @@ interface UserMember {
 export default function ProfilePage() {
   const { organization, isLoading: orgLoading } = useOrganization();
   const { error, handleError, clearError, withErrorHandling } = useErrorHandler();
+  const { success: showSuccess } = useToastHelpers();
   
   // Note: Profile operations use apiClient directly (don't require organization)
   // Organization-scoped operations use apiClient with organization ID directly
@@ -45,13 +47,33 @@ export default function ProfilePage() {
   const [email, setEmail] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Fetch guards to prevent infinite loops and redundant requests
+  const isFetchingRef = useRef(false);
+  const hasFetchedRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   // Load user information
   useEffect(() => {
     if (orgLoading) {
       return;
     }
 
+    // Prevent multiple simultaneous requests
+    if (isFetchingRef.current) {
+      return;
+    }
+
+    // Abort previous request if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     const fetchUserInfo = withErrorHandling(async () => {
+      isFetchingRef.current = true;
       setLoading(true);
       clearError();
 
@@ -109,15 +131,28 @@ export default function ProfilePage() {
           }
         }
       } catch (err) {
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          return;
+        }
         console.error('Failed to load user info:', err);
         handleError(err, { title: 'Failed to Load Profile' });
       } finally {
         setLoading(false);
+        isFetchingRef.current = false;
+        hasFetchedRef.current = true;
       }
     }, { title: 'Failed to Load Profile' });
 
     fetchUserInfo();
-  }, [orgLoading, organization, withErrorHandling, clearError, handleError]);
+
+    // Cleanup: Abort request on unmount or when dependencies change
+    return () => {
+      abortController.abort();
+      isFetchingRef.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgLoading, organization]);
 
   const handleSave = withErrorHandling(async () => {
     if (!userInfo || !name.trim()) {
@@ -138,7 +173,7 @@ export default function ProfilePage() {
       if (response.success && response.data) {
         setUserInfo(response.data);
         setName(response.data.name);
-        // Show success message or handle success state
+        showSuccess('Profile updated successfully', 'Profile Saved');
       }
     } catch (err) {
       handleError(err, { title: 'Failed to Update Profile' });
@@ -224,6 +259,7 @@ export default function ProfilePage() {
 
       if (profileResponse.success && profileResponse.data) {
         setUserInfo(profileResponse.data);
+        showSuccess('Avatar uploaded successfully', 'Avatar Updated');
       }
     } catch (err) {
       handleError(err, { title: 'Failed to Upload Avatar' });
@@ -245,6 +281,7 @@ export default function ProfilePage() {
 
       if (response.success && response.data) {
         setUserInfo(response.data);
+        showSuccess('Avatar removed successfully', 'Avatar Removed');
       }
     } catch (err) {
       handleError(err, { title: 'Failed to Remove Avatar' });

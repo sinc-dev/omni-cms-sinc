@@ -3,7 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { AuthLayout } from '@/components/auth/auth-layout';
 import { ProviderButton } from '@/components/auth/provider-button';
-import { getCloudflareAccessLoginUrl, getRedirectUrl, storeRedirectUrl } from '@/lib/auth/cloudflare-access-client';
+import { getCloudflareAccessLoginUrlWithCleanup, getRedirectUrl, storeRedirectUrl } from '@/lib/auth/cloudflare-access-client';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
@@ -23,7 +23,8 @@ export default function SignUpPage() {
   const handleProviderClick = (provider: 'google' | 'github' | 'email' | 'microsoft' | 'okta') => {
     try {
       setError(null);
-      const loginUrl = getCloudflareAccessLoginUrl(redirectUrl);
+      // Use cleanup function to clear OTP tokens when using Cloudflare Access
+      const loginUrl = getCloudflareAccessLoginUrlWithCleanup(redirectUrl);
       window.location.href = loginUrl;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to initiate sign-up. Please try again.');

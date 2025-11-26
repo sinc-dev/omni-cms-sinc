@@ -15,7 +15,7 @@ interface ForbiddenCardProps {
 export function ForbiddenCard({ 
   message = "You don't have permission to access this resource.",
   requiredPermission,
-  backUrl = '/admin',
+  backUrl = '/select-organization',
   className 
 }: ForbiddenCardProps) {
   return (

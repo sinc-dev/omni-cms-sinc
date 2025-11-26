@@ -34,6 +34,7 @@ import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
 import { FilterBar } from '@/components/filters/filter-bar';
 import { useFilterParams } from '@/lib/hooks/use-filter-params';
+import { DeleteConfirmationDialog } from '@/components/dialogs/delete-confirmation-dialog';
 
 interface UserMember {
   id: string;
@@ -99,6 +100,8 @@ export default function UsersPage() {
   const [roleId, setRoleId] = useState('');
   const [adding, setAdding] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToRemove, setUserToRemove] = useState<{ userId: string; userName: string } | null>(null);
 
   // Debounce search
   useEffect(() => {
@@ -113,7 +116,7 @@ export default function UsersPage() {
   useEffect(() => {
     if (!api || !organization) return;
 
-    const fetchRoles = async () => {
+    const fetchRoles = withErrorHandling(async () => {
       try {
         const response = (await api.getRoles()) as { success: boolean; data: Role[] };
         if (response.success) {
@@ -127,12 +130,20 @@ export default function UsersPage() {
           }
         }
       } catch (err) {
-        console.error('Failed to load roles:', err);
+        // Error is handled by withErrorHandling wrapper
+        // Show error but don't block the page
+        handleError(err, { 
+          title: 'Failed to Load Roles',
+          showToast: false // Don't show toast for role loading failures
+        });
       }
-    };
+    }, { 
+      title: 'Failed to Load Roles',
+      showToast: false // Don't show toast for role loading failures
+    });
 
     fetchRoles();
-  }, [api, organization, roleId]);
+  }, [api, organization, roleId, withErrorHandling, handleError]);
 
   // Fetch users
   useEffect(() => {
@@ -232,14 +243,13 @@ export default function UsersPage() {
     setUpdating(false);
   }, { title: 'Failed to Update Role' });
 
-  const handleRemoveUser = withErrorHandling(async (userId: string, userName: string) => {
-    if (!api || !confirm(`Are you sure you want to remove ${userName} from this organization?`)) {
-      return;
-    }
+  const handleRemoveUser = withErrorHandling(async (userId: string) => {
+    if (!api) return;
 
     await api.removeUser(userId);
     // Refresh users list
     setPage(1);
+    setUserToRemove(null);
   }, { title: 'Failed to Remove User' });
 
   const handleEditClick = (user: UserMember) => {
@@ -475,9 +485,10 @@ export default function UsersPage() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-destructive hover:text-destructive"
-                              onClick={() =>
-                                handleRemoveUser(member.userId, member.user.name)
-                              }
+                              onClick={() => {
+                                setUserToRemove({ userId: member.userId, userName: member.user.name });
+                                setDeleteDialogOpen(true);
+                              }}
                               aria-label={`Remove ${member.user.name}`}
                             >
                               <Trash2 className="h-4 w-4" />
@@ -677,6 +688,22 @@ export default function UsersPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={async () => {
+          if (!userToRemove) return;
+          await handleRemoveUser(userToRemove.userId);
+        }}
+        title="Remove User"
+        description="Are you sure you want to remove this user from the organization?"
+        itemName={userToRemove ? userToRemove.userName : undefined}
+        confirmText="Remove"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }

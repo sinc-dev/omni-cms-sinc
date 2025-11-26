@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Search, Network, ExternalLink, List, GitBranch } from 'lucide-react';
@@ -49,26 +50,72 @@ export default function RelationshipsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'graph'>('list');
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+  
+  // Fetch guards to prevent infinite loops and redundant requests
+  const isFetchingRef = useRef(false);
+  const hasFetchedRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Get filter values from URL
   const selectedPostType = getFilter('post_type') || 'all';
   const selectedRelationshipType = getFilter('relationship_type') || 'all';
+
+  // Debounce search query (500ms delay)
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [search]);
 
   useEffect(() => {
     if (!organization || !api || orgLoading) {
       return;
     }
 
+    // Prevent multiple simultaneous requests
+    if (isFetchingRef.current) {
+      return;
+    }
+
+    // Abort previous request if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     const fetchData = withErrorHandling(async () => {
+      isFetchingRef.current = true;
       setLoading(true);
       clearError();
 
       const postsResponse = await api.getPosts({ per_page: '1000' });
       const postsData = postsResponse as { success: boolean; data: Post[] };
 
+      // Check if request was aborted
+      if (abortController.signal.aborted) {
+        return;
+      }
+
       if (postsData.success) {
         setPosts(postsData.data);
 
+        // NOTE: This is an N+1 query problem - fetches relationships for each post individually
+        // TODO: Backend should provide a batch endpoint for relationships
         // Fetch relationships for all posts
         const relationshipPromises = postsData.data.map(async (post) => {
           try {
@@ -96,13 +143,22 @@ export default function RelationshipsPage() {
           new Map(allRelationships.map((r) => [r.id, r])).values()
         );
         setRelationships(uniqueRelationships);
+        hasFetchedRef.current = true;
       }
 
       setLoading(false);
+      isFetchingRef.current = false;
     }, { title: 'Failed to Load Relationships' });
 
     fetchData();
-  }, [organization, api, orgLoading, withErrorHandling, clearError]);
+
+    // Cleanup: Abort request on unmount or when dependencies change
+    return () => {
+      abortController.abort();
+      isFetchingRef.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organization, debouncedSearch]);
 
   const postTypes = Array.from(new Set(posts.map((p) => p.postType.id))).map((id) => {
     const post = posts.find((p) => p.postType.id === id);
@@ -111,8 +167,8 @@ export default function RelationshipsPage() {
 
   const filteredRelationships = relationships.filter((rel) => {
     const matchesSearch =
-      rel.fromPost?.title.toLowerCase().includes(search.toLowerCase()) ||
-      rel.toPost?.title.toLowerCase().includes(search.toLowerCase());
+      rel.fromPost?.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      rel.toPost?.title.toLowerCase().includes(debouncedSearch.toLowerCase());
     const matchesPostType =
       selectedPostType === 'all' ||
       rel.fromPost?.postType.id === selectedPostType ||
@@ -223,7 +279,19 @@ export default function RelationshipsPage() {
       {loading ? (
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Loading relationships...</p>
+            <div className="space-y-4">
+              <Skeleton className="h-6 w-48 mb-4" />
+              <div className="space-y-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex items-center gap-4 p-4 border rounded-lg">
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-4 rounded" />
+                    <Skeleton className="h-5 w-32" />
+                  </div>
+                ))}
+              </div>
+            </div>
           </CardContent>
         </Card>
       ) : error ? (

@@ -116,3 +116,47 @@ export function clearStoredRedirectUrl(): void {
   }
 }
 
+/**
+ * Clears OTP-related tokens from localStorage
+ * Should be called when using Cloudflare Access authentication
+ * to prevent conflicts between OTP and Cloudflare Access auth methods
+ */
+export function clearOtpTokens(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('omni-cms:session-token');
+    // Also clear any OTP-related session data
+    sessionStorage.removeItem('omni-cms:otp-email');
+    sessionStorage.removeItem('omni-cms:otp-requested');
+  }
+}
+
+/**
+ * Detects if we're in a production environment
+ * @returns true if in production, false otherwise
+ */
+export function isProductionEnvironment(): boolean {
+  if (typeof window === 'undefined') {
+    // Server-side: check NODE_ENV
+    return process.env.NODE_ENV === 'production';
+  }
+  
+  // Client-side: check if we're on a production domain
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+  const isDevDomain = hostname.includes('.dev') || hostname.includes('localhost');
+  
+  return !isLocalhost && !isDevDomain;
+}
+
+/**
+ * Gets the Cloudflare Access login URL and clears OTP tokens
+ * This ensures clean separation between auth methods
+ * @param redirectUrl - The URL to redirect to after authentication
+ * @returns The Cloudflare Access login URL
+ */
+export function getCloudflareAccessLoginUrlWithCleanup(redirectUrl: string): string {
+  // Clear OTP tokens when using Cloudflare Access
+  clearOtpTokens();
+  return getCloudflareAccessLoginUrl(redirectUrl);
+}
+
