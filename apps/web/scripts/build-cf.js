@@ -11,7 +11,6 @@ const { execSync } = require('child_process');
 /* eslint-enable @typescript-eslint/no-require-imports */
 
 // Ensure we're running from the correct directory (apps/web)
-const currentDir = process.cwd();
 const scriptDir = __dirname;
 const projectRoot = path.resolve(scriptDir, '..');
 
@@ -21,7 +20,18 @@ if (!fs.existsSync(path.join(projectRoot, '.next'))) {
   process.exit(1);
 }
 
-// Step 1: Delete source maps
+// Step 1: Create symlink (for @cloudflare/next-on-pages path resolution)
+try {
+  if (fs.existsSync('web')) {
+    fs.unlinkSync('web');
+  }
+  fs.symlinkSync('.', 'web', 'dir');
+  console.log('✓ Created symlink');
+} catch (error) {
+  console.warn('⚠ Symlink creation failed (may already exist):', error.message);
+}
+
+// Step 2: Delete source maps
 function deleteSourceMaps(dir) {
   if (!fs.existsSync(dir)) return;
   
@@ -44,25 +54,52 @@ if (fs.existsSync('.next')) {
   console.log('✓ Cleaned source maps');
 }
 
-// Step 2: Run @cloudflare/next-on-pages from the project root
+// Step 3: Run @cloudflare/next-on-pages from the project root
 console.log('⚡ Running @cloudflare/next-on-pages...');
 console.log(`   Working directory: ${projectRoot}`);
 try {
   // Ensure we run from the project root directory
   process.chdir(projectRoot);
+  
+  // Set environment variables to prevent path duplication
+  // Clear any root directory settings that might confuse vercel build
+  const env = {
+    ...process.env,
+    PWD: projectRoot,
+  };
+  
+  // Remove any root directory related env vars that might cause path duplication
+  delete env.VERCEL_ROOT;
+  delete env.ROOT_DIR;
+  
   execSync('npx @cloudflare/next-on-pages@1', { 
     stdio: 'inherit',
     cwd: projectRoot,
-    env: {
-      ...process.env,
-      // Explicitly set working directory environment variable
-      PWD: projectRoot,
-    }
+    env: env
   });
   console.log('✓ Cloudflare Pages build complete');
 } catch (error) {
   console.error('✗ Build failed:', error.message);
+  // Clean up symlink even on error
+  try {
+    if (fs.existsSync('web')) {
+      fs.unlinkSync('web');
+      console.log('✓ Cleaned up symlink');
+    }
+  } catch {
+    // Ignore cleanup errors
+  }
   process.exit(1);
+}
+
+// Step 4: Clean up symlink
+try {
+  if (fs.existsSync('web')) {
+    fs.unlinkSync('web');
+    console.log('✓ Cleaned up symlink');
+  }
+} catch (error) {
+  console.warn('⚠ Failed to remove symlink:', error.message);
 }
 
 console.log('✅ Build complete!');
