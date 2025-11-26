@@ -80,8 +80,9 @@ try {
     // Increase Node.js heap size to prevent out of memory errors during vercel build
     // This is critical for vercel build which runs inside @cloudflare/next-on-pages
     // The NODE_OPTIONS from package.json script may not be inherited by child processes
-    // Using 6GB to provide more headroom for the vercel build process
-    NODE_OPTIONS: '--max-old-space-size=6144',
+    // Using 4GB (4096MB) - Cloudflare Pages builds typically have ~4-5GB total memory
+    // Setting too high (e.g., 6GB) can cause SIGSEGV if it exceeds available system memory
+    NODE_OPTIONS: process.env.NODE_OPTIONS || '--max-old-space-size=4096',
   };
   
   // Remove any root directory related env vars that might cause path duplication
