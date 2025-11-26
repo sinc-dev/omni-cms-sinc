@@ -1365,6 +1365,7 @@ app.get(
                 relationship_type: 'Optional. Filter by relationship type when using related_to_slug (e.g., "university")',
                 taxonomy: 'Filter by taxonomy term. Format: "taxonomy-slug:term-slug" (e.g., "program-degree-level:bachelor"). Can be repeated for multiple taxonomy filters (AND logic). Example: "?taxonomy=program-degree-level:bachelor&taxonomy=program-languages:english"',
                 author_id: 'Filter posts by author ID',
+                fields: 'Comma-separated list of fields to return. Reduces payload size. Supports: standard fields (id, title, slug, content, excerpt, status, publishedAt, createdAt, updatedAt), nested fields (author.id, author.name, postType.slug), custom fields (customFields.{field-slug}), and special fields (taxonomies, featuredImage). Example: "?fields=id,title,slug,excerpt,featuredImage,customFields.tuition_fee". If not specified, returns all fields.',
                 sort: 'Sort order: "field_asc" or "field_desc" (e.g., "publishedAt_desc", "title_asc"). Supported fields: publishedAt, createdAt, updatedAt, title',
               },
               response: {
@@ -1381,6 +1382,10 @@ app.get(
               exampleWithRelationship: '/api/public/v1/study-in-kazakhstan/posts?post_type=programs&related_to_slug=coventry-university-kazakhstan&relationship_type=university&per_page=100',
               exampleWithTaxonomy: '/api/public/v1/study-in-kazakhstan/posts?post_type=programs&taxonomy=program-degree-level:bachelor&taxonomy=program-languages:english',
               exampleMultipleTypes: '/api/public/v1/study-in-kazakhstan/posts?post_type=programs,blogs&per_page=20',
+              exampleListView: '/api/public/v1/study-in-kazakhstan/posts?post_type=programs&fields=id,title,slug,excerpt,featuredImage&per_page=20',
+              exampleCustomFields: '/api/public/v1/study-in-kazakhstan/posts?post_type=programs&fields=id,title,slug,customFields.tuition_fee,customFields.duration',
+              exampleMobileApp: '/api/public/v1/study-in-kazakhstan/posts?post_type=programs&fields=id,title,slug,excerpt,publishedAt&per_page=20',
+              exampleSEOMetadata: '/api/public/v1/study-in-kazakhstan/posts?fields=id,title,slug,excerpt,customFields.meta_title,customFields.meta_description',
             },
             get: {
               method: 'GET',

@@ -69,6 +69,44 @@ app.get(
     const taxonomyFilters = url.searchParams.getAll('taxonomy'); // Can be repeated
     const authorId = url.searchParams.get('author_id') ?? undefined;
     const sort = url.searchParams.get('sort') ?? 'publishedAt_desc';
+    const fieldsParam = url.searchParams.get('fields') ?? undefined;
+
+    // Parse fields parameter
+    const requestedFields = fieldsParam
+      ? fieldsParam.split(',').map(f => f.trim()).filter(Boolean)
+      : undefined;
+
+    // Categorize requested fields
+    const standardFields = new Set<string>();
+    const authorFields = new Set<string>();
+    const postTypeFields = new Set<string>();
+    const customFieldSlugs = new Set<string>();
+    let includeTaxonomies = false;
+    let includeFeaturedImage = false;
+
+    if (requestedFields) {
+      for (const field of requestedFields) {
+        if (field.startsWith('customFields.')) {
+          const slug = field.replace('customFields.', '');
+          customFieldSlugs.add(slug);
+        } else if (field.startsWith('author.')) {
+          const subField = field.replace('author.', '');
+          authorFields.add(subField);
+        } else if (field.startsWith('postType.')) {
+          const subField = field.replace('postType.', '');
+          postTypeFields.add(subField);
+        } else if (field === 'taxonomies') {
+          includeTaxonomies = true;
+        } else if (field === 'featuredImage') {
+          includeFeaturedImage = true;
+        } else {
+          // Standard field
+          standardFields.add(field);
+        }
+      }
+      // Always include id for identification
+      standardFields.add('id');
+    }
 
     // Build where conditions - only published posts
     const conditions: any[] = [
@@ -301,27 +339,28 @@ app.get(
     }
 
     // Fetch posts with relations
+    // Note: We fetch all columns and filter in response to ensure we have all necessary IDs for relations
     const allPosts = await db.query.posts.findMany({
       where: (p, { and: andFn }) => andFn(...conditions),
       limit: perPage,
       offset,
       orderBy,
       with: {
-        author: {
+        author: (!requestedFields || authorFields.size > 0) ? {
           columns: {
             id: true,
             name: true,
             email: true,
             avatarUrl: true,
           },
-        },
-        postType: {
+        } : undefined,
+        postType: (!requestedFields || postTypeFields.size > 0) ? {
           columns: {
             id: true,
             name: true,
             slug: true,
           },
-        },
+        } : undefined,
       },
     });
 
@@ -335,124 +374,150 @@ app.get(
     // Fetch taxonomies, custom fields, featured images, and format data for each post
     const postsWithRelations = await Promise.all(
       allPosts.map(async (post) => {
-        // Fetch taxonomies
-        const postTaxonomiesData = await db.query.postTaxonomies.findMany({
-          where: (pt, { eq }) => eq(pt.postId, post.id),
-        });
+        const result: any = {};
 
-        const taxonomyTermsData = await Promise.all(
-          postTaxonomiesData.map(async (pt) => {
-            const termData = await db.query.taxonomyTerms.findFirst({
-              where: (tt, { eq }) => eq(tt.id, pt.taxonomyTermId),
-              with: {
-                taxonomy: {
-                  columns: {
-                    id: true,
-                    name: true,
-                    slug: true,
+        // Add standard fields
+        if (!requestedFields || standardFields.has('id')) result.id = post.id;
+        if (!requestedFields || standardFields.has('title')) result.title = post.title;
+        if (!requestedFields || standardFields.has('slug')) result.slug = post.slug;
+        if (!requestedFields || standardFields.has('excerpt')) result.excerpt = post.excerpt;
+        if (!requestedFields || standardFields.has('content')) result.content = post.content;
+        if (!requestedFields || standardFields.has('status')) result.status = post.status;
+        if (!requestedFields || standardFields.has('publishedAt')) {
+          result.publishedAt = post.publishedAt ? new Date(post.publishedAt).toISOString() : null;
+        }
+        if (!requestedFields || standardFields.has('updatedAt')) {
+          result.updatedAt = post.updatedAt ? new Date(post.updatedAt).toISOString() : null;
+        }
+        if (!requestedFields || standardFields.has('createdAt')) {
+          result.createdAt = post.createdAt ? new Date(post.createdAt).toISOString() : null;
+        }
+
+        // Add author if requested or if not filtering fields
+        if ((!requestedFields || authorFields.size > 0) && post.author) {
+          result.author = {};
+          if (!requestedFields || authorFields.has('id')) result.author.id = post.author.id;
+          if (!requestedFields || authorFields.has('name')) result.author.name = post.author.name;
+          if (!requestedFields || authorFields.has('email')) result.author.email = post.author.email;
+          if (!requestedFields || authorFields.has('avatarUrl')) result.author.avatarUrl = post.author.avatarUrl || null;
+        }
+
+        // Add postType if requested or if not filtering fields
+        if ((!requestedFields || postTypeFields.size > 0) && post.postType) {
+          result.postType = {};
+          if (!requestedFields || postTypeFields.has('id')) result.postType.id = post.postType.id;
+          if (!requestedFields || postTypeFields.has('name')) result.postType.name = post.postType.name;
+          if (!requestedFields || postTypeFields.has('slug')) result.postType.slug = post.postType.slug;
+        }
+
+        // Fetch taxonomies if requested
+        if (!requestedFields || includeTaxonomies) {
+          const postTaxonomiesData = await db.query.postTaxonomies.findMany({
+            where: (pt, { eq }) => eq(pt.postId, post.id),
+          });
+
+          const taxonomyTermsData = await Promise.all(
+            postTaxonomiesData.map(async (pt) => {
+              const termData = await db.query.taxonomyTerms.findFirst({
+                where: (tt, { eq }) => eq(tt.id, pt.taxonomyTermId),
+                with: {
+                  taxonomy: {
+                    columns: {
+                      id: true,
+                      name: true,
+                      slug: true,
+                    },
                   },
                 },
-              },
-            });
-            return termData;
-          })
-        );
+              });
+              return termData;
+            })
+          );
 
-        // Fetch custom field values
-        const fieldValuesData = await db.query.postFieldValues.findMany({
-          where: (pfv, { eq }) => eq(pfv.postId, post.id),
-        });
-
-        const customFieldsData = await Promise.all(
-          fieldValuesData.map(async (fv) => {
-            const field = await db.query.customFields.findFirst({
-              where: (cf, { eq }) => eq(cf.id, fv.customFieldId),
-            });
-            if (!field) return null;
-
-            let parsedValue: unknown = fv.value;
-            try {
-              parsedValue = JSON.parse(fv.value || '{}');
-            } catch {
-              // Keep as string if not valid JSON
+          // Group taxonomies by taxonomy slug
+          const taxonomiesBySlug: Record<string, any[]> = {};
+          taxonomyTermsData.filter(Boolean).forEach((term: any) => {
+            const taxonomySlug = term.taxonomy?.slug || 'uncategorized';
+            if (!taxonomiesBySlug[taxonomySlug]) {
+              taxonomiesBySlug[taxonomySlug] = [];
             }
+            taxonomiesBySlug[taxonomySlug].push({
+              id: term.id,
+              name: term.name,
+              slug: term.slug,
+            });
+          });
+          result.taxonomies = taxonomiesBySlug;
+        }
 
-            return {
-              field: {
-                id: field.id,
-                name: field.name,
-                slug: field.slug,
-                fieldType: field.fieldType,
-              },
-              value: parsedValue,
-            };
-          })
-        );
+        // Fetch custom fields if requested
+        if (!requestedFields || customFieldSlugs.size > 0) {
+          const fieldValuesData = await db.query.postFieldValues.findMany({
+            where: (pfv, { eq }) => eq(pfv.postId, post.id),
+          });
 
-        // Fetch featured image if present
-        let featuredImage = null;
-        if (post.featuredImageId) {
+          const customFieldsData = await Promise.all(
+            fieldValuesData.map(async (fv) => {
+              const field = await db.query.customFields.findFirst({
+                where: (cf, { eq }) => eq(cf.id, fv.customFieldId),
+              });
+              if (!field) return null;
+
+              // Only include requested custom fields
+              if (requestedFields && !customFieldSlugs.has(field.slug)) {
+                return null;
+              }
+
+              let parsedValue: unknown = fv.value;
+              try {
+                parsedValue = JSON.parse(fv.value || '{}');
+              } catch {
+                // Keep as string if not valid JSON
+              }
+
+              return {
+                field: {
+                  id: field.id,
+                  name: field.name,
+                  slug: field.slug,
+                  fieldType: field.fieldType,
+                },
+                value: parsedValue,
+              };
+            })
+          );
+
+          // Group custom fields by field slug
+          const customFieldsBySlug: Record<string, unknown> = {};
+          customFieldsData.filter(Boolean).forEach((cf: any) => {
+            if (cf && cf.field) {
+              customFieldsBySlug[cf.field.slug] = cf.value;
+            }
+          });
+          result.customFields = customFieldsBySlug;
+        }
+
+        // Fetch featured image if requested
+        if ((!requestedFields || includeFeaturedImage) && post.featuredImageId) {
           const featuredMedia = await db.query.media.findFirst({
             where: (m, { eq }) => eq(m.id, post.featuredImageId!),
           });
           if (featuredMedia) {
             const urls = getMediaVariantUrls(featuredMedia, c.env);
-            featuredImage = {
+            result.featuredImage = {
               id: featuredMedia.id,
               ...urls,
               altText: featuredMedia.altText,
               caption: featuredMedia.caption,
             };
+          } else {
+            result.featuredImage = null;
           }
+        } else if (!requestedFields) {
+          result.featuredImage = null;
         }
 
-        // Group taxonomies by taxonomy slug
-        const taxonomiesBySlug: Record<string, any[]> = {};
-        taxonomyTermsData.filter(Boolean).forEach((term: any) => {
-          const taxonomySlug = term.taxonomy?.slug || 'uncategorized';
-          if (!taxonomiesBySlug[taxonomySlug]) {
-            taxonomiesBySlug[taxonomySlug] = [];
-          }
-          taxonomiesBySlug[taxonomySlug].push({
-            id: term.id,
-            name: term.name,
-            slug: term.slug,
-          });
-        });
-
-        // Group custom fields by field slug
-        const customFieldsBySlug: Record<string, unknown> = {};
-        customFieldsData.filter(Boolean).forEach((cf: any) => {
-          if (cf && cf.field) {
-            customFieldsBySlug[cf.field.slug] = cf.value;
-          }
-        });
-
-        return {
-          id: post.id,
-          title: post.title,
-          slug: post.slug,
-          excerpt: post.excerpt,
-          content: post.content,
-          status: post.status,
-          publishedAt: post.publishedAt ? new Date(post.publishedAt).toISOString() : null,
-          updatedAt: post.updatedAt ? new Date(post.updatedAt).toISOString() : null,
-          createdAt: post.createdAt ? new Date(post.createdAt).toISOString() : null,
-          author: {
-            id: post.author.id,
-            name: post.author.name,
-            email: post.author.email,
-            avatarUrl: post.author.avatarUrl || null,
-          },
-          postType: {
-            id: post.postType.id,
-            name: post.postType.name,
-            slug: post.postType.slug,
-          },
-          featuredImage,
-          taxonomies: taxonomiesBySlug,
-          customFields: customFieldsBySlug,
-        };
+        return result;
       })
     );
 
