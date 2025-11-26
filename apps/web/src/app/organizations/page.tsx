@@ -192,7 +192,9 @@ export default function OrganizationsPage() {
       }
       isFetchingRef.current = false;
     };
-  }, [debouncedSearch, pathname]); // handleError and clearError are stable via useCallback
+    // handleError and clearError are stable via useCallback inside useErrorHandler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch, pathname]);
 
   // Generate slug from name
   const generateSlug = (nameValue: string) => {
@@ -535,6 +537,22 @@ export default function OrganizationsPage() {
           fetchOrganizations();
         }}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={async () => {
+          if (!orgToDelete) return;
+          await handleDelete(orgToDelete.id);
+        }}
+        title="Delete Organization"
+        description="Are you sure you want to delete this organization? This action cannot be undone."
+        itemName={orgToDelete ? `"${orgToDelete.name}"` : undefined}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }
@@ -781,22 +799,6 @@ function EditOrganizationFormContent({ onCancel }: { onCancel: () => void }) {
           </Button>
         </div>
       </div>
-
-      {/* Delete Confirmation Dialog */}
-      <DeleteConfirmationDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        onConfirm={async () => {
-          if (!orgToDelete) return;
-          await handleDelete(orgToDelete.id);
-        }}
-        title="Delete Organization"
-        description="Are you sure you want to delete this organization? This action cannot be undone."
-        itemName={orgToDelete ? `"${orgToDelete.name}"` : undefined}
-        confirmText="Delete"
-        cancelText="Cancel"
-        variant="destructive"
-      />
     </>
   );
 }
