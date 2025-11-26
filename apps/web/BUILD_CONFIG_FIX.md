@@ -38,7 +38,9 @@ When `vercel build` (called by `@cloudflare/next-on-pages`) looks for `apps/web/
 
 1. Cloudflare Pages sets Root Directory to `/apps/web`
 2. Cloudflare runs `pnpm install && pnpm run build:cf` from `/opt/buildhome/repo/apps/web`
-3. `build:cf` runs `next build --webpack && node scripts/build-cf.js`
+3. `build:cf` runs `NEXT_PRIVATE_WORKERS=4 next build && node scripts/build-cf.js`
+   - Uses SWC compiler (default in Next.js 16) - **much faster and lower memory than webpack**
+   - `NEXT_PRIVATE_WORKERS=4` reduces parallel workers to lower peak memory usage
 4. `build-cf.js` creates symlinks (`web` and `apps`), deletes source maps, then runs `@cloudflare/next-on-pages`
 5. `@cloudflare/next-on-pages` internally runs `vercel build`
 6. `vercel build` looks for `apps/web/apps/web/.next/` but symlinks redirect to `apps/web/.next/` ✅

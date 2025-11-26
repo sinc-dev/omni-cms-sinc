@@ -16,20 +16,26 @@ const nextConfig: NextConfig = {
     root: root,
   },
   
-  // 1. Disable Source Maps (Critical)
+  // 1. Disable Source Maps (Critical - reduces memory usage)
   productionBrowserSourceMaps: false,
   experimental: {
     serverSourceMaps: false,
   },
 
-  // 2. Remove 'serverExternalPackages' 
-  // Let Webpack bundle and tree-shake @aws-sdk/client-s3 naturally.
+  // 2. Note: Don't use 'standalone' output for Cloudflare Pages
+  // Cloudflare Pages requires standard Next.js output structure
   
-  // 3. Force Webpack to drop source maps entirely and improve pnpm resolution
+  // 3. SWC Configuration (Next.js 16 default - much faster and lower memory than webpack)
+  // SWC is automatically used when --webpack flag is not specified
+  // SWC optimizations are handled automatically by Next.js
+  
+  // 4. Webpack fallback config (only used if --webpack flag is specified)
+  // Kept for backwards compatibility if needed
   webpack: (config, { isServer }) => {
+    // Disable source maps entirely (reduces memory)
     config.devtool = false;
     
-    // Improve module resolution for pnpm workspaces
+    // Only apply webpack-specific optimizations if webpack is being used
     if (!isServer) {
       config.resolve = config.resolve || {};
       config.resolve.symlinks = false;
