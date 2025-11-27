@@ -7,6 +7,8 @@
     "build": "NODE_OPTIONS='--max-old-space-size=4096' NEXT_PRIVATE_WORKERS=4 next build",
     "build:cf": "NODE_OPTIONS='--max-old-space-size=4096' NEXT_PRIVATE_WORKERS=4 next build && node scripts/build-cf.js",
     "build:webpack": "NODE_OPTIONS='--max-old-space-size=4096' NEXT_PRIVATE_WORKERS=4 next build --webpack && node scripts/build-cf.js",
+    "build:simulate": "node scripts/simulate-cloudflare-build.js",
+    "build:debug": "BUILD_DEBUG=true NODE_OPTIONS='--max-old-space-size=4096' NEXT_PRIVATE_WORKERS=4 next build && BUILD_DEBUG=true node scripts/build-cf.js",
     "analyze": "ANALYZE=true next build",
     "start": "next start",
     "lint": "eslint",

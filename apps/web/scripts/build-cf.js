@@ -10,6 +10,35 @@ const path = require('path');
 const { execSync } = require('child_process');
 /* eslint-enable @typescript-eslint/no-require-imports */
 
+// Helper function to format bytes
+function formatBytes(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+// Helper function to get memory usage
+function getMemoryUsage() {
+  const usage = process.memoryUsage();
+  return {
+    rss: formatBytes(usage.rss), // Resident Set Size - total memory allocated
+    heapTotal: formatBytes(usage.heapTotal), // Total heap memory
+    heapUsed: formatBytes(usage.heapUsed), // Heap memory used
+    external: formatBytes(usage.external), // External memory
+  };
+}
+
+// Helper function to log memory usage (only if BUILD_DEBUG is set)
+function logMemoryUsage(label) {
+  if (process.env.BUILD_DEBUG === 'true') {
+    const mem = getMemoryUsage();
+    console.log(`\n📊 Memory Usage [${label}]:`);
+    console.log(`   RSS: ${mem.rss} | Heap Total: ${mem.heapTotal} | Heap Used: ${mem.heapUsed} | External: ${mem.external}`);
+  }
+}
+
 // Ensure we're running from the correct directory (apps/web)
 const scriptDir = __dirname;
 const projectRoot = path.resolve(scriptDir, '..');
@@ -19,6 +48,9 @@ if (!fs.existsSync(path.join(projectRoot, '.next'))) {
   console.error('✗ Error: .next directory not found. Make sure Next.js build completed successfully.');
   process.exit(1);
 }
+
+// Log initial memory usage
+logMemoryUsage('Initial (after Next.js build)');
 
 // Step 1: Create symlinks (for @cloudflare/next-on-pages path resolution)
 // When Root Directory is /apps/web, vercel build looks for apps/web/apps/web/
@@ -61,8 +93,10 @@ function deleteSourceMaps(dir) {
 }
 
 if (fs.existsSync('.next')) {
+  logMemoryUsage('Before source map deletion');
   deleteSourceMaps('.next');
   console.log('✓ Cleaned source maps');
+  logMemoryUsage('After source map deletion');
 }
 
 // Step 3: Run @cloudflare/next-on-pages from the project root
@@ -99,11 +133,17 @@ try {
   
   console.log(`   NODE_OPTIONS: ${env.NODE_OPTIONS}`);
   
+  // Log memory before vercel build (the memory-intensive step)
+  logMemoryUsage('Before @cloudflare/next-on-pages (vercel build)');
+  
   execSync('npx @cloudflare/next-on-pages@1', { 
     stdio: 'inherit',
     cwd: projectRoot,
     env: env
   });
+  
+  // Log memory after vercel build
+  logMemoryUsage('After @cloudflare/next-on-pages (vercel build)');
   console.log('✓ Cloudflare Pages build complete');
 } catch (error) {
   console.error('✗ Build failed:', error.message);

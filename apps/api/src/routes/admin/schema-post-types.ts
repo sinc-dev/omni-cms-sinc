@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
 import { eq, and } from 'drizzle-orm';
 import type { CloudflareBindings } from '../../types';
-import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-middleware';
+import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-admin-middleware';
 import { successResponse, Errors } from '../../lib/api/hono-response';
-import { postTypes, customFields } from '../../db/schema';
+import { postTypes, customFields, postTypeFields } from '../../db/schema';
 import { PostStatus, CustomFieldType } from '../../lib/types/enums';
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
@@ -43,10 +43,13 @@ app.get(
         return c.json(Errors.notFound('Post Type'), 404);
       }
 
-      // Fetch all custom fields for this organization
-      // Note: In current schema, custom fields are organization-wide
-      const allCustomFields = await db.query.customFields.findMany({
-        where: (cf, { eq }) => eq(cf.organizationId, organizationId!),
+      // Fetch custom fields attached to this post type via post_type_fields junction table
+      const postTypeFieldsList = await db.query.postTypeFields.findMany({
+        where: (ptf, { eq }) => eq(ptf.postTypeId, postTypeId),
+        with: {
+          customField: true,
+        },
+        orderBy: (ptf, { asc }) => [asc(ptf.order)],
       });
 
       // Build standard post properties
@@ -170,63 +173,68 @@ app.get(
         },
       ];
 
-      // Build custom field properties
-      const customFieldProperties = allCustomFields.map((field) => {
-        let settings: Record<string, unknown> | null = null;
-        try {
-          settings = field.settings ? JSON.parse(field.settings) : null;
-        } catch (error) {
-          console.error(`Failed to parse settings for custom field ${field.id}:`, error);
-          settings = null;
-        }
-        
-        const baseProperty = {
-          name: field.slug,
-          label: field.name,
-          type: field.fieldType,
-          required: false,
-          description: `Custom field: ${field.name}`,
-        };
-
-        // Add field-specific properties
-        if (field.fieldType === 'select' || field.fieldType === 'multi_select') {
-          const optionsRaw = settings?.options;
-          const options = Array.isArray(optionsRaw) ? optionsRaw : [];
-          return {
-            ...baseProperty,
-            enum: options.map((opt: string | { value: string; label: string }) => 
-              typeof opt === 'string' ? opt : opt.value
-            ),
-            options: options.map((opt: string | { value: string; label: string }) => 
-              typeof opt === 'string' 
-                ? { value: opt, label: opt }
-                : opt
-            ),
+      // Build custom field properties from post_type_fields relationships
+      const customFieldProperties = postTypeFieldsList
+        .filter(ptf => ptf.customField !== null)
+        .map((ptf) => {
+          const field = ptf.customField!;
+          let settings: Record<string, unknown> | null = null;
+          try {
+            settings = field.settings ? JSON.parse(field.settings) : null;
+          } catch (error) {
+            console.error(`Failed to parse settings for custom field ${field.id}:`, error);
+            settings = null;
+          }
+          
+          const baseProperty = {
+            name: field.slug,
+            label: field.name,
+            type: field.fieldType,
+            required: ptf.isRequired,
+            defaultValue: ptf.defaultValue,
+            order: ptf.order,
+            description: `Custom field: ${field.name}`,
           };
-        }
 
-        if (field.fieldType === 'number') {
-          return {
-            ...baseProperty,
-            validation: {
-              min: settings?.min,
-              max: settings?.max,
-            },
-          };
-        }
+          // Add field-specific properties
+          if (field.fieldType === 'select' || field.fieldType === 'multi_select') {
+            const optionsRaw = settings?.options;
+            const options = Array.isArray(optionsRaw) ? optionsRaw : [];
+            return {
+              ...baseProperty,
+              enum: options.map((opt: string | { value: string; label: string }) => 
+                typeof opt === 'string' ? opt : opt.value
+              ),
+              options: options.map((opt: string | { value: string; label: string }) => 
+                typeof opt === 'string' 
+                  ? { value: opt, label: opt }
+                  : opt
+              ),
+            };
+          }
 
-        if (field.fieldType === 'text' || field.fieldType === 'textarea') {
-          return {
-            ...baseProperty,
-            validation: {
-              maxLength: settings?.maxLength,
-              pattern: settings?.pattern,
-            },
-          };
-        }
+          if (field.fieldType === 'number') {
+            return {
+              ...baseProperty,
+              validation: {
+                min: settings?.min,
+                max: settings?.max,
+              },
+            };
+          }
 
-        return baseProperty;
-      });
+          if (field.fieldType === 'text' || field.fieldType === 'textarea') {
+            return {
+              ...baseProperty,
+              validation: {
+                maxLength: settings?.maxLength,
+                pattern: settings?.pattern,
+              },
+            };
+          }
+
+          return baseProperty;
+        });
 
       const schema = {
         objectType: 'post',
@@ -275,6 +283,13 @@ app.get(
       return c.json(successResponse(schema));
     } catch (error) {
       console.error('Error fetching post type schema:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error details:', {
+        message: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+        organizationId,
+        postTypeId,
+      });
       return c.json(Errors.serverError('Failed to fetch post type schema'), 500);
     }
   }

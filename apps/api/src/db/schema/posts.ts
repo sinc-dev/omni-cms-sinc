@@ -37,6 +37,7 @@ export const posts = sqliteTable(
     ogImageId: text('og_image_id'), // References media table
     canonicalUrl: text('canonical_url'),
     structuredData: text('structured_data'), // JSON string for schema markup
+    viewCount: integer('view_count').notNull().default(0), // Number of times post has been viewed (denormalized from analytics)
     shareCount: integer('share_count').notNull().default(0), // Number of times post was shared
     createdAt: integer('created_at', { mode: 'timestamp' })
       .notNull()

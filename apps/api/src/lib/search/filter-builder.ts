@@ -28,11 +28,25 @@ export class FilterBuilder {
         group.filters.map(filter => this.buildFilterCondition(filter))
       );
 
-      if (groupConditions.length > 0) {
+      // Filter out null conditions and ensure we have valid SQL conditions
+      const validConditions = groupConditions.filter((c): c is SQL => c !== null);
+      
+      if (validConditions.length > 0) {
         if (group.operator === 'OR') {
-          conditions.push(or(...groupConditions.filter((c): c is SQL => c !== null))!);
+          const orCondition = or(...validConditions);
+          if (orCondition) {
+            conditions.push(orCondition);
+          }
         } else {
-          conditions.push(and(...groupConditions.filter((c): c is SQL => c !== null))!);
+          const andCondition = and(...validConditions);
+          if (andCondition) {
+            conditions.push(andCondition);
+          }
+        }
+      } else if (groupConditions.length > 0 && validConditions.length === 0) {
+        // Log warning if all filters in a group were invalid
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('All filters in a filter group were invalid:', group.filters);
         }
       }
     }
@@ -191,8 +205,39 @@ export class FilterBuilder {
     operator: Filter['operator'],
     value: Filter['value']
   ): SQL<unknown> | null {
-    const column = (posts as any)[property];
+    // Map of known post properties to their column references
+    const postPropertyMap: Record<string, any> = {
+      id: posts.id,
+      title: posts.title,
+      slug: posts.slug,
+      content: posts.content,
+      excerpt: posts.excerpt,
+      status: posts.status,
+      workflowStatus: posts.workflowStatus,
+      createdAt: posts.createdAt,
+      updatedAt: posts.updatedAt,
+      publishedAt: posts.publishedAt,
+      scheduledPublishAt: posts.scheduledPublishAt,
+      authorId: posts.authorId,
+      postTypeId: posts.postTypeId,
+      organizationId: posts.organizationId,
+      parentId: posts.parentId,
+      featuredImageId: posts.featuredImageId,
+      ogImageId: posts.ogImageId,
+      metaTitle: posts.metaTitle,
+      metaDescription: posts.metaDescription,
+      metaKeywords: posts.metaKeywords,
+      canonicalUrl: posts.canonicalUrl,
+      viewCount: posts.viewCount,
+      shareCount: posts.shareCount,
+    };
+
+    const column = postPropertyMap[property] || (posts as any)[property];
     if (!column) {
+      // Log when property is not found for debugging (only in development)
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`Property "${property}" not found in posts schema. Available: ${Object.keys(postPropertyMap).join(', ')}`);
+      }
       return null; // Property doesn't exist
     }
 

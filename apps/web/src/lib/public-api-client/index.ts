@@ -61,6 +61,8 @@ export interface PublicPostsOptions {
   publishedFrom?: string; // ISO 8601 date
   publishedTo?: string; // ISO 8601 date
   sort?: string; // Format: "field_asc" or "field_desc", e.g., "publishedAt_desc", "title_asc"
+  relatedToSlug?: string; // Filter posts that have a relationship to a post with this slug (e.g., "coventry-university-kazakhstan")
+  relationshipType?: string; // Filter by relationship type when using relatedToSlug (e.g., "university")
 }
 
 class PublicApiClient {
@@ -111,12 +113,20 @@ class PublicApiClient {
    * 
    * @example
    * ```typescript
+   * // Basic usage
    * const { data: posts, meta } = await publicApi.getPosts('study-in-kazakhstan', {
    *   page: 1,
    *   perPage: 20,
    *   postType: 'programs',
    *   search: 'engineering',
    *   sort: 'publishedAt_desc'
+   * });
+   * 
+   * // Filter by university
+   * const { data: programs } = await publicApi.getPosts('study-in-kazakhstan', {
+   *   postType: 'programs',
+   *   relatedToSlug: 'coventry-university-kazakhstan',
+   *   relationshipType: 'university'
    * });
    * ```
    */
@@ -133,6 +143,8 @@ class PublicApiClient {
     if (options.publishedFrom) params.set('published_from', options.publishedFrom);
     if (options.publishedTo) params.set('published_to', options.publishedTo);
     if (options.sort) params.set('sort', options.sort);
+    if (options.relatedToSlug) params.set('related_to_slug', options.relatedToSlug);
+    if (options.relationshipType) params.set('relationship_type', options.relationshipType);
 
     const queryString = params.toString();
     const endpoint = `/api/public/v1/${orgSlug}/posts${queryString ? `?${queryString}` : ''}`;

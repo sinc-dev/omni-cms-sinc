@@ -175,6 +175,12 @@ app.get(
       return c.json(successResponse(schema));
     } catch (error) {
       console.error('Error introspecting database schema:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error details:', {
+        message: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+        organizationId: c.req.param('orgId'),
+      });
       return c.json(
         Errors.serverError(
           error instanceof Error ? error.message : 'Failed to introspect database schema'

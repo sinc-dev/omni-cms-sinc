@@ -1091,6 +1091,18 @@ app.get(
               path: '/organizations/:orgId/schema',
               description: 'Get comprehensive schema for organization',
               auth: 'required',
+              response: {
+                success: true,
+                data: {
+                  postTypes: 'Array of post type objects with custom fields grouped by post type',
+                  customFields: 'Array of all custom fields in organization',
+                  taxonomies: 'Array of taxonomy objects with terms',
+                  relationshipTypes: 'Array of unique relationship types',
+                  fieldTypes: 'Array of unique custom field types',
+                  colorMappings: 'Color mappings for relationship types and field types',
+                },
+                note: 'Custom fields are filtered by post type - only fields attached to each post type via post_type_fields junction table are included. Each custom field includes metadata: isRequired, defaultValue, and order. Fields are sorted by order within each post type.',
+              },
             },
             objectType: {
               method: 'GET',
@@ -1102,8 +1114,23 @@ app.get(
             postType: {
               method: 'GET',
               path: '/organizations/:orgId/schema/post-types/:postTypeId',
-              description: 'Get schema for specific post type',
+              description: 'Get schema for specific post type, including only custom fields attached to this post type',
               auth: 'required',
+              params: ['orgId', 'postTypeId'],
+              response: {
+                success: true,
+                data: {
+                  postType: 'Post type object',
+                  standardProperties: 'Array of standard post properties',
+                  customFields: 'Array of custom fields attached to this post type (via post_type_fields junction table)',
+                  customFieldMetadata: {
+                    isRequired: 'boolean - Whether field is required for this post type',
+                    defaultValue: 'string | null - Default value for this field in this post type',
+                    order: 'number - Display order of field in this post type',
+                  },
+                  note: 'Custom fields are sorted by order property. Only fields explicitly attached to this post type are returned.',
+                },
+              },
             },
             database: {
               method: 'GET',
@@ -1370,7 +1397,7 @@ app.get(
               },
               response: {
                 success: true,
-                data: 'Array of post objects with author, postType, featuredImage, taxonomies, and customFields. Note: relatedPosts are NOT included in list responses (only in single post responses)',
+                data: 'Array of post objects with author, postType, featuredImage, taxonomies, and customFields. Note: relatedPosts are NOT included in list responses (only in single post responses). Custom fields are filtered by post type - only fields attached to each post\'s post type (via post_type_fields junction table) are returned, sorted by their order property.',
                 meta: {
                   page: 'Current page number',
                   perPage: 'Items per page',
@@ -1392,8 +1419,14 @@ app.get(
               path: '/:orgSlug/posts/:slug',
               description: 'Get a published post by slug',
               auth: 'optional',
+              params: ['orgSlug', 'slug'],
+              queryParams: {
+                fields: 'Comma-separated list of fields to return. Supports: standard fields (id, title, slug, content, excerpt, status, publishedAt, createdAt, updatedAt), nested fields (author.id, author.name, author.email, author.avatarUrl, postType.id, postType.name, postType.slug), custom fields (customFields.{field-slug}), and special fields (taxonomies, featuredImage, relatedPosts). Example: "?fields=id,title,slug,excerpt,featuredImage,customFields.tuition_fee". If not specified, returns all fields.',
+              },
               includes: ['author', 'postType', 'taxonomies', 'customFields', 'featuredImage', 'relatedPosts'],
+              note: 'viewCount is automatically incremented atomically when a post is fetched. This happens for all successful GET requests to published posts. The increment is atomic and handles concurrent requests safely. Custom fields are filtered by post type - only fields attached to the post\'s post type (via post_type_fields junction table) are returned, sorted by their order property.',
               example: '/api/public/v1/study-in-kazakhstan/posts/my-post-slug',
+              exampleWithFields: '/api/public/v1/study-in-kazakhstan/posts/my-post-slug?fields=id,title,slug,excerpt,featuredImage,customFields.tuition_fee',
             },
           },
 
@@ -1417,7 +1450,28 @@ app.get(
               path: '/:orgSlug/taxonomies/:taxonomySlug/:termSlug/posts',
               description: 'List posts by taxonomy term',
               auth: 'optional',
-              queryParams: ['page', 'per_page', 'post_type', 'search', 'published_from', 'published_to', 'sort'],
+              params: ['orgSlug', 'taxonomySlug', 'termSlug'],
+              queryParams: {
+                page: 'Page number (default: 1)',
+                per_page: 'Items per page (default: 20, max: 100)',
+                post_type: 'Filter by post type slug(s). Supports single type (e.g., "programs") or comma-separated multiple types (e.g., "programs,blogs")',
+                search: 'Search in title, content, and excerpt',
+                published_from: 'Filter posts published after this date (ISO 8601, e.g., "2024-01-01T00:00:00Z")',
+                published_to: 'Filter posts published before this date (ISO 8601, e.g., "2024-12-31T23:59:59Z")',
+                sort: 'Sort order: "field_asc" or "field_desc" (e.g., "publishedAt_desc", "title_asc"). Supported fields: publishedAt, createdAt, updatedAt, title',
+                fields: 'Comma-separated list of fields to return. Supports: standard fields (id, title, slug, content, excerpt, status, publishedAt, createdAt, updatedAt), nested fields (author.id, author.name, author.email, author.avatarUrl, postType.id, postType.name, postType.slug), custom fields (customFields.{field-slug}), and special fields (taxonomies, featuredImage). Example: "?fields=id,title,slug,excerpt,featuredImage,customFields.tuition_fee". If not specified, returns all fields.',
+              },
+              response: {
+                success: true,
+                data: 'Array of post objects with author, postType, featuredImage, taxonomies, and customFields. Custom fields are filtered by post type - only fields attached to each post\'s post type (via post_type_fields junction table) are returned, sorted by their order property.',
+                meta: {
+                  page: 'Current page number',
+                  perPage: 'Items per page',
+                  total: 'Total number of posts matching filters',
+                  totalPages: 'Total number of pages',
+                },
+              },
+              note: 'Custom fields are filtered by post type even when using fields parameter. Only custom fields attached to each post\'s post type are returned.',
             },
           },
 
@@ -1435,11 +1489,11 @@ app.get(
               after: 'string (optional, cursor for pagination)',
               search: 'string (optional, text search query)',
             },
-            response: 'Cursor-based search results',
-            note: 'API key is required. Search analytics are tracked automatically.',
+            response: 'Cursor-based search results. Custom fields in results are filtered by post type - only fields attached to each post\'s post type (via post_type_fields junction table) are returned, sorted by their order property.',
+            note: 'API key is required. Search analytics are tracked automatically. QueryBuilder filters custom fields based on each post\'s post type to ensure consistency.',
             filterProperties: {
-              standard: 'Standard post properties: id, title, slug, content, excerpt, status, createdAt, updatedAt, publishedAt, authorId, postTypeId, organizationId',
-              customFields: 'Custom field properties: customFields.{field-slug} (e.g., customFields.tuition_fee). Supports all operators: eq, ne, gt, gte, lt, lte, in, not_in, contains, not_contains, is_null, is_not_null',
+              standard: 'Standard post properties: id, title, slug, content, excerpt, status, createdAt, updatedAt, publishedAt, authorId, postTypeId, organizationId, viewCount, shareCount',
+              customFields: 'Custom field properties: customFields.{field-slug} (e.g., customFields.tuition_fee). Supports all operators: eq, ne, gt, gte, lt, lte, in, not_in, contains, not_contains, is_null, is_not_null. Note: Only custom fields attached to the post\'s post type are returned in results.',
               relationships: 'Relationship properties: relationships.{type}.{field} (e.g., relationships.university.slug, relationships.university.id). Supported types: any relationship type. Supported fields: slug, id. Supports operators: eq, ne, in, not_in',
               taxonomies: 'Taxonomy properties: taxonomies.{taxonomy-slug} or taxonomies.{taxonomy-slug}.{term-slug} (e.g., taxonomies.program-degree-level, taxonomies.program-degree-level.bachelor). Supports operators: eq, ne, in, not_in. Use "in" operator for multiple terms',
             },

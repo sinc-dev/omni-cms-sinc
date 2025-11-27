@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import type { CloudflareBindings } from '../../types';
-import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-middleware';
+import { authMiddleware, orgAccessMiddleware, permissionMiddleware, getAuthContext } from '../../lib/api/hono-admin-middleware';
 import { successResponse, Errors } from '../../lib/api/hono-response';
-import { postTypes, customFields, taxonomies, postRelationships, posts } from '../../db/schema';
+import { postTypes, customFields, taxonomies, postRelationships, posts, postTypeFields } from '../../db/schema';
 import { sql } from 'drizzle-orm';
 import {
   PostStatus,
@@ -28,8 +28,8 @@ app.get(
   orgAccessMiddleware,
   permissionMiddleware('post-types:read'),
   async (c) => {
+    const { db, organizationId } = getAuthContext(c);
     try {
-      const { db, organizationId } = getAuthContext(c);
 
       // Fetch all post types
       const allPostTypes = await db.query.postTypes.findMany({
@@ -94,40 +94,90 @@ app.get(
         return mapping;
       };
 
+      // Fetch post type fields relationships
+      const allPostTypeFields = allPostTypes.length > 0
+        ? await db.query.postTypeFields.findMany({
+            where: (ptf, { inArray }) => inArray(
+              ptf.postTypeId,
+              allPostTypes.map(pt => pt.id)
+            ),
+            with: {
+              customField: true,
+            },
+            orderBy: (ptf, { asc }) => [asc(ptf.order)],
+          })
+        : [];
+
+      // Build a map of post type ID to custom fields
+      const postTypeFieldsMap = new Map<string, Array<{
+        id: string;
+        name: string;
+        slug: string;
+        fieldType: string;
+        settings: any;
+        isRequired: boolean;
+        defaultValue: string | null;
+        order: number;
+      }>>();
+
+      for (const ptf of allPostTypeFields) {
+        if (!ptf.customField) continue;
+        
+        const fieldList = postTypeFieldsMap.get(ptf.postTypeId) || [];
+        let settings: any = null;
+        try {
+          settings = ptf.customField.settings ? JSON.parse(ptf.customField.settings) : null;
+        } catch (error) {
+          console.error(`Failed to parse settings for custom field ${ptf.customField.id}:`, error);
+        }
+
+        fieldList.push({
+          id: ptf.customField.id,
+          name: ptf.customField.name,
+          slug: ptf.customField.slug,
+          fieldType: ptf.customField.fieldType,
+          settings,
+          isRequired: ptf.isRequired,
+          defaultValue: ptf.defaultValue,
+          order: ptf.order,
+        });
+        postTypeFieldsMap.set(ptf.postTypeId, fieldList);
+      }
+
       // Build post types with their associated custom fields
-      // Note: In the current schema, custom fields are organization-wide,
-      // not directly linked to post types. This could be enhanced with a junction table.
-      const postTypesWithFields = allPostTypes.map((postType) => ({
-        id: postType.id,
-        name: postType.name,
-        slug: postType.slug,
-        description: postType.description,
-        icon: postType.icon,
-        isHierarchical: postType.isHierarchical,
-        settings: (() => {
-          try {
-            return postType.settings ? JSON.parse(postType.settings) : null;
-          } catch (error) {
-            console.error(`Failed to parse settings for post type ${postType.id}:`, error);
-            return null;
-          }
-        })(),
-        // All custom fields are available to all post types in current schema
-        availableFields: allCustomFields.map((field) => ({
-          id: field.id,
-          name: field.name,
-          slug: field.slug,
-          fieldType: field.fieldType,
+      const postTypesWithFields = allPostTypes.map((postType) => {
+        const fields = postTypeFieldsMap.get(postType.id) || [];
+        // Sort fields by order
+        fields.sort((a, b) => a.order - b.order);
+
+        return {
+          id: postType.id,
+          name: postType.name,
+          slug: postType.slug,
+          description: postType.description,
+          icon: postType.icon,
+          isHierarchical: postType.isHierarchical,
           settings: (() => {
             try {
-              return field.settings ? JSON.parse(field.settings) : null;
+              return postType.settings ? JSON.parse(postType.settings) : null;
             } catch (error) {
-              console.error(`Failed to parse settings for custom field ${field.id}:`, error);
+              console.error(`Failed to parse settings for post type ${postType.id}:`, error);
               return null;
             }
           })(),
-        })),
-      }));
+          // Only return custom fields attached to this post type
+          availableFields: fields.map((field) => ({
+            id: field.id,
+            name: field.name,
+            slug: field.slug,
+            fieldType: field.fieldType,
+            settings: field.settings,
+            isRequired: field.isRequired,
+            defaultValue: field.defaultValue,
+            order: field.order,
+          })),
+        };
+      });
 
       // Build standard post properties
       const standardPostProperties = [
@@ -296,6 +346,12 @@ app.get(
       return c.json(successResponse(schema));
     } catch (error) {
       console.error('Error fetching schema:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error details:', {
+        message: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+        organizationId,
+      });
       return c.json(Errors.serverError('Failed to fetch schema'), 500);
     }
   }

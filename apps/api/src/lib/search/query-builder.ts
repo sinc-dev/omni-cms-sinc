@@ -1,6 +1,6 @@
 import { eq, and, or, desc, asc, sql, SQL } from 'drizzle-orm';
 import type { DbClient } from '@/db/client';
-import { posts, postFieldValues, customFields } from '@/db/schema';
+import { posts, postFieldValues, customFields, postTypeFields } from '@/db/schema';
 import type { SortConfig } from '@/lib/validations/search';
 import { FilterBuilder } from './filter-builder';
 import type { FilterGroup } from '@/lib/validations/search';
@@ -209,6 +209,24 @@ export class QueryBuilder {
   private async enhanceResults(results: any[]): Promise<any[]> {
     if (results.length === 0) return results;
 
+    // Batch fetch post_type_fields for all post types (for custom fields filtering)
+    const postTypeIds = Array.from(new Set(results.map(r => r.postTypeId).filter(Boolean)));
+    const allPostTypeFields = postTypeIds.length > 0
+      ? await this.db.query.postTypeFields.findMany({
+          where: (ptf, { inArray }) => inArray(ptf.postTypeId, postTypeIds),
+          orderBy: (ptf, { asc }) => [asc(ptf.order)],
+        })
+      : [];
+
+    // Create map: postTypeId -> Set of allowed custom field IDs
+    const postTypeFieldsMap = new Map<string, Set<string>>();
+    for (const ptf of allPostTypeFields) {
+      if (!postTypeFieldsMap.has(ptf.postTypeId)) {
+        postTypeFieldsMap.set(ptf.postTypeId, new Set());
+      }
+      postTypeFieldsMap.get(ptf.postTypeId)!.add(ptf.customFieldId);
+    }
+
     const enhanced = await Promise.all(
       results.map(async (item) => {
         const enhanced: any = { ...item };
@@ -260,8 +278,16 @@ export class QueryBuilder {
               .filter(p => p.startsWith('customFields.'))
               .map(p => p.replace('customFields.', ''));
 
+            // Get allowed custom field IDs for this post's post type
+            const allowedCustomFieldIds = item.postTypeId 
+              ? postTypeFieldsMap.get(item.postTypeId) || new Set<string>()
+              : new Set<string>();
+
             const fieldValues = await this.db.select().from(postFieldValues)
               .where(eq(postFieldValues.postId, item.id));
+
+            // Filter to only include values for custom fields attached to this post type
+            const filteredFieldValues = fieldValues.filter(fv => allowedCustomFieldIds.has(fv.customFieldId));
 
             const customFieldsData: Record<string, any> = {};
             for (const fieldSlug of customFieldProps) {
@@ -273,7 +299,12 @@ export class QueryBuilder {
               });
 
               if (customField) {
-                const fieldValue = fieldValues.find(fv => fv.customFieldId === customField.id);
+                // Only include if field is attached to this post type
+                if (!allowedCustomFieldIds.has(customField.id)) {
+                  continue;
+                }
+
+                const fieldValue = filteredFieldValues.find(fv => fv.customFieldId === customField.id);
                 if (fieldValue && fieldValue.value !== null && fieldValue.value !== undefined) {
                   // Parse value based on field type
                   try {
@@ -305,6 +336,55 @@ export class QueryBuilder {
           if (post) {
             enhanced.author = post.author;
             enhanced.postType = post.postType;
+          }
+
+          // Also include custom fields if no properties specified (all fields attached to post type)
+          if (item.postTypeId) {
+            const allowedCustomFieldIds = postTypeFieldsMap.get(item.postTypeId) || new Set<string>();
+            
+            if (allowedCustomFieldIds.size > 0) {
+              const fieldValues = await this.db.select().from(postFieldValues)
+                .where(eq(postFieldValues.postId, item.id));
+
+              // Filter to only include values for custom fields attached to this post type
+              const filteredFieldValues = fieldValues.filter(fv => allowedCustomFieldIds.has(fv.customFieldId));
+
+              const customFieldsData: Record<string, any> = {};
+              
+              // Get all custom fields for this post type
+              const postTypeFieldsList = allPostTypeFields.filter(ptf => ptf.postTypeId === item.postTypeId);
+              const customFieldIds = postTypeFieldsList.map(ptf => ptf.customFieldId);
+              
+              const customFieldsList = await Promise.all(
+                customFieldIds.map(cfId => 
+                  this.db.query.customFields.findFirst({
+                    where: (cf, { eq }) => eq(cf.id, cfId),
+                  })
+                )
+              );
+
+              for (const customField of customFieldsList) {
+                if (!customField) continue;
+                
+                const fieldValue = filteredFieldValues.find(fv => fv.customFieldId === customField.id);
+                if (fieldValue && fieldValue.value !== null && fieldValue.value !== undefined) {
+                  // Parse value based on field type
+                  try {
+                    if (['number', 'boolean', 'select', 'multi_select', 'json'].includes(customField.fieldType)) {
+                      customFieldsData[customField.slug] = JSON.parse(fieldValue.value as string);
+                    } else {
+                      customFieldsData[customField.slug] = fieldValue.value;
+                    }
+                  } catch {
+                    customFieldsData[customField.slug] = fieldValue.value;
+                  }
+                }
+              }
+
+              if (Object.keys(customFieldsData).length > 0) {
+                enhanced.customFields = customFieldsData;
+              }
+            }
           }
         }
 

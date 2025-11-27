@@ -16,6 +16,7 @@ import {
   customFields,
   media,
   postRelationships,
+  postTypeFields,
 } from '../../db/schema';
 import { getMediaVariantUrls } from '../../lib/media/urls';
 
@@ -371,6 +372,29 @@ app.get(
       .where(and(...conditions));
     const total = Number(totalResult[0]?.count || 0);
 
+    // Collect unique post type IDs from fetched posts
+    const postTypeIds = Array.from(new Set(allPosts.map(p => p.postTypeId).filter(Boolean)));
+
+    // Batch fetch post_type_fields for all post types (to filter custom fields)
+    const allPostTypeFields = postTypeIds.length > 0
+      ? await db.query.postTypeFields.findMany({
+          where: (ptf, { inArray }) => inArray(ptf.postTypeId, postTypeIds),
+          orderBy: (ptf, { asc }) => [asc(ptf.order)],
+        })
+      : [];
+
+    // Create map: postTypeId -> Set of allowed custom field IDs
+    const postTypeFieldsMap = new Map<string, Set<string>>();
+    const customFieldOrderMap = new Map<string, number>();
+
+    for (const ptf of allPostTypeFields) {
+      if (!postTypeFieldsMap.has(ptf.postTypeId)) {
+        postTypeFieldsMap.set(ptf.postTypeId, new Set());
+      }
+      postTypeFieldsMap.get(ptf.postTypeId)!.add(ptf.customFieldId);
+      customFieldOrderMap.set(ptf.customFieldId, ptf.order);
+    }
+
     // Fetch taxonomies, custom fields, featured images, and format data for each post
     const postsWithRelations = await Promise.all(
       allPosts.map(async (post) => {
@@ -456,8 +480,16 @@ app.get(
             where: (pfv, { eq }) => eq(pfv.postId, post.id),
           });
 
+          // Get allowed custom field IDs for this post's post type
+          const allowedCustomFieldIds = post.postTypeId 
+            ? postTypeFieldsMap.get(post.postTypeId) || new Set<string>()
+            : new Set<string>();
+
+          // Filter to only include values for custom fields attached to this post type
+          const filteredFieldValues = fieldValuesData.filter(fv => allowedCustomFieldIds.has(fv.customFieldId));
+
           const customFieldsData = await Promise.all(
-            fieldValuesData.map(async (fv) => {
+            filteredFieldValues.map(async (fv) => {
               const field = await db.query.customFields.findFirst({
                 where: (cf, { eq }) => eq(cf.id, fv.customFieldId),
               });
@@ -483,13 +515,24 @@ app.get(
                   fieldType: field.fieldType,
                 },
                 value: parsedValue,
+                _order: customFieldOrderMap.get(fv.customFieldId) ?? 0, // Internal use for sorting only
               };
             })
           );
 
+          // Filter out null values and sort by order
+          const validCustomFieldsData = customFieldsData.filter((cf): cf is NonNullable<typeof cf> => cf !== null);
+          validCustomFieldsData.sort((a, b) => (a._order || 0) - (b._order || 0));
+          
+          // Remove internal _order property
+          const cleanedCustomFieldsData = validCustomFieldsData.map((cf) => {
+            const { _order, ...rest } = cf;
+            return rest;
+          });
+
           // Group custom fields by field slug
           const customFieldsBySlug: Record<string, unknown> = {};
-          customFieldsData.filter(Boolean).forEach((cf: any) => {
+          cleanedCustomFieldsData.forEach((cf: any) => {
             if (cf && cf.field) {
               customFieldsBySlug[cf.field.slug] = cf.value;
             }

@@ -12,6 +12,9 @@ import {
   taxonomyTerms,
   taxonomies,
   media,
+  postFieldValues,
+  customFields,
+  postTypeFields,
 } from '../../db/schema';
 import { getMediaVariantUrls } from '../../lib/media/urls';
 
@@ -89,6 +92,41 @@ app.get(
     const publishedFrom = c.req.query('published_from');
     const publishedTo = c.req.query('published_to');
     const sort = c.req.query('sort') || 'publishedAt_desc';
+    const fieldsParam = c.req.query('fields') ?? undefined;
+
+    // Parse fields parameter
+    const requestedFields = fieldsParam
+      ? fieldsParam.split(',').map(f => f.trim()).filter(Boolean)
+      : undefined;
+
+    // Categorize requested fields
+    const standardFields = new Set<string>();
+    const authorFields = new Set<string>();
+    const postTypeFieldsSet = new Set<string>();
+    const customFieldSlugs = new Set<string>();
+    let includeTaxonomies = false;
+    let includeFeaturedImage = false;
+
+    if (requestedFields) {
+      for (const field of requestedFields) {
+        if (field.startsWith('customFields.')) {
+          const slug = field.replace('customFields.', '');
+          customFieldSlugs.add(slug);
+        } else if (field.startsWith('author.')) {
+          const subField = field.replace('author.', '');
+          authorFields.add(subField);
+        } else if (field.startsWith('postType.')) {
+          const subField = field.replace('postType.', '');
+          postTypeFieldsSet.add(subField);
+        } else if (field === 'taxonomies') {
+          includeTaxonomies = true;
+        } else if (field === 'featuredImage') {
+          includeFeaturedImage = true;
+        } else {
+          standardFields.add(field);
+        }
+      }
+    }
 
     // Find all posts with this taxonomy term
     const postIdsWithTerm = await db.query.postTaxonomies.findMany({
@@ -194,7 +232,30 @@ app.get(
       .where(and(...conditions));
     const total = Number(totalResult[0]?.count || 0);
 
-    // Fetch taxonomies, featured images, and format data for each post
+    // Collect unique post type IDs from fetched posts
+    const postTypeIds = Array.from(new Set(allPosts.map(p => p.postTypeId).filter(Boolean)));
+
+    // Batch fetch post_type_fields for all post types (to filter custom fields)
+    const allPostTypeFields = postTypeIds.length > 0
+      ? await db.query.postTypeFields.findMany({
+          where: (ptf, { inArray }) => inArray(ptf.postTypeId, postTypeIds),
+          orderBy: (ptf, { asc }) => [asc(ptf.order)],
+        })
+      : [];
+
+    // Create map: postTypeId -> Set of allowed custom field IDs
+    const postTypeFieldsMap = new Map<string, Set<string>>();
+    const customFieldOrderMap = new Map<string, number>();
+
+    for (const ptf of allPostTypeFields) {
+      if (!postTypeFieldsMap.has(ptf.postTypeId)) {
+        postTypeFieldsMap.set(ptf.postTypeId, new Set());
+      }
+      postTypeFieldsMap.get(ptf.postTypeId)!.add(ptf.customFieldId);
+      customFieldOrderMap.set(ptf.customFieldId, ptf.order);
+    }
+
+    // Fetch taxonomies, featured images, custom fields, and format data for each post
     const postsWithRelations = await Promise.all(
       allPosts.map(async (post) => {
         // Fetch taxonomies
@@ -251,30 +312,162 @@ app.get(
           });
         });
 
-        return {
-          id: post.id,
-          title: post.title,
-          slug: post.slug,
-          excerpt: post.excerpt,
-          content: post.content,
-          status: post.status,
-          publishedAt: post.publishedAt ? new Date(post.publishedAt).toISOString() : null,
-          updatedAt: post.updatedAt ? new Date(post.updatedAt).toISOString() : null,
-          createdAt: post.createdAt ? new Date(post.createdAt).toISOString() : null,
-          author: {
-            id: post.author.id,
-            name: post.author.name,
-            email: post.author.email,
-            avatarUrl: post.author.avatarUrl || null,
-          },
-          postType: {
-            id: post.postType.id,
-            name: post.postType.name,
-            slug: post.postType.slug,
-          },
-          featuredImage,
-          taxonomies: taxonomiesBySlug,
-        };
+        // Fetch custom fields if requested or if no fields specified (include all)
+        let customFieldsData: any[] = [];
+        const shouldIncludeCustomFields = !requestedFields || customFieldSlugs.size > 0 || requestedFields.length === 0;
+        
+        if (shouldIncludeCustomFields && post.postTypeId) {
+          const allowedCustomFieldIds = postTypeFieldsMap.get(post.postTypeId) || new Set<string>();
+          const customFieldOrderMapForPostType = customFieldOrderMap; // Use the global map for order
+
+          if (allowedCustomFieldIds.size > 0) {
+            // Fetch all field values for this post
+            const fieldValuesData = await db.query.postFieldValues.findMany({
+              where: (pfv, { eq }) => eq(pfv.postId, post.id),
+            });
+
+            // Filter to only include values for custom fields attached to this post type
+            const filteredFieldValues = fieldValuesData.filter(fv => allowedCustomFieldIds.has(fv.customFieldId));
+
+            // If specific custom fields requested, filter by slug
+            const fieldValuesToProcess = customFieldSlugs.size > 0
+              ? filteredFieldValues.filter(fv => {
+                  // We need to check if the custom field slug matches
+                  // This will be done in the Promise.all below
+                  return true; // Will filter by slug later
+                })
+              : filteredFieldValues;
+
+            customFieldsData = await Promise.all(
+              fieldValuesToProcess.map(async (fv) => {
+                const customField = await db.query.customFields.findFirst({
+                  where: (cf, { eq }) => eq(cf.id, fv.customFieldId),
+                });
+
+                if (!customField) return null;
+
+                // If specific custom fields requested, check if this field matches
+                if (customFieldSlugs.size > 0 && !customFieldSlugs.has(customField.slug)) {
+                  return null;
+                }
+
+                // Parse value based on field type
+                let parsedValue: any = fv.value;
+                try {
+                  if (['number', 'boolean', 'select', 'multi_select', 'json'].includes(customField.fieldType)) {
+                    parsedValue = JSON.parse(fv.value as string);
+                  }
+                } catch {
+                  // Keep original value if parsing fails
+                }
+
+                return {
+                  field: {
+                    id: customField.id,
+                    name: customField.name,
+                    slug: customField.slug,
+                    fieldType: customField.fieldType,
+                  },
+                  value: parsedValue,
+                  _order: customFieldOrderMapForPostType.get(fv.customFieldId) ?? 0, // Internal use for sorting only
+                };
+              })
+            );
+
+            // Filter out null values, sort by order, then remove internal _order property
+            const validCustomFieldsData = customFieldsData.filter((cf): cf is NonNullable<typeof cf> => cf !== null);
+            validCustomFieldsData.sort((a, b) => (a._order || 0) - (b._order || 0));
+            
+            // Remove internal _order property before building response
+            customFieldsData = validCustomFieldsData.map((cf) => {
+              const { _order, ...rest } = cf;
+              return rest;
+            });
+          }
+        }
+
+        // Build response object based on requested fields
+        const response: any = {};
+
+        // Add standard fields
+        if (!requestedFields || requestedFields.length === 0 || standardFields.size === 0) {
+          // Include all standard fields if no fields specified or no standard fields specified
+          response.id = post.id;
+          response.title = post.title;
+          response.slug = post.slug;
+          response.excerpt = post.excerpt;
+          response.content = post.content;
+          response.status = post.status;
+          response.publishedAt = post.publishedAt ? new Date(post.publishedAt).toISOString() : null;
+          response.updatedAt = post.updatedAt ? new Date(post.updatedAt).toISOString() : null;
+          response.createdAt = post.createdAt ? new Date(post.createdAt).toISOString() : null;
+        } else {
+          // Include only requested standard fields
+          if (standardFields.has('id')) response.id = post.id;
+          if (standardFields.has('title')) response.title = post.title;
+          if (standardFields.has('slug')) response.slug = post.slug;
+          if (standardFields.has('excerpt')) response.excerpt = post.excerpt;
+          if (standardFields.has('content')) response.content = post.content;
+          if (standardFields.has('status')) response.status = post.status;
+          if (standardFields.has('publishedAt')) response.publishedAt = post.publishedAt ? new Date(post.publishedAt).toISOString() : null;
+          if (standardFields.has('updatedAt')) response.updatedAt = post.updatedAt ? new Date(post.updatedAt).toISOString() : null;
+          if (standardFields.has('createdAt')) response.createdAt = post.createdAt ? new Date(post.createdAt).toISOString() : null;
+        }
+
+        // Add author if requested or if no fields specified
+        if (!requestedFields || requestedFields.length === 0 || authorFields.size > 0 || standardFields.size === 0) {
+          if (authorFields.size === 0 || standardFields.size === 0) {
+            // Include all author fields
+            response.author = {
+              id: post.author.id,
+              name: post.author.name,
+              email: post.author.email,
+              avatarUrl: post.author.avatarUrl || null,
+            };
+          } else {
+            // Include only requested author fields
+            response.author = {};
+            if (authorFields.has('id')) response.author.id = post.author.id;
+            if (authorFields.has('name')) response.author.name = post.author.name;
+            if (authorFields.has('email')) response.author.email = post.author.email;
+            if (authorFields.has('avatarUrl')) response.author.avatarUrl = post.author.avatarUrl || null;
+          }
+        }
+
+        // Add postType if requested or if no fields specified
+        if (!requestedFields || requestedFields.length === 0 || postTypeFieldsSet.size > 0 || standardFields.size === 0) {
+          if (postTypeFieldsSet.size === 0 || standardFields.size === 0) {
+            // Include all postType fields
+            response.postType = {
+              id: post.postType.id,
+              name: post.postType.name,
+              slug: post.postType.slug,
+            };
+          } else {
+            // Include only requested postType fields
+            response.postType = {};
+            if (postTypeFieldsSet.has('id')) response.postType.id = post.postType.id;
+            if (postTypeFieldsSet.has('name')) response.postType.name = post.postType.name;
+            if (postTypeFieldsSet.has('slug')) response.postType.slug = post.postType.slug;
+          }
+        }
+
+        // Add featured image if requested or if no fields specified
+        if (!requestedFields || requestedFields.length === 0 || includeFeaturedImage || standardFields.size === 0) {
+          response.featuredImage = featuredImage;
+        }
+
+        // Add taxonomies if requested or if no fields specified
+        if (!requestedFields || requestedFields.length === 0 || includeTaxonomies || standardFields.size === 0) {
+          response.taxonomies = taxonomiesBySlug;
+        }
+
+        // Add custom fields if requested or if no fields specified
+        if (shouldIncludeCustomFields && customFieldsData.length > 0) {
+          response.customFields = customFieldsData;
+        }
+
+        return response;
       })
     );
 
