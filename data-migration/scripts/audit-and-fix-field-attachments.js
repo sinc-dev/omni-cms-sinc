@@ -736,8 +736,8 @@ async function generateSQL(missingAttachments) {
   
   try {
     await fs.writeFile(sqlPath, sqlContent, 'utf-8');
-    console.log(`\n✅ SQL file generated: ${sqlPath}`);
-    console.log(`   Run it with: npx wrangler d1 execute omni-cms --remote --file=${sqlPath}`);
+  console.log(`\n✅ SQL file generated: ${sqlPath}`);
+  console.log(`   Run it with: npx wrangler d1 execute omni-cms --remote --file=${sqlPath}`);
   } catch (error) {
     console.error(`\n❌ Error writing SQL file: ${error.message}`);
     throw error;

@@ -6,6 +6,10 @@ import { Loader2 } from 'lucide-react';
 import { useOrganization } from '@/lib/context/organization-context';
 import { apiClient } from '@/lib/api-client';
 
+// Force dynamic rendering to prevent static generation
+// This page needs to check authentication state and redirect accordingly
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   const router = useRouter();
   const { organizations, isLoading: orgsLoading } = useOrganization();
@@ -14,17 +18,13 @@ export default function Home() {
   useEffect(() => {
     const checkAuthAndRedirect = async () => {
       // Wait a moment for organization context to load
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Check if user has session token (OTP) or Cloudflare Access cookie
-      const hasSessionToken = typeof window !== 'undefined' && 
-        localStorage.getItem('omni-cms:session-token') !== null;
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       // Check if organizations are loaded (indicates authentication worked)
       if (!orgsLoading) {
         setIsChecking(false);
         
-        // If user has organizations, redirect to organization selection
+        // If user has organizations, redirect appropriately
         if (organizations.length > 0) {
           // If exactly 1 organization, redirect to dashboard
           if (organizations.length === 1) {
@@ -35,15 +35,21 @@ export default function Home() {
           return;
         }
         
-        // If no organizations but has session token, might be new user
-        // Let them see the select-organization page with empty state
-        if (hasSessionToken) {
-          router.replace('/select-organization');
-          return;
-        }
+        // No organizations loaded - could mean:
+        // 1. User is authenticated but has no organizations (new user)
+        // 2. User is not authenticated
+        // 
+        // If organizations array is empty but context finished loading without error,
+        // it likely means user is authenticated but has no orgs (Cloudflare Access
+        // would return 401 if not authenticated, which would be caught by api-client)
+        // 
+        // For OTP auth, check localStorage token
+        // For Cloudflare Access, rely on the fact that getOrganizations() succeeded
+        // (even with empty array) to indicate authentication
         
-        // No auth - redirect to sign-in
-        router.replace('/sign-in');
+        // Default: redirect to select-organization (will show empty state if no orgs)
+        // This handles both authenticated users with no orgs and provides a safe fallback
+        router.replace('/select-organization');
       }
     };
 

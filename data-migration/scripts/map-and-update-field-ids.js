@@ -1,10 +1,11 @@
 /**
- * Map old WordPress field IDs to new D1 field IDs and update post_field_values
+ * Map old WordPress field IDs to new D1 field IDs and generate update SQL
  * 
- * This script:
- * 1. Analyzes which old field IDs are used for which post types
- * 2. Matches them to new custom field IDs based on post type and field usage patterns
- * 3. Generates SQL to update post_field_values.custom_field_id
+ * Strategy:
+ * 1. Analyze which old field IDs are used for which post types
+ * 2. Match them to new custom fields based on organization + post type patterns
+ * 3. Generate SQL to update post_field_values.custom_field_id
+ * 4. Then we can attach the fields
  */
 
 import fs from 'fs/promises';
@@ -51,10 +52,10 @@ async function loadCustomFields() {
   console.log(`Reading custom_fields CSV: ${CUSTOM_FIELDS_CSV}`);
   const content = await fs.readFile(CUSTOM_FIELDS_CSV, 'utf-8');
   const lines = content.split('\n').filter(line => line.trim());
-  const dataLines = lines.slice(1); // Skip header
+  const dataLines = lines.slice(1);
   
   const customFields = new Map(); // id -> { organization_id, name, slug }
-  const byOrgAndSlug = new Map(); // org_id + slug -> field_id
+  const byOrgAndSlug = new Map(); // org_id:slug -> field_id
   
   for (const line of dataLines) {
     const parts = parseCSVLine(line);
@@ -133,22 +134,23 @@ async function loadPostTypes() {
 }
 
 /**
- * Analyze field usage patterns
+ * Analyze old field ID usage patterns
  */
-async function analyzeFieldUsage(posts, postTypes) {
-  console.log(`\nAnalyzing field usage patterns...`);
+async function analyzeOldFieldUsage(posts, postTypes) {
+  console.log(`\nAnalyzing old field ID usage patterns...`);
   const content = await fs.readFile(POST_FIELD_VALUES_CSV, 'utf-8');
   const lines = content.split('\n').filter(line => line.trim());
   const dataLines = lines.slice(1);
   
-  // Map: old_field_id -> { post_type_slug, organization_id, usage_count }
+  // Map: old_field_id -> { organization_id, post_type_slug, usage_count, sample_value }
   const fieldUsage = new Map();
   
   for (const line of dataLines) {
     const parts = parseCSVLine(line);
-    if (parts.length >= 3) {
+    if (parts.length >= 4) {
       const postId = parts[1]?.trim();
       const oldFieldId = parts[2]?.trim();
+      const value = parts[3]?.trim();
       
       if (postId && oldFieldId) {
         const postInfo = posts.get(postId);
@@ -157,9 +159,10 @@ async function analyzeFieldUsage(posts, postTypes) {
           if (postTypeInfo) {
             if (!fieldUsage.has(oldFieldId)) {
               fieldUsage.set(oldFieldId, {
-                post_type_slug: postTypeInfo.slug,
                 organization_id: postInfo.organization_id,
+                post_type_slug: postTypeInfo.slug,
                 usage_count: 0,
+                sample_value: value,
               });
             }
             fieldUsage.get(oldFieldId).usage_count++;
@@ -175,45 +178,38 @@ async function analyzeFieldUsage(posts, postTypes) {
 
 /**
  * Try to match old field IDs to new ones
- * Strategy: Match by organization + post type + field slug patterns
+ * Strategy: Match by organization + post type + field usage patterns
  */
 function matchFields(oldFieldUsage, byOrgAndSlug, customFields) {
-  console.log(`\nMatching old field IDs to new field IDs...`);
+  console.log(`\nAttempting to match old field IDs to new ones...`);
   
   const matches = new Map(); // old_field_id -> new_field_id
   const unmatched = [];
   
   // Group custom fields by organization and post type usage
-  // This is a heuristic - we'll try to match based on which fields are used for which post types
+  // We'll try to match based on which fields are available for each org/post type combo
   
   for (const [oldFieldId, usage] of oldFieldUsage.entries()) {
     const orgId = usage.organization_id;
     const postTypeSlug = usage.post_type_slug;
     
-    // Strategy: Look for custom fields in the same organization
-    // Since we don't have a direct mapping, we'll need to use heuristics
-    // For now, we'll create a report of what needs to be matched
+    // Get all custom fields for this organization
+    const orgFields = Array.from(customFields.entries())
+      .filter(([id, field]) => field.organization_id === orgId);
     
-    // Check if any custom field in this org could match
-    let matched = false;
-    for (const [fieldId, field] of customFields.entries()) {
-      if (field.organization_id === orgId) {
-        // This is a potential match, but we need more info
-        // For now, we'll just note it
-      }
-    }
-    
-    if (!matched) {
-      unmatched.push({
-        old_field_id: oldFieldId,
-        organization_id: orgId,
-        post_type_slug: postTypeSlug,
-        usage_count: usage.usage_count,
-      });
-    }
+    // For now, we can't automatically match without more context
+    // We'll generate a report for manual matching
+    unmatched.push({
+      old_field_id: oldFieldId,
+      organization_id: orgId,
+      post_type_slug: postTypeSlug,
+      usage_count: usage.usage_count,
+      sample_value: usage.sample_value,
+      available_fields_in_org: orgFields.length,
+    });
   }
   
-  console.log(`   ⚠ Found ${unmatched.length} unmatched field IDs`);
+  console.log(`   ⚠ Could not automatically match ${unmatched.length} field IDs`);
   console.log(`   ✓ Matched ${matches.size} field IDs`);
   
   return { matches, unmatched };
@@ -233,8 +229,8 @@ async function main() {
     const posts = await loadPosts();
     const postTypes = await loadPostTypes();
     
-    // Analyze field usage
-    const oldFieldUsage = await analyzeFieldUsage(posts, postTypes);
+    // Analyze old field usage
+    const oldFieldUsage = await analyzeOldFieldUsage(posts, postTypes);
     
     // Try to match
     const { matches, unmatched } = matchFields(oldFieldUsage, byOrgAndSlug, customFields);
@@ -242,14 +238,14 @@ async function main() {
     // Generate report
     console.log(`\n============================================================`);
     console.log('MATCHING REPORT');
-    console.log('============================================================');
+    console.log(`============================================================`);
     console.log(`\nMatched: ${matches.size}`);
     console.log(`Unmatched: ${unmatched.length}`);
     
-    // Save unmatched for manual review
+    // Save unmatched for analysis
     const reportPath = path.join(__dirname, 'unmatched-field-ids.json');
-    await fs.writeFile(reportPath, JSON.stringify(unmatched.slice(0, 100), null, 2), 'utf-8');
-    console.log(`\n✓ Saved first 100 unmatched fields to: ${reportPath}`);
+    await fs.writeFile(reportPath, JSON.stringify(unmatched.slice(0, 500), null, 2), 'utf-8');
+    console.log(`\n✓ Saved first 500 unmatched fields to: ${reportPath}`);
     
     // Generate SQL to update post_field_values (for matched fields)
     if (matches.size > 0) {
@@ -271,8 +267,9 @@ async function main() {
       console.log(`\n✓ Generated update SQL: ${sqlPath}`);
     }
     
-    console.log(`\n⚠️  Note: ${unmatched.length} field IDs could not be automatically matched.`);
-    console.log(`   These may need manual mapping or the custom fields may need to be created.`);
+    console.log(`\n⚠️  Note: ${unmatched.length} field IDs need manual mapping.`);
+    console.log(`   Review the unmatched-field-ids.json file to create a mapping.`);
+    console.log(`   Then update the script to use the mapping and regenerate the SQL.`);
     
   } catch (error) {
     console.error('\n❌ Error:', error);

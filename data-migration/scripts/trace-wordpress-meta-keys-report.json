@@ -1,0 +1,1369 @@
+{
+  "timestamp": "2025-11-28T19:13:45.010Z",
+  "organizations": {
+    "study-in-north-cyprus": {
+      "orgId": "3Kyv3hvrybf_YohTZRgPV",
+      "postTypes": {
+        "dormitories": {
+          "metaKeys": [
+            "capacity",
+            "gallery",
+            "langlong",
+            "price_range_eur",
+            "address"
+          ],
+          "analysis": [
+            {
+              "metaKey": "capacity",
+              "normalized": "capacity",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "638c8821cbbaa100ccde0891",
+                "slug": "capacity",
+                "name": "Capacity",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "gallery",
+              "normalized": "gallery",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "e006d5823353b48a692fd886",
+                "slug": "gallery",
+                "name": "Gallery",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "langlong",
+              "normalized": "langlong",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "dfaff853d1f1aa97405eb75b",
+                "slug": "langlong",
+                "name": "Langlong",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "price_range_eur",
+              "normalized": "pricerangeeur",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "a458843c0f8b14ef126d46b7",
+                "slug": "price_range_eur",
+                "name": "Price Range Eur",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "address",
+              "normalized": "address",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "8754f1bb60588b6288fad189",
+                "slug": "address",
+                "name": "Address",
+                "isUnknown": false
+              }
+            }
+          ]
+        },
+        "programs": {
+          "metaKeys": [
+            "associated_university_hubspot_id",
+            "associated_university_name",
+            "program_name",
+            "accreditation",
+            "about-program",
+            "program-outcomes",
+            "career-opportunities",
+            "degree_level",
+            "duration_in_years",
+            "language",
+            "sinc_special_tuition_fee",
+            "yearly_tuition_fee",
+            "tuition_currency",
+            "additional_information",
+            "disciplines",
+            "study_format",
+            "with_thesis_or_not",
+            "first_payment",
+            "on_arrival_payment"
+          ],
+          "analysis": [
+            {
+              "metaKey": "associated_university_hubspot_id",
+              "normalized": "associateduniversityhubspotid",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "f2b6758557a5f16edba695f2",
+                "slug": "associated_university_hubspot_id",
+                "name": "Associated University Hubspot Id",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "associated_university_name",
+              "normalized": "associateduniversityname",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "f2ca25de093204af6891d10d",
+                "slug": "associated_university_name",
+                "name": "Associated University Name",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "program_name",
+              "normalized": "programname",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "760726f6cea5ccc0ddca5887",
+                "slug": "program_name",
+                "name": "Program Name",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "accreditation",
+              "normalized": "accreditation",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "about-program",
+              "normalized": "aboutprogram",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "2d4c63729b4b7818e5a90de2",
+                "slug": "about-program",
+                "name": "About-program",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "program-outcomes",
+              "normalized": "programoutcomes",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "a66b4c3fce2b022795f6a5df",
+                "slug": "program-outcomes",
+                "name": "Program-outcomes",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "career-opportunities",
+              "normalized": "careeropportunities",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "6dacef6016ec9b2466bd5906",
+                "slug": "career-opportunities",
+                "name": "Career-opportunities",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "degree_level",
+              "normalized": "degreelevel",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "8a3fa09aa08900205b2a9202",
+                "slug": "degree_level",
+                "name": "Degree Level",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "duration_in_years",
+              "normalized": "durationinyears",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "b404745f7056c78ebb76dcf5",
+                "slug": "duration_in_years",
+                "name": "Duration In Years",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "language",
+              "normalized": "language",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "e4caa6a8145aaadea427b3b2",
+                "slug": "language",
+                "name": "Language",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "sinc_special_tuition_fee",
+              "normalized": "sincspecialtuitionfee",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "08849b028a902ba36d309178",
+                "slug": "sinc_special_tuition_fee",
+                "name": "Sinc Special Tuition Fee",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "yearly_tuition_fee",
+              "normalized": "yearlytuitionfee",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "7e99a683ce15da79a67778df",
+                "slug": "yearly_tuition_fee",
+                "name": "Yearly Tuition Fee",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "tuition_currency",
+              "normalized": "tuitioncurrency",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "84a454abd4ff59db7b493953",
+                "slug": "tuition_currency",
+                "name": "Tuition Currency",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "additional_information",
+              "normalized": "additionalinformation",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "f0acb74c44b2b623318a6d0c",
+                "slug": "additional_information",
+                "name": "Additional Information",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "disciplines",
+              "normalized": "disciplines",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "c0b0942b318c1e568a957fc8",
+                "slug": "disciplines",
+                "name": "Disciplines",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "study_format",
+              "normalized": "studyformat",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "0b893c5d4b2f90e38c58a52f",
+                "slug": "study_format",
+                "name": "Study Format",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "with_thesis_or_not",
+              "normalized": "withthesisornot",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "dd427cdee4dfb15fc233e9ad",
+                "slug": "with_thesis_or_not",
+                "name": "With Thesis Or Not",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "first_payment",
+              "normalized": "firstpayment",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "c1b9e54071676fd050c4a785",
+                "slug": "first_payment",
+                "name": "First Payment",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "on_arrival_payment",
+              "normalized": "onarrivalpayment",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "faba38a974e0341fe949788a",
+                "slug": "on_arrival_payment",
+                "name": "On Arrival Payment",
+                "isUnknown": false
+              }
+            }
+          ]
+        },
+        "reviews": {
+          "metaKeys": [
+            "reviewer_name",
+            "avatar",
+            "review",
+            "rating",
+            "total_reviews",
+            "relative_time_description",
+            "review_link",
+            "review_unique_identifier",
+            "featured"
+          ],
+          "analysis": [
+            {
+              "metaKey": "reviewer_name",
+              "normalized": "reviewername",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "46424b53e3cc67828444dc6a",
+                "slug": "reviewer_name",
+                "name": "Reviewer Name",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "avatar",
+              "normalized": "avatar",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "f019b94b64e7864fb0325d2d",
+                "slug": "avatar",
+                "name": "Avatar",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "review",
+              "normalized": "review",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "c37a06ab798842c8ae46a88e",
+                "slug": "review",
+                "name": "Review",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "rating",
+              "normalized": "rating",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "73f1d7520a08106191c0b346",
+                "slug": "rating",
+                "name": "Rating",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "total_reviews",
+              "normalized": "totalreviews",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "d4d14b7a1710aebc356a19c2",
+                "slug": "total_reviews",
+                "name": "Total Reviews",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "relative_time_description",
+              "normalized": "relativetimedescription",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "5cbcdf85dacf99b85e90abdb",
+                "slug": "relative_time_description",
+                "name": "Relative Time Description",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "review_link",
+              "normalized": "reviewlink",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "a41c6813b765880218d9e6cf",
+                "slug": "review_link",
+                "name": "Review Link",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "review_unique_identifier",
+              "normalized": "reviewuniqueidentifier",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "eb8cc67b77706b610bbfe6cd",
+                "slug": "review_unique_identifier",
+                "name": "Review Unique Identifier",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "featured",
+              "normalized": "featured",
+              "hasMatchingField": false,
+              "matchingField": null
+            }
+          ]
+        },
+        "universities": {
+          "metaKeys": [
+            "university_name",
+            "address",
+            "country",
+            "logo",
+            "university_background_image",
+            "photos",
+            "founding_year",
+            "google_map_gallery",
+            "phone",
+            "photo1",
+            "photo2",
+            "photo3",
+            "photo4",
+            "number_of_reviews",
+            "google_map_rating",
+            "google_map_profile_link",
+            "university_street_address",
+            "university_phone_number",
+            "website"
+          ],
+          "analysis": [
+            {
+              "metaKey": "university_name",
+              "normalized": "universityname",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "687fa7352aaf5a3788ba89eb",
+                "slug": "university_name",
+                "name": "University Name",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "address",
+              "normalized": "address",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "8754f1bb60588b6288fad189",
+                "slug": "address",
+                "name": "Address",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "country",
+              "normalized": "country",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "44331570b51eda4ebffdd175",
+                "slug": "country",
+                "name": "Country",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "logo",
+              "normalized": "logo",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "c1d0045d5060af552f81e4a1",
+                "slug": "logo",
+                "name": "Logo",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "university_background_image",
+              "normalized": "universitybackgroundimage",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "9f2b832d3203a148a7b1a36b",
+                "slug": "university_background_image",
+                "name": "University Background Image",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "photos",
+              "normalized": "photos",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "484b169103372935414abd86",
+                "slug": "photos",
+                "name": "Photos",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "founding_year",
+              "normalized": "foundingyear",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "dd3afb5b684794d2790fec5b",
+                "slug": "founding_year",
+                "name": "Founding Year",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "google_map_gallery",
+              "normalized": "googlemapgallery",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "9605922aafa8063f1c3b669e",
+                "slug": "google_map_gallery",
+                "name": "Google Map Gallery",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "phone",
+              "normalized": "phone",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "be1c3d9eefee12db12de6926",
+                "slug": "phone",
+                "name": "Phone",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "photo1",
+              "normalized": "photo1",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "b46c88cef3111494ae63c1b7",
+                "slug": "photo1",
+                "name": "Photo1",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "photo2",
+              "normalized": "photo2",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "2b7cb87363ab1147d1b5675f",
+                "slug": "photo2",
+                "name": "Photo2",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "photo3",
+              "normalized": "photo3",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "bec1323b993d96ec35304a41",
+                "slug": "photo3",
+                "name": "Photo3",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "photo4",
+              "normalized": "photo4",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "d5ca7cfff1ed187e1bd29d1e",
+                "slug": "photo4",
+                "name": "Photo4",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "number_of_reviews",
+              "normalized": "numberofreviews",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "0f7a17c51bd0cab910f5e640",
+                "slug": "number_of_reviews",
+                "name": "Number Of Reviews",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "google_map_rating",
+              "normalized": "googlemaprating",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "84946cca1e51aef6c5c5689f",
+                "slug": "google_map_rating",
+                "name": "Google Map Rating",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "google_map_profile_link",
+              "normalized": "googlemapprofilelink",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "3178ceb59018d6be08bcf06c",
+                "slug": "google_map_profile_link",
+                "name": "Google Map Profile Link",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "university_street_address",
+              "normalized": "universitystreetaddress",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "a93b356bdee46d036fc13132",
+                "slug": "university_street_address",
+                "name": "University Street Address",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "university_phone_number",
+              "normalized": "universityphonenumber",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "d09be0029039c3e35557ec44",
+                "slug": "university_phone_number",
+                "name": "University Phone Number",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "website",
+              "normalized": "website",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "fea49c47a4228edf8da5d6f6",
+                "slug": "website",
+                "name": "Website",
+                "isUnknown": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    "study-in-kazakhstan": {
+      "orgId": "IBfLssGjH23-f9uxjH5Ms",
+      "postTypes": {
+        "programs": {
+          "metaKeys": [
+            "associated_university_hubspot_id",
+            "associated_university_name",
+            "program_name",
+            "accreditation",
+            "degree_level",
+            "disciplines",
+            "duration_in_years",
+            "language",
+            "yearly_tuition_fee",
+            "tuition_currency",
+            "entry_requirements",
+            "tuition-fees-without-discount",
+            "tuition-fees-with-discount",
+            "featured",
+            "program-salesforce-id",
+            "scholarship",
+            "application-link"
+          ],
+          "analysis": [
+            {
+              "metaKey": "associated_university_hubspot_id",
+              "normalized": "associateduniversityhubspotid",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "e29073a2439406e7616a4bc5",
+                "slug": "associated_university_hubspot_id",
+                "name": "Associated University Hubspot Id",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "associated_university_name",
+              "normalized": "associateduniversityname",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "d7373d9608f49c43b4001ba6",
+                "slug": "associated_university_name",
+                "name": "Associated University Name",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "program_name",
+              "normalized": "programname",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "e17f99dc589c6e5885dfc00d",
+                "slug": "program_name",
+                "name": "Program Name",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "accreditation",
+              "normalized": "accreditation",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "degree_level",
+              "normalized": "degreelevel",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "ad8e78d32cf87743554f12f2",
+                "slug": "degree_level",
+                "name": "Degree Level",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "disciplines",
+              "normalized": "disciplines",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "3a0a71b2c6050cf27b2166a8",
+                "slug": "disciplines",
+                "name": "Disciplines",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "duration_in_years",
+              "normalized": "durationinyears",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "7109ad7b735c9e359872b591",
+                "slug": "duration_in_years",
+                "name": "Duration In Years",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "language",
+              "normalized": "language",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "37e95442370772ac27ea9e42",
+                "slug": "language",
+                "name": "Language",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "yearly_tuition_fee",
+              "normalized": "yearlytuitionfee",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "952eae92d8374bd2e527a561",
+                "slug": "yearly_tuition_fee",
+                "name": "Yearly Tuition Fee",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "tuition_currency",
+              "normalized": "tuitioncurrency",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "ba09efb8086e5cd1d1594036",
+                "slug": "tuition_currency",
+                "name": "Tuition Currency",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "entry_requirements",
+              "normalized": "entryrequirements",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "56839c83b8a28a058d3d4fee",
+                "slug": "entry_requirements",
+                "name": "Entry Requirements",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "tuition-fees-without-discount",
+              "normalized": "tuitionfeeswithoutdiscount",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "tuition-fees-with-discount",
+              "normalized": "tuitionfeeswithdiscount",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "featured",
+              "normalized": "featured",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "program-salesforce-id",
+              "normalized": "programsalesforceid",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "scholarship",
+              "normalized": "scholarship",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "application-link",
+              "normalized": "applicationlink",
+              "hasMatchingField": false,
+              "matchingField": null
+            }
+          ]
+        },
+        "reviews": {
+          "metaKeys": [
+            "reviewer_name",
+            "avatar",
+            "review",
+            "rating",
+            "total_reviews",
+            "relative_time_description",
+            "review_link",
+            "review_unique_identifier",
+            "featured"
+          ],
+          "analysis": [
+            {
+              "metaKey": "reviewer_name",
+              "normalized": "reviewername",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "adfc3e850289911f51fef0ff",
+                "slug": "reviewer_name",
+                "name": "Reviewer Name",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "avatar",
+              "normalized": "avatar",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "255040528b64bbd31110f011",
+                "slug": "avatar",
+                "name": "Avatar",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "review",
+              "normalized": "review",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "8ad4a2fd7903b53fd154e3c5",
+                "slug": "review",
+                "name": "Review",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "rating",
+              "normalized": "rating",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "83f281fb47b1dc671b75fabb",
+                "slug": "rating",
+                "name": "Rating",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "total_reviews",
+              "normalized": "totalreviews",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "4d4514f03d1c78ff7b6353e0",
+                "slug": "total_reviews",
+                "name": "Total Reviews",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "relative_time_description",
+              "normalized": "relativetimedescription",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "dd68ee29710abcefaecb6bab",
+                "slug": "relative_time_description",
+                "name": "Relative Time Description",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "review_link",
+              "normalized": "reviewlink",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "92f6de82254c754874edb5ee",
+                "slug": "review_link",
+                "name": "Review Link",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "review_unique_identifier",
+              "normalized": "reviewuniqueidentifier",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "099c80627729e6fb6ab651b9",
+                "slug": "review_unique_identifier",
+                "name": "Review Unique Identifier",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "featured",
+              "normalized": "featured",
+              "hasMatchingField": false,
+              "matchingField": null
+            }
+          ]
+        },
+        "universities": {
+          "metaKeys": [
+            "university_name",
+            "address",
+            "country",
+            "logo",
+            "university_background_image",
+            "photos",
+            "google_map_gallery",
+            "founding-year",
+            "student-number",
+            "academic-staff-number",
+            "programs",
+            "nationalities",
+            "motto",
+            "cover",
+            "reson1",
+            "reason2",
+            "reason2_704",
+            "about-university",
+            "facilities",
+            "gallery",
+            "promotional-video",
+            "student-life",
+            "locations",
+            "admissions",
+            "admission-criteria",
+            "tuition-fees-text",
+            "scholarship-opportunities-text",
+            "accreditations-amp-rankings-text",
+            "accommodation",
+            "programs-text",
+            "acceptance-rate"
+          ],
+          "analysis": [
+            {
+              "metaKey": "university_name",
+              "normalized": "universityname",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "146f7d2e6b829a96a554e4cc",
+                "slug": "university_name",
+                "name": "University Name",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "address",
+              "normalized": "address",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "eb934610d42af6c28c0391b5",
+                "slug": "address",
+                "name": "Address",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "country",
+              "normalized": "country",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "ed38dd00ee38889e1bab11ca",
+                "slug": "country",
+                "name": "Country",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "logo",
+              "normalized": "logo",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "406c5a3d47b438b4c673b7cd",
+                "slug": "logo",
+                "name": "Logo",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "university_background_image",
+              "normalized": "universitybackgroundimage",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "a1ab7275395cfbfe51642402",
+                "slug": "university_background_image",
+                "name": "University Background Image",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "photos",
+              "normalized": "photos",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "d52bedfe8b66d29292328199",
+                "slug": "photos",
+                "name": "Photos",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "google_map_gallery",
+              "normalized": "googlemapgallery",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "founding-year",
+              "normalized": "foundingyear",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "student-number",
+              "normalized": "studentnumber",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "academic-staff-number",
+              "normalized": "academicstaffnumber",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "programs",
+              "normalized": "programs",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "nationalities",
+              "normalized": "nationalities",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "motto",
+              "normalized": "motto",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "cover",
+              "normalized": "cover",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "reson1",
+              "normalized": "reson1",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "reason2",
+              "normalized": "reason2",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "reason2_704",
+              "normalized": "reason2704",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "about-university",
+              "normalized": "aboutuniversity",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "facilities",
+              "normalized": "facilities",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "gallery",
+              "normalized": "gallery",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "promotional-video",
+              "normalized": "promotionalvideo",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "student-life",
+              "normalized": "studentlife",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "locations",
+              "normalized": "locations",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "admissions",
+              "normalized": "admissions",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "admission-criteria",
+              "normalized": "admissioncriteria",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "tuition-fees-text",
+              "normalized": "tuitionfeestext",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "scholarship-opportunities-text",
+              "normalized": "scholarshipopportunitiestext",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "accreditations-amp-rankings-text",
+              "normalized": "accreditationsamprankingstext",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "accommodation",
+              "normalized": "accommodation",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "programs-text",
+              "normalized": "programstext",
+              "hasMatchingField": false,
+              "matchingField": null
+            },
+            {
+              "metaKey": "acceptance-rate",
+              "normalized": "acceptancerate",
+              "hasMatchingField": false,
+              "matchingField": null
+            }
+          ]
+        }
+      }
+    },
+    "paris-american-international-university": {
+      "orgId": "ND-k8iHHx70s5XaW28Mk2",
+      "postTypes": {
+        "programs": {
+          "metaKeys": [
+            "image",
+            "price_eur",
+            "tuition_fee_with_discount",
+            "course_outcomes",
+            "course_curriculum",
+            "course_credit",
+            "language_options",
+            "duration",
+            "degree_level",
+            "study_format",
+            "course_description",
+            "number_of_lessons",
+            "featured",
+            "career_opportunities"
+          ],
+          "analysis": [
+            {
+              "metaKey": "image",
+              "normalized": "image",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "e3dec6538b65700fdfc92306",
+                "slug": "image",
+                "name": "Image",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "price_eur",
+              "normalized": "priceeur",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "09abb148af252e2b99a73777",
+                "slug": "price_eur",
+                "name": "Price Eur",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "tuition_fee_with_discount",
+              "normalized": "tuitionfeewithdiscount",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "d54e52ab6455f54f5bb0c434",
+                "slug": "tuition_fee_with_discount",
+                "name": "Tuition Fee With Discount",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "course_outcomes",
+              "normalized": "courseoutcomes",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "ab389bb8329103790d733f11",
+                "slug": "course_outcomes",
+                "name": "Course Outcomes",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "course_curriculum",
+              "normalized": "coursecurriculum",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "f78e0c257607c4be917e7852",
+                "slug": "course_curriculum",
+                "name": "Course Curriculum",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "course_credit",
+              "normalized": "coursecredit",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "37a236e92e03d9bffd3c19ed",
+                "slug": "course_credit",
+                "name": "Course Credit",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "language_options",
+              "normalized": "languageoptions",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "efbfcfaae6a1ad82430c59a8",
+                "slug": "language_options",
+                "name": "Language Options",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "duration",
+              "normalized": "duration",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "268aa0e5d9ecc8ea391ef82e",
+                "slug": "duration",
+                "name": "Duration",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "degree_level",
+              "normalized": "degreelevel",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "3910979d174162968d30a06f",
+                "slug": "degree_level",
+                "name": "Degree Level",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "study_format",
+              "normalized": "studyformat",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "f9ead5b88198b42bf99eba4f",
+                "slug": "study_format",
+                "name": "Study Format",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "course_description",
+              "normalized": "coursedescription",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "915042207ea9f89be515dfc5",
+                "slug": "course_description",
+                "name": "Course Description",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "number_of_lessons",
+              "normalized": "numberoflessons",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "96bece51d96c6072cc9b05ab",
+                "slug": "number_of_lessons",
+                "name": "Number Of Lessons",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "featured",
+              "normalized": "featured",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "35d1a3209e50ff543c4c2aae",
+                "slug": "featured",
+                "name": "Featured",
+                "isUnknown": false
+              }
+            },
+            {
+              "metaKey": "career_opportunities",
+              "normalized": "careeropportunities",
+              "hasMatchingField": true,
+              "matchingField": {
+                "id": "7dd1cc6e39da54527e64c423",
+                "slug": "career_opportunities",
+                "name": "Career Opportunities",
+                "isUnknown": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
