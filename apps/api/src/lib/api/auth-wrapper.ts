@@ -43,12 +43,7 @@ export function withAuth(
 
       // Authenticate user
       // Note: env vars need to be passed from the request context in Next.js
-      const env = (request as any).env as { 
-        CF_ACCESS_TEAM_DOMAIN?: string; 
-        CF_ACCESS_AUD?: string;
-        ENABLE_LOCAL_AUTH_BYPASS?: string;
-      } | undefined;
-      const user = await getAuthenticatedUser(request, db, env);
+      const user = await getAuthenticatedUser(request, db);
 
       // Extract organization ID from route params
       const params = routeParams?.params || {};

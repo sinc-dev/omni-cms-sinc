@@ -1,10 +1,16 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - apps/*
+  - packages/*
 
 onlyBuiltDependencies:
+  - core-js
   - es5-ext
   - esbuild
+  - keccak
+  - scrypt
+  - secp256k1
+  - sha3
   - sharp
   - unrs-resolver
+  - websocket
   - workerd

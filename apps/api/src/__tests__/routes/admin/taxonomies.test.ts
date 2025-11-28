@@ -44,11 +44,11 @@ describe('Admin API - Taxonomies', () => {
         ]),
       };
 
-      (mockDb.select as any) = jest.fn<() => { from: () => { where: () => Promise<Array<{ count: number }>> } }>().mockReturnValue({
+      (mockDb.select as any) = jest.fn().mockReturnValue({
         from: jest.fn().mockReturnValue({
           where: jest.fn<() => Promise<Array<{ count: number }>>>().mockResolvedValue([{ count: 2 }]),
         }),
-      });
+      }) as any;
 
       const context = createAuthenticatedContext(regularUser, {
         url: `http://localhost:8787/api/admin/v1/organizations/${testOrg.id}/taxonomies?page=1&per_page=20`,
@@ -74,9 +74,9 @@ describe('Admin API - Taxonomies', () => {
 
       (mockDb.select as any) = jest.fn().mockReturnValue({
         from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([{ count: 1 }]),
+          where: jest.fn<() => Promise<Array<{ count: number }>>>().mockResolvedValue([{ count: 1 }]),
         }),
-      });
+      }) as any;
 
       const context = createAuthenticatedContext(regularUser, {
         url: `http://localhost:8787/api/admin/v1/organizations/${testOrg.id}/taxonomies?search=Categories`,

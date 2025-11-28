@@ -31,7 +31,8 @@ app.post(
     const options = validation.success ? validation.data : {};
 
     try {
-      const exportData = await generateExportFile(db, organizationId!, options);
+      // Type assertion needed due to schema path resolution differences
+      const exportData = await generateExportFile(db as any, organizationId!, options);
 
       return c.text(exportData, 200, {
         'Content-Type': 'application/json',

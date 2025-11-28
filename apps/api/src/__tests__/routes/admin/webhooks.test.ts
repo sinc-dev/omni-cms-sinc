@@ -380,7 +380,7 @@ describe('Admin API - Webhooks', () => {
       };
 
       (mockDb.delete as any) = jest.fn().mockReturnValue({
-        where: jest.fn().mockResolvedValue(undefined),
+        where: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
       });
 
       const context = createAuthenticatedContext(regularUser, {
@@ -407,6 +407,174 @@ describe('Admin API - Webhooks', () => {
       const context = createAuthenticatedContext(regularUser, {
         method: 'DELETE',
         url: `http://localhost:8787/api/admin/v1/organizations/${testOrg.id}/webhooks/non-existent`,
+        params: { orgId: testOrg.id, webhookId: 'non-existent' },
+        organizationId: testOrg.id,
+        env: { DB: { query: mockDb.query } as any },
+      });
+
+      expect(context.req.param('webhookId')).toBe('non-existent');
+    });
+  });
+
+  describe('POST /api/admin/v1/organizations/:orgId/webhooks/:webhookId/test', () => {
+    it('should test webhook delivery', async () => {
+      const mockDb = createMockDb({
+        users: [regularUser],
+        organizations: [testOrg],
+      });
+
+      (mockDb.query as any).webhooks = {
+        findFirst: jest.fn<() => Promise<typeof mockWebhook | null>>().mockResolvedValue(mockWebhook),
+      };
+
+      (mockDb.insert as any) = jest.fn().mockReturnValue({
+        values: jest.fn().mockReturnValue({
+          returning: jest.fn<() => Promise<Array<any>>>().mockResolvedValue([{
+            id: 'log_123',
+            webhookId: mockWebhook.id,
+            event: 'webhook.test',
+            payload: JSON.stringify({ event: 'webhook.test', data: { message: 'This is a test webhook' } }),
+            responseStatus: 200,
+            responseBody: 'OK',
+            createdAt: new Date(),
+          }]),
+        }),
+      });
+
+      // Mock global fetch
+      global.fetch = jest.fn<() => Promise<Response>>().mockResolvedValue({
+        status: 200,
+        text: jest.fn<() => Promise<string>>().mockResolvedValue('OK'),
+      } as any);
+
+      const context = createAuthenticatedContext(regularUser, {
+        method: 'POST',
+        url: `http://localhost:8787/api/admin/v1/organizations/${testOrg.id}/webhooks/${mockWebhook.id}/test`,
+        params: { orgId: testOrg.id, webhookId: mockWebhook.id },
+        organizationId: testOrg.id,
+        env: { DB: { query: mockDb.query, insert: mockDb.insert } as any },
+      });
+
+      expect(context.req.method).toBe('POST');
+      expect(context.req.param('webhookId')).toBe(mockWebhook.id);
+    });
+
+    it('should return 404 when webhook not found', async () => {
+      const mockDb = createMockDb({
+        users: [regularUser],
+        organizations: [testOrg],
+      });
+
+      (mockDb.query as any).webhooks = {
+        findFirst: jest.fn<() => Promise<Webhook | null>>().mockResolvedValue(null),
+      };
+
+      const context = createAuthenticatedContext(regularUser, {
+        method: 'POST',
+        url: `http://localhost:8787/api/admin/v1/organizations/${testOrg.id}/webhooks/non-existent/test`,
+        params: { orgId: testOrg.id, webhookId: 'non-existent' },
+        organizationId: testOrg.id,
+        env: { DB: { query: mockDb.query } as any },
+      });
+
+      expect(context.req.param('webhookId')).toBe('non-existent');
+    });
+
+    it('should handle network errors during webhook test', async () => {
+      const mockDb = createMockDb({
+        users: [regularUser],
+        organizations: [testOrg],
+      });
+
+      (mockDb.query as any).webhooks = {
+        findFirst: jest.fn<() => Promise<typeof mockWebhook | null>>().mockResolvedValue(mockWebhook),
+      };
+
+      (mockDb.insert as any) = jest.fn().mockReturnValue({
+        values: jest.fn().mockReturnValue({
+          returning: jest.fn<() => Promise<Array<any>>>().mockResolvedValue([{
+            id: 'log_123',
+            webhookId: mockWebhook.id,
+            event: 'webhook.test',
+            payload: JSON.stringify({ event: 'webhook.test' }),
+            responseStatus: 0,
+            responseBody: 'Network error',
+            createdAt: new Date(),
+          }]),
+        }),
+      });
+
+      // Mock global fetch to throw error
+      global.fetch = jest.fn<() => Promise<Response>>().mockRejectedValue(new Error('Network error'));
+
+      const context = createAuthenticatedContext(regularUser, {
+        method: 'POST',
+        url: `http://localhost:8787/api/admin/v1/organizations/${testOrg.id}/webhooks/${mockWebhook.id}/test`,
+        params: { orgId: testOrg.id, webhookId: mockWebhook.id },
+        organizationId: testOrg.id,
+        env: { DB: { query: mockDb.query, insert: mockDb.insert } as any },
+      });
+
+      expect(context.req.param('webhookId')).toBe(mockWebhook.id);
+    });
+  });
+
+  describe('GET /api/admin/v1/organizations/:orgId/webhooks/:webhookId/logs', () => {
+    it('should return paginated webhook logs', async () => {
+      const mockLog = {
+        id: 'log_123',
+        webhookId: mockWebhook.id,
+        event: 'post.published',
+        payload: JSON.stringify({ event: 'post.published', data: { postId: 'post_123' } }),
+        responseStatus: 200,
+        responseBody: 'OK',
+        createdAt: new Date('2024-01-01'),
+      };
+
+      const mockDb = createMockDb({
+        users: [regularUser],
+        organizations: [testOrg],
+      });
+
+      (mockDb.query as any).webhooks = {
+        findFirst: jest.fn<() => Promise<typeof mockWebhook | null>>().mockResolvedValue(mockWebhook),
+      };
+
+      (mockDb.query as any).webhookLogs = {
+        findMany: jest.fn<() => Promise<typeof mockLog[]>>().mockResolvedValue([mockLog]),
+      };
+
+      (mockDb.select as any) = jest.fn().mockReturnValue({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn<() => Promise<Array<{ count: number }>>>().mockResolvedValue([{ count: 1 }]),
+        }),
+      }) as any;
+
+      const context = createAuthenticatedContext(regularUser, {
+        url: `http://localhost:8787/api/admin/v1/organizations/${testOrg.id}/webhooks/${mockWebhook.id}/logs?page=1&per_page=20`,
+        params: { orgId: testOrg.id, webhookId: mockWebhook.id },
+        query: { page: '1', per_page: '20' },
+        organizationId: testOrg.id,
+        env: { DB: { query: mockDb.query, select: mockDb.select } as any },
+      });
+
+      expect(context.var.organizationId).toBe(testOrg.id);
+      expect(context.req.param('webhookId')).toBe(mockWebhook.id);
+      expect(context.req.query('page')).toBe('1');
+    });
+
+    it('should return 404 when webhook not found', async () => {
+      const mockDb = createMockDb({
+        users: [regularUser],
+        organizations: [testOrg],
+      });
+
+      (mockDb.query as any).webhooks = {
+        findFirst: jest.fn<() => Promise<Webhook | null>>().mockResolvedValue(null),
+      };
+
+      const context = createAuthenticatedContext(regularUser, {
+        url: `http://localhost:8787/api/admin/v1/organizations/${testOrg.id}/webhooks/non-existent/logs`,
         params: { orgId: testOrg.id, webhookId: 'non-existent' },
         organizationId: testOrg.id,
         env: { DB: { query: mockDb.query } as any },

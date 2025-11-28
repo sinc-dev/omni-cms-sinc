@@ -1,6 +1,6 @@
-import type { Config } from 'drizzle-kit';
+import { defineConfig } from 'drizzle-kit';
 
-export default {
+export default defineConfig({
   schema: './src/db/schema/*',
   out: './drizzle/migrations',
   driver: 'd1',
@@ -8,4 +8,4 @@ export default {
     wranglerConfigPath: './wrangler.toml',
     dbName: 'omni-cms',
   },
-} satisfies Config;
+});

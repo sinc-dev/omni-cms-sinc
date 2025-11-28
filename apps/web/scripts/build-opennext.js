@@ -19,6 +19,18 @@ if (!fs.existsSync(path.join(projectRoot, '.next'))) {
   process.exit(1);
 }
 
+// Verify opennext.config.ts exists, create if missing
+const configPath = path.join(projectRoot, 'opennext.config.ts');
+if (!fs.existsSync(configPath)) {
+  console.warn('⚠ opennext.config.ts not found, creating default config...');
+  const defaultConfig = `import { defineCloudflareConfig } from "@opennextjs/cloudflare";
+
+export default defineCloudflareConfig();
+`;
+  fs.writeFileSync(configPath, defaultConfig, 'utf8');
+  console.log('✓ Created opennext.config.ts');
+}
+
 console.log('⚡ Running OpenNext Cloudflare adapter...');
 console.log(`   Working directory: ${projectRoot}`);
 console.log(`   Output directory: .open-next`);
@@ -34,6 +46,7 @@ try {
 
   // Run OpenNext build
   // OpenNext handles all the transformation and optimization
+  // Config file is ensured to exist above, so no prompts should appear
   execSync('npx opennextjs-cloudflare build', {
     stdio: 'inherit',
     cwd: projectRoot,

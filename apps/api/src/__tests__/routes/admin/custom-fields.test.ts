@@ -45,11 +45,11 @@ describe('Admin API - Custom Fields', () => {
         ]),
       };
 
-      (mockDb.select as any) = jest.fn<() => { from: () => { where: () => Promise<Array<{ count: number }>> } }>().mockReturnValue({
+      (mockDb.select as any) = jest.fn().mockReturnValue({
         from: jest.fn().mockReturnValue({
           where: jest.fn<() => Promise<Array<{ count: number }>>>().mockResolvedValue([{ count: 2 }]),
         }),
-      });
+      }) as any;
 
       const context = createAuthenticatedContext(regularUser, {
         url: `http://localhost:8787/api/admin/v1/organizations/${testOrg.id}/custom-fields?page=1&per_page=20`,
@@ -75,9 +75,9 @@ describe('Admin API - Custom Fields', () => {
 
       (mockDb.select as any) = jest.fn().mockReturnValue({
         from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([{ count: 1 }]),
+          where: jest.fn<() => Promise<Array<{ count: number }>>>().mockResolvedValue([{ count: 1 }]),
         }),
-      });
+      }) as any;
 
       const context = createAuthenticatedContext(regularUser, {
         url: `http://localhost:8787/api/admin/v1/organizations/${testOrg.id}/custom-fields?field_type=textarea`,
@@ -102,9 +102,9 @@ describe('Admin API - Custom Fields', () => {
 
       (mockDb.select as any) = jest.fn().mockReturnValue({
         from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([{ count: 1 }]),
+          where: jest.fn<() => Promise<Array<{ count: number }>>>().mockResolvedValue([{ count: 1 }]),
         }),
-      });
+      }) as any;
 
       const context = createAuthenticatedContext(regularUser, {
         url: `http://localhost:8787/api/admin/v1/organizations/${testOrg.id}/custom-fields?search=Author`,
@@ -127,11 +127,11 @@ describe('Admin API - Custom Fields', () => {
         findMany: jest.fn<() => Promise<typeof mockCustomField[]>>().mockResolvedValue([mockCustomField2, mockCustomField]),
       };
 
-      (mockDb.select as any) = jest.fn<() => { from: () => { where: () => Promise<Array<{ count: number }>> } }>().mockReturnValue({
+      (mockDb.select as any) = jest.fn().mockReturnValue({
         from: jest.fn().mockReturnValue({
           where: jest.fn<() => Promise<Array<{ count: number }>>>().mockResolvedValue([{ count: 2 }]),
         }),
-      });
+      }) as any;
 
       const context = createAuthenticatedContext(regularUser, {
         url: `http://localhost:8787/api/admin/v1/organizations/${testOrg.id}/custom-fields?sort=name_asc`,

@@ -193,8 +193,9 @@ describe('Admin API - API Keys', () => {
             revokedAt: null,
             rotatedFromId: null,
             createdAt: new Date(),
+            updatedAt: new Date(),
             lastUsedAt: null,
-            expiresAt: new Date(newKeyData.expiresAt),
+            expiresAt: newKeyData.expiresAt ? new Date(newKeyData.expiresAt) : null,
           }]),
         }),
       });

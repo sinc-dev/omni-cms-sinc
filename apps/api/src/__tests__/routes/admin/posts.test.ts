@@ -529,7 +529,7 @@ describe('Admin API - Posts', () => {
       });
 
       (mockDb.delete as any) = jest.fn().mockReturnValue({
-        where: jest.fn().mockResolvedValue(undefined),
+        where: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
       });
 
       (mockDb.insert as any) = jest.fn().mockReturnValue({
@@ -586,7 +586,7 @@ describe('Admin API - Posts', () => {
       });
 
       (mockDb.delete as any) = jest.fn().mockReturnValue({
-        where: jest.fn().mockResolvedValue(undefined),
+        where: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
       });
 
       const context = createAuthenticatedContext(regularUser, {
