@@ -39,4 +39,8 @@ bucket_name = "omni-cms-media"
 # Note: NODE_OPTIONS is already set in package.json scripts for local builds
 [vars]
 R2_BUCKET_NAME = "omni-cms-media"
+# NOTE: NODE_OPTIONS in [vars] is for RUNTIME only (when the Pages function executes).
+# For BUILD-TIME (during vercel build), you MUST set NODE_OPTIONS in Cloudflare Pages
+# dashboard → Settings → Environment Variables → Build section.
+# Build-time NODE_OPTIONS prevents "JavaScript heap out of memory" errors during build.
 NODE_OPTIONS = "--max-old-space-size=4096"

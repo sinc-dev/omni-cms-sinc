@@ -144,10 +144,21 @@ try {
   // Execute @cloudflare/next-on-pages with explicit environment variables
   // The NODE_OPTIONS is set in env object above, which should propagate to child processes
   // The @cloudflare/next-on-pages tool runs 'pnpm dlx vercel build' internally
-  execSync('npx @cloudflare/next-on-pages@1', { 
+  // 
+  // CRITICAL: Use shell wrapper to ensure NODE_OPTIONS is explicitly set before npx runs.
+  // This is necessary because pnpm dlx creates an isolated environment that doesn't
+  // inherit NODE_OPTIONS from parent processes. By setting it in the shell command itself,
+  // we ensure it's available to the vercel build process.
+  const isWindows = process.platform === 'win32';
+  const command = isWindows
+    ? `set NODE_OPTIONS=${env.NODE_OPTIONS} && npx @cloudflare/next-on-pages@1`
+    : `NODE_OPTIONS="${env.NODE_OPTIONS}" npx @cloudflare/next-on-pages@1`;
+  
+  execSync(command, { 
+    shell: true, // Use shell to ensure NODE_OPTIONS is set in the command
     stdio: 'inherit',
     cwd: projectRoot,
-    env: env,
+    env: env, // Still pass env for other variables
   });
   
   // Log memory after vercel build

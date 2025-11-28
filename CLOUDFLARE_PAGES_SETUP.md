@@ -57,8 +57,27 @@ echo "Build completed successfully"
 1. In your **omni-cms-sinc** project (same as above)
 2. Click **Settings** tab
 3. Scroll down and click **Environment Variables** in the left sidebar (under Settings)
-4. You'll see sections for **Production**, **Preview**, and **Branch previews**
+4. You'll see sections for **Production**, **Preview**, **Branch previews**, and **Build**
 5. Add variables to **Production** (and Preview if needed)
+
+#### ⚠️ CRITICAL: Set NODE_OPTIONS for Build
+
+**IMPORTANT**: To prevent "JavaScript heap out of memory" errors during build, you **MUST** set `NODE_OPTIONS` in the **Build** environment variables section:
+
+1. In the **Environment Variables** page, scroll to the **Build** section (separate from Production/Preview)
+2. Click **Add variable** in the Build section
+3. Set:
+   - **Variable name**: `NODE_OPTIONS`
+   - **Value**: `--max-old-space-size=4096`
+4. Click **Save**
+
+**Why this is needed:**
+- The `@cloudflare/next-on-pages` tool runs `vercel build` internally
+- `vercel build` is memory-intensive and needs the increased heap size
+- Build environment variables are separate from runtime variables
+- Without this, builds will fail with out-of-memory errors
+
+**Note**: This is different from runtime environment variables. Build variables are only available during the build process.
 
 **Add these variables:**
 
@@ -111,6 +130,9 @@ echo "Build completed successfully"
 **Optional:**
 - `CLOUDFLARE_ACCOUNT_ID` - Your Cloudflare account ID
 - `R2_PUBLIC_URL` - Custom domain for R2 media (if using)
+
+**Build Environment Variables (Required for successful builds):**
+- `NODE_OPTIONS` = `--max-old-space-size=4096` ⚠️ **CRITICAL** - Prevents out-of-memory errors during build
 
 ### 4. Create/Verify Resources
 

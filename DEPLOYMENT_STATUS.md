@@ -44,7 +44,7 @@ npx wrangler pages deploy .vercel/output/static
 
 **Location**: Settings → Environment Variables
 
-**Required:**
+**Required Runtime Variables (Production/Preview):**
 - `CF_ACCESS_TEAM_DOMAIN`
 - `CF_ACCESS_AUD`
 - `R2_ACCOUNT_ID`
@@ -52,6 +52,15 @@ npx wrangler pages deploy .vercel/output/static
 - `R2_SECRET_ACCESS_KEY`
 - `R2_BUCKET_NAME` = `omni-cms-media`
 - `NEXT_PUBLIC_APP_URL` = Your production URL
+
+**⚠️ CRITICAL: Build Environment Variables**
+
+**Location**: Settings → Environment Variables → **Build** section
+
+**Required:**
+- `NODE_OPTIONS` = `--max-old-space-size=4096`
+
+**Why**: Prevents "JavaScript heap out of memory" errors during the build process. The `vercel build` step (run by `@cloudflare/next-on-pages`) requires increased memory allocation.
 
 ## 📋 Remaining Steps (After Dashboard Configuration)
 
