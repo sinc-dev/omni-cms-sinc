@@ -2,9 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-// Optimized: Direct icon imports to reduce bundle size
-import ShieldX from 'lucide-react/dist/esm/icons/shield-x';
-import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
+import { ShieldX, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 interface ForbiddenCardProps {

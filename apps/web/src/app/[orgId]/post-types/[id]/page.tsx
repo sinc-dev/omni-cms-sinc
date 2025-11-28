@@ -8,10 +8,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-// Optimized: Direct icon imports to reduce bundle size
-import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
-import Settings from 'lucide-react/dist/esm/icons/settings';
-import Layers from 'lucide-react/dist/esm/icons/layers';
+import { ArrowLeft, Settings, Layers } from 'lucide-react';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';

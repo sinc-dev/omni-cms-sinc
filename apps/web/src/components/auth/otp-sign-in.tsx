@@ -12,12 +12,7 @@ import {
   InputOTPSlot,
 } from '@/components/ui/input-otp';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-// Optimized: Direct icon imports to reduce bundle size
-import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
-import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
-import Mail from 'lucide-react/dist/esm/icons/mail';
-import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
-import Info from 'lucide-react/dist/esm/icons/info';
+import { AlertCircle, Loader2, Mail, ArrowLeft, Info } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { getRedirectUrl, storeRedirectUrl } from '@/lib/auth/cloudflare-access-client';
 

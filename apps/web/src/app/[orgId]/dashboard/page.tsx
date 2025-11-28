@@ -6,13 +6,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-// Optimized: Direct icon imports to reduce bundle size
-import FileText from 'lucide-react/dist/esm/icons/file-text';
-import Image from 'lucide-react/dist/esm/icons/image';
-import Users from 'lucide-react/dist/esm/icons/users';
-import Tags from 'lucide-react/dist/esm/icons/tags';
-import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
-import Clock from 'lucide-react/dist/esm/icons/clock';
+import { FileText, Image, Users, Tags, Loader2, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';

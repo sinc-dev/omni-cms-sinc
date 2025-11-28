@@ -2,9 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-// Optimized: Direct icon import to reduce bundle size
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right"
-import type { LucideIcon } from "lucide-react"
+import { ChevronRight, type LucideIcon } from "lucide-react"
 
 import {
   Collapsible,

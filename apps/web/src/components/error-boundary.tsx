@@ -3,10 +3,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-// Optimized: Direct icon imports to reduce bundle size
-import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
-import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
-import Home from 'lucide-react/dist/esm/icons/home';
+import { AlertCircle, RefreshCw, Home } from 'lucide-react';
 import Link from 'next/link';
 
 interface Props {

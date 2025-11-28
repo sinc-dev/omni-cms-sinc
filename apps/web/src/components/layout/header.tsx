@@ -10,23 +10,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-// Optimized: Direct icon imports to reduce bundle size
-import User from 'lucide-react/dist/esm/icons/user';
-import LogOut from 'lucide-react/dist/esm/icons/log-out';
-import Settings from 'lucide-react/dist/esm/icons/settings';
-import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
-import Building2 from 'lucide-react/dist/esm/icons/building-2';
-import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
-import FileText from 'lucide-react/dist/esm/icons/file-text';
-import Image from 'lucide-react/dist/esm/icons/image';
-import Tags from 'lucide-react/dist/esm/icons/tags';
-import FolderTree from 'lucide-react/dist/esm/icons/folder-tree';
-import Layers from 'lucide-react/dist/esm/icons/layers';
-import Blocks from 'lucide-react/dist/esm/icons/blocks';
-import Users from 'lucide-react/dist/esm/icons/users';
-import Webhook from 'lucide-react/dist/esm/icons/webhook';
-import BarChart3 from 'lucide-react/dist/esm/icons/bar-chart-3';
-import Key from 'lucide-react/dist/esm/icons/key';
+import { 
+  User, 
+  LogOut, 
+  Settings, 
+  ChevronDown, 
+  Building2, 
+  LayoutDashboard, 
+  FileText, 
+  Image, 
+  Tags, 
+  FolderTree, 
+  Layers, 
+  Blocks, 
+  Users, 
+  Webhook, 
+  BarChart3, 
+  Key 
+} from 'lucide-react';
 import Link from 'next/link';
 import { useOrganization } from '@/lib/context/organization-context';
 import { MobileMenu } from '@/components/navigation/mobile-menu';

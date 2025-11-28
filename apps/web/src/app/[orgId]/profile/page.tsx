@@ -7,12 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-// Optimized: Direct icon imports to reduce bundle size
-import Save from 'lucide-react/dist/esm/icons/save';
-import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
-import UserIcon from 'lucide-react/dist/esm/icons/user';
-import Upload from 'lucide-react/dist/esm/icons/upload';
-import X from 'lucide-react/dist/esm/icons/x';
+import { Save, Loader2, User as UserIcon, Upload, X } from 'lucide-react';
 import NextImage from 'next/image';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';

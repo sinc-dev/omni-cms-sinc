@@ -1,8 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-// Optimized: Direct icon import to reduce bundle size
-import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
+import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 
 interface ProviderButtonProps {

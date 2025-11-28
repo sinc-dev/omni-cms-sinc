@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-// Optimized: Direct icon import to reduce bundle size
-import Layers from "lucide-react/dist/esm/icons/layers"
+import { Layers } from "lucide-react"
 import { RootNavMain } from "@/components/root/nav-main"
 import { NavUser } from "@/components/navigation/nav-user"
 import {

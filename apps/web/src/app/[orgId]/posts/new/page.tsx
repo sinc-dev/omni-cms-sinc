@@ -12,12 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
-// Optimized: Direct icon imports to reduce bundle size
-import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
-import Save from 'lucide-react/dist/esm/icons/save';
-import Eye from 'lucide-react/dist/esm/icons/eye';
-import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
-import ExternalLink from 'lucide-react/dist/esm/icons/external-link';
+import { ArrowLeft, Save, Eye, Loader2, ExternalLink } from 'lucide-react';
 import { TipTapEditor } from '@/components/editor/tiptap-editor';
 import { CustomFieldRenderer } from '@/components/editor/custom-field-renderer';
 import { MediaPicker } from '@/components/editor/media-picker';
