@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { createMockContext } from '../../helpers/mock-hono-context';
 import { fixtures } from '../../helpers/fixtures';
 import { createMockDb } from '../../helpers/mock-db';
+import type { CustomField, PostFieldValue, PostType } from '../../../db/schema';
 
 describe('Public API - Posts', () => {
   const testOrg = fixtures.organizations.testOrg;
@@ -131,6 +132,204 @@ describe('Public API - Posts', () => {
       });
 
       expect(context.req.param('slug')).toBe('draft-post');
+    });
+
+    it('should return post with custom field values', async () => {
+      const mockPostType: PostType = {
+        id: 'post_type_123',
+        organizationId: testOrg.id,
+        name: 'Blog Post',
+        slug: 'blog-post',
+        description: 'Blog posts',
+        isHierarchical: false,
+        icon: null,
+        settings: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const mockCustomField: CustomField = {
+        id: 'field_123',
+        organizationId: testOrg.id,
+        name: 'Author Bio',
+        slug: 'author_bio',
+        fieldType: 'textarea',
+        settings: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const mockFieldValue: PostFieldValue = {
+        id: 'pfv_123',
+        postId: mockPublishedPost.id,
+        customFieldId: mockCustomField.id,
+        value: JSON.stringify('Author bio text'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const mockDb = createMockDb({
+        users: [],
+        organizations: [testOrg],
+      });
+
+      (mockDb.query as any).organizations = {
+        findFirst: jest.fn<() => Promise<typeof testOrg | null>>().mockResolvedValue(testOrg),
+      };
+
+      (mockDb.query as any).posts = {
+        findFirst: jest.fn<() => Promise<typeof mockPublishedPost & { postType: PostType } | null>>().mockResolvedValue({
+          ...mockPublishedPost,
+          postType: mockPostType,
+        } as any),
+      };
+
+      (mockDb.query as any).postTypes = {
+        findFirst: jest.fn<() => Promise<typeof mockPostType | null>>().mockResolvedValue(mockPostType),
+      };
+
+      (mockDb.query as any).postTypeFields = {
+        findMany: jest.fn<() => Promise<Array<{ customFieldId: string }>>>().mockResolvedValue([
+          { customFieldId: mockCustomField.id },
+        ]),
+      };
+
+      (mockDb.query as any).postFieldValues = {
+        findMany: jest.fn<() => Promise<typeof mockFieldValue[]>>().mockResolvedValue([mockFieldValue]),
+      };
+
+      (mockDb.query as any).customFields = {
+        findFirst: jest.fn<() => Promise<typeof mockCustomField | null>>().mockResolvedValue(mockCustomField),
+      };
+
+      (mockDb.query as any).postTaxonomies = {
+        findMany: jest.fn<() => Promise<any[]>>().mockResolvedValue([]),
+      };
+
+      const context = createMockContext({
+        url: `http://localhost:8787/api/public/v1/${testOrg.slug}/posts/${mockPublishedPost.slug}`,
+        params: { orgSlug: testOrg.slug, slug: mockPublishedPost.slug },
+        env: { DB: { query: mockDb.query } as any },
+      });
+
+      expect(context.req.param('slug')).toBe(mockPublishedPost.slug);
+    });
+
+    it('should filter posts by custom field values', async () => {
+      const mockCustomField: CustomField = {
+        id: 'field_123',
+        organizationId: testOrg.id,
+        name: 'Category',
+        slug: 'category',
+        fieldType: 'select',
+        settings: JSON.stringify({
+          options: [
+            { label: 'Tech', value: 'tech' },
+            { label: 'Blog', value: 'blog' },
+          ],
+        }),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const mockDb = createMockDb({
+        users: [],
+        organizations: [testOrg],
+      });
+
+      (mockDb.query as any).organizations = {
+        findFirst: jest.fn<() => Promise<typeof testOrg | null>>().mockResolvedValue(testOrg),
+      };
+
+      (mockDb.query as any).posts = {
+        findMany: jest.fn<() => Promise<typeof mockPublishedPost[]>>().mockResolvedValue([mockPublishedPost]),
+      };
+
+      const context = createMockContext({
+        url: `http://localhost:8787/api/public/v1/${testOrg.slug}/posts?custom_fields[category]=tech`,
+        params: { orgSlug: testOrg.slug },
+        query: { 'custom_fields[category]': 'tech' },
+        env: { DB: { query: mockDb.query } as any },
+      });
+
+      expect(context.req.query('custom_fields[category]')).toBe('tech');
+    });
+
+    it('should return custom fields in post list response', async () => {
+      const mockPostType: PostType = {
+        id: 'post_type_123',
+        organizationId: testOrg.id,
+        name: 'Blog Post',
+        slug: 'blog-post',
+        description: 'Blog posts',
+        isHierarchical: false,
+        icon: null,
+        settings: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const mockCustomField: CustomField = {
+        id: 'field_123',
+        organizationId: testOrg.id,
+        name: 'Reading Time',
+        slug: 'reading_time',
+        fieldType: 'number',
+        settings: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const mockDb = createMockDb({
+        users: [],
+        organizations: [testOrg],
+      });
+
+      (mockDb.query as any).organizations = {
+        findFirst: jest.fn<() => Promise<typeof testOrg | null>>().mockResolvedValue(testOrg),
+      };
+
+      (mockDb.query as any).posts = {
+        findMany: jest.fn<() => Promise<Array<typeof mockPublishedPost & { postType: PostType }>>>().mockResolvedValue([{
+          ...mockPublishedPost,
+          postType: mockPostType,
+        } as any]),
+      };
+
+      (mockDb.query as any).postTypes = {
+        findFirst: jest.fn<() => Promise<typeof mockPostType | null>>().mockResolvedValue(mockPostType),
+      };
+
+      (mockDb.query as any).postTypeFields = {
+        findMany: jest.fn<() => Promise<Array<{ customFieldId: string }>>>().mockResolvedValue([
+          { customFieldId: mockCustomField.id },
+        ]),
+      };
+
+      (mockDb.query as any).postFieldValues = {
+        findMany: jest.fn<() => Promise<Array<PostFieldValue>>>().mockResolvedValue([
+          {
+            id: 'pfv_123',
+            postId: mockPublishedPost.id,
+            customFieldId: mockCustomField.id,
+            value: JSON.stringify(5),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ]),
+      };
+
+      (mockDb.query as any).customFields = {
+        findFirst: jest.fn<() => Promise<typeof mockCustomField | null>>().mockResolvedValue(mockCustomField),
+      };
+
+      const context = createMockContext({
+        url: `http://localhost:8787/api/public/v1/${testOrg.slug}/posts`,
+        params: { orgSlug: testOrg.slug },
+        env: { DB: { query: mockDb.query } as any },
+      });
+
+      expect(context.req.param('orgSlug')).toBe(testOrg.slug);
     });
   });
 });

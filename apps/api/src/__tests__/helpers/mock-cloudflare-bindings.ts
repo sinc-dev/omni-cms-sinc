@@ -88,7 +88,7 @@ export function createSimpleMockD1(): D1Database {
           run: async () => ({} as any),
           all: async () => ({ results: [] } as any),
           raw: async () => [[]] as [string[], ...any[]],
-        };
+      };
         return stmt;
       };
       return createPreparedStatement();

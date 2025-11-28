@@ -8,9 +8,13 @@ Update your Cloudflare Pages dashboard with these settings:
 
 **Build command:**
 ```
-pnpm install && pnpm run build:cf
+pnpm install --no-frozen-lockfile && pnpm run build:cf
 ```
-✅ **This is correct!** No changes needed.
+⚠️ **UPDATE REQUIRED**: Add `--no-frozen-lockfile` flag to allow pnpm to update the lockfile during CI builds.
+
+**Why**: The `pnpm-lock.yaml` is out of sync (still has old `@cloudflare/next-on-pages`). This flag allows pnpm to update it during the build.
+
+**Note**: After updating the lockfile locally and committing it, you can revert to `pnpm install && pnpm run build:cf`.
 
 **Build output directory:**
 ```
@@ -65,12 +69,22 @@ After updating, your next deployment should:
 ## Complete Settings Summary
 
 ```
-Build command:        pnpm install && pnpm run build:cf
+Build command:        pnpm install --no-frozen-lockfile && pnpm run build:cf
 Build output dir:     .open-next
 Root directory:       apps/web
 Build system:         3 (latest)
 Node version:         22 (or latest)
 ```
+
+## Important: Lockfile Update
+
+The `--no-frozen-lockfile` flag is needed because `pnpm-lock.yaml` is out of sync with `package.json` after the OpenNext migration.
+
+**To fix permanently:**
+1. Run locally: `cd apps/web && pnpm install`
+2. Commit the updated `pnpm-lock.yaml`
+3. Push to repository
+4. Then you can use: `pnpm install && pnpm run build:cf` (without the flag)
 
 ## Environment Variables
 
