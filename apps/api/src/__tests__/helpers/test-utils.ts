@@ -5,59 +5,59 @@ import type { SuccessResponse, PaginatedResponse, ErrorResponse } from '../../li
  * Request builder for creating test requests
  */
 export class RequestBuilder {
-  private method: string = 'GET';
-  private url: string = 'http://localhost:8787';
-  private headers: Record<string, string> = {};
-  private body: any = undefined;
-  private params: Record<string, string> = {};
-  private query: Record<string, string> = {};
+  private _method: string = 'GET';
+  private _url: string = 'http://localhost:8787';
+  private _headers: Record<string, string> = {};
+  private _body: any = undefined;
+  private _params: Record<string, string> = {};
+  private _query: Record<string, string> = {};
 
   static create(): RequestBuilder {
     return new RequestBuilder();
   }
 
   method(method: string): this {
-    this.method = method;
+    this._method = method;
     return this;
   }
 
   url(url: string): this {
-    this.url = url;
+    this._url = url;
     return this;
   }
 
   header(name: string, value: string): this {
-    this.headers[name] = value;
+    this._headers[name] = value;
     return this;
   }
 
   headers(headers: Record<string, string>): this {
-    this.headers = { ...this.headers, ...headers };
+    this._headers = { ...this._headers, ...headers };
     return this;
   }
 
   body(body: any): this {
-    this.body = body;
+    this._body = body;
     return this;
   }
 
   param(key: string, value: string): this {
-    this.params[key] = value;
+    this._params[key] = value;
     return this;
   }
 
   params(params: Record<string, string>): this {
-    this.params = { ...this.params, ...params };
+    this._params = { ...this._params, ...params };
     return this;
   }
 
   query(key: string, value: string): this {
-    this.query[key] = value;
+    this._query[key] = value;
     return this;
   }
 
   queryParams(query: Record<string, string>): this {
-    this.query = { ...this.query, ...query };
+    this._query = { ...this._query, ...query };
     return this;
   }
 
@@ -70,12 +70,12 @@ export class RequestBuilder {
     query: Record<string, string>;
   } {
     return {
-      method: this.method,
-      url: this.url,
-      headers: this.headers,
-      body: this.body,
-      params: this.params,
-      query: this.query,
+      method: this._method,
+      url: this._url,
+      headers: this._headers,
+      body: this._body,
+      params: this._params,
+      query: this._query,
     };
   }
 }
@@ -124,7 +124,7 @@ export class ResponseValidator {
   async expectPaginatedResponse<T = any>(): Promise<PaginatedResponse<T>> {
     await this.expectStatus(200);
     await this.expectJson();
-    const data = await this.response.json();
+    const data = await this.response.json() as any;
     expect(data).toHaveProperty('success', true);
     expect(data).toHaveProperty('data');
     expect(data).toHaveProperty('meta');
@@ -136,7 +136,7 @@ export class ResponseValidator {
   }
 
   async expectErrorResponse(code?: string): Promise<ErrorResponse> {
-    const data = await this.response.json();
+    const data = await this.response.json() as any;
     expect(data).toHaveProperty('success', false);
     expect(data).toHaveProperty('error');
     expect(data.error).toHaveProperty('code');

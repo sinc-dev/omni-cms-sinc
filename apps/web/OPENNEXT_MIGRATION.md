@@ -1,155 +1,176 @@
-# OpenNext Migration Guide
+# OpenNext Adapter Migration Guide
 
-## Current Status
+## Overview
 
-The project currently uses `@cloudflare/next-on-pages`, which is **deprecated** as of late 2024/early 2025. Cloudflare recommends migrating to the **OpenNext Cloudflare adapter** (`@opennextjs/cloudflare`).
+This guide helps you migrate from `@cloudflare/next-on-pages` to `@opennextjs/cloudflare` adapter.
 
-## Why Migrate?
-
-1. **Deprecated Package**: `@cloudflare/next-on-pages` is no longer actively maintained
-2. **Better Next.js 16 Support**: OpenNext adapter has better support for Next.js 16 features
-3. **Active Development**: OpenNext is actively maintained and recommended by Cloudflare
-4. **Future-Proof**: Ensures long-term compatibility and support
-
-## Current Setup
-
-- **Adapter**: `@cloudflare/next-on-pages@1.13.16` (deprecated)
-- **Build Script**: `scripts/build.mjs` - handles adapter execution
-- **Build Command**: `pnpm build` → runs adapter which runs Next.js build
-- **Output**: `.vercel/output/static`
+**Current Status:**
+- ✅ OpenNext officially supports Next.js 15 and 14
+- ⚠️ Next.js 16 support is not officially confirmed (may work, but not guaranteed)
+- ✅ Actively maintained (unlike `@cloudflare/next-on-pages` which is deprecated)
+- ✅ Better Node.js API support
+- ✅ No Vercel CLI dependency (avoids segfault issues)
 
 ## Migration Steps
 
-### 1. Install OpenNext Cloudflare Adapter
+### Step 1: Install OpenNext Adapter
 
 ```bash
-cd web
-pnpm remove @cloudflare/next-on-pages
+cd apps/web
 pnpm add -D @opennextjs/cloudflare
 ```
 
-### 2. Update Build Script
+### Step 2: Update Build Script
 
-Replace the current build logic in `scripts/build.mjs` with OpenNext build commands:
+Replace the `build:cf` script in `package.json`:
+
+```json
+{
+  "scripts": {
+    "build:cf": "next build && opennext build"
+  }
+}
+```
+
+### Step 3: Create OpenNext Configuration
+
+Create `opennext.config.ts` in `apps/web/`:
+
+```typescript
+import { defineConfig } from '@opennextjs/cloudflare';
+
+export default defineConfig({
+  // Cloudflare-specific configuration
+  buildCommand: 'next build',
+  outputDir: '.opennext',
+  
+  // Cloudflare bindings
+  bindings: {
+    DB: 'DB', // D1 database binding
+    R2_BUCKET: 'R2_BUCKET', // R2 bucket binding
+  },
+  
+  // Environment variables that should be available at runtime
+  env: [
+    'R2_BUCKET_NAME',
+    'CF_ACCESS_TEAM_DOMAIN',
+    'CF_ACCESS_AUD',
+    'NEXT_PUBLIC_APP_URL',
+  ],
+});
+```
+
+### Step 4: Update wrangler.toml
+
+The `pages_build_output_dir` should point to OpenNext's output:
+
+```toml
+pages_build_output_dir = ".opennext"
+```
+
+### Step 5: Update Build Script (build-cf.js)
+
+Replace the `@cloudflare/next-on-pages` command with OpenNext:
 
 ```javascript
-// New build script for OpenNext
-import { execSync } from 'child_process';
-import path from 'path';
-import { fileURLToPath } from 'url';
+// Replace this line:
+// npx @cloudflare/next-on-pages
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// With:
+// npx opennext build
+```
+
+Or create a new script file `scripts/build-opennext.js`:
+
+```javascript
+#!/usr/bin/env node
+const { execSync } = require('child_process');
+const path = require('path');
+
 const projectRoot = path.resolve(__dirname, '..');
 
-process.chdir(projectRoot);
-
 try {
-  console.log('Building with OpenNext...');
+  process.chdir(projectRoot);
   
-  // Build Next.js app
-  execSync('next build', {
+  // Run OpenNext build
+  execSync('npx opennext build', {
     stdio: 'inherit',
-    env: { ...process.env, TURBOPACK: '0' },
+    env: {
+      ...process.env,
+      NODE_OPTIONS: process.env.NODE_OPTIONS || '--max-old-space-size=3584',
+    },
   });
   
-  // Build OpenNext output
-  execSync('open-next build', {
-    stdio: 'inherit',
-  });
-  
-  console.log('Build completed successfully!');
+  console.log('✅ OpenNext build complete');
 } catch (error) {
-  console.error('Build failed:', error.message);
+  console.error('✗ Build failed:', error.message);
   process.exit(1);
 }
 ```
 
-### 3. Update Cloudflare Pages Configuration
-
-**Build Command**: Update to use OpenNext build:
-```bash
-pnpm build
-```
-
-**Build Output Directory**: Change from `.vercel/output/static` to:
-```
-.open-next
-```
-
-### 4. Update Deployment Command (if using manual deployment)
-
-If you're using `wrangler pages deploy` manually:
+### Step 6: Test Locally
 
 ```bash
-# Old (deprecated adapter)
-wrangler pages deploy .vercel/output/static
+# Build with OpenNext
+pnpm run build:cf
 
-# New (OpenNext)
-wrangler pages deploy .open-next
+# Verify output directory
+ls -la .opennext
 ```
 
-### 5. Update Environment Variables
+### Step 7: Update Cloudflare Pages Settings
 
-OpenNext may require different environment variable handling. Check the [OpenNext Cloudflare documentation](https://opennext.js.org/cloudflare) for specific requirements.
+In Cloudflare Pages dashboard:
+- **Build command**: `pnpm install && pnpm run build:cf`
+- **Build output directory**: `.opennext` (instead of `.vercel/output/static`)
 
-### 6. Test Locally
+## If Next.js 16 Doesn't Work
+
+If you encounter issues with Next.js 16, you have two options:
+
+### Option A: Downgrade to Next.js 15
 
 ```bash
-cd web
-pnpm build
-# Verify .open-next directory is created
+pnpm add next@15 react@18 react-dom@18
 ```
 
-### 7. Update Documentation
+Then update your code for any Next.js 16-specific features you're using.
 
-- Update `BUILD_OPTIMIZATION.md` with OpenNext-specific instructions
-- Update `DEPLOYMENT.md` with new adapter information
-- Remove references to `@cloudflare/next-on-pages`
+### Option B: Wait for Official Support
 
-## Key Differences
+Monitor the OpenNext repository for Next.js 16 support:
+- GitHub: https://github.com/serverless-stack/open-next
+- Documentation: https://opennext.js.org/cloudflare
 
-### Build Process
+## Differences from next-on-pages
 
-**Old (deprecated)**:
-1. Run `next build`
-2. Run `@cloudflare/next-on-pages` adapter
-3. Adapter processes `.next` output
-4. Output to `.vercel/output/static`
+1. **Output Directory**: `.opennext` instead of `.vercel/output/static`
+2. **No Vercel CLI**: OpenNext doesn't use Vercel CLI, avoiding segfault issues
+3. **Better Node.js Support**: More Node.js APIs are supported
+4. **Configuration**: Uses `opennext.config.ts` instead of relying on Vercel build output
 
-**New (OpenNext)**:
-1. Run `next build`
-2. Run `open-next build`
-3. OpenNext processes `.next` output
-4. Output to `.open-next`
+## Troubleshooting
 
-### Configuration
+### Build Fails with Next.js 16
 
-OpenNext uses a different configuration approach. Check the [OpenNext documentation](https://opennext.js.org/cloudflare) for:
-- Configuration file requirements
-- Environment variable handling
-- Cloudflare-specific settings
+If you see compatibility errors, try:
+1. Check OpenNext GitHub issues for Next.js 16 compatibility
+2. Temporarily downgrade to Next.js 15 to verify the setup works
+3. Report issues to OpenNext repository
 
-## Migration Timeline
+### Missing Bindings
 
-**Recommended**: Plan migration for next major update or when:
-- Current adapter stops working with Next.js updates
-- New features require OpenNext-specific functionality
-- Maintenance becomes difficult with deprecated package
+Ensure all Cloudflare bindings are configured in:
+- `wrangler.toml` (for local development)
+- Cloudflare Pages dashboard (for production)
 
-**Not Urgent**: The current setup will continue to work, but migration should be planned.
+### Memory Issues
+
+Set `NODE_OPTIONS` in Cloudflare Pages dashboard:
+- Build environment variable: `NODE_OPTIONS=--max-old-space-size=4096`
 
 ## Resources
 
 - [OpenNext Cloudflare Documentation](https://opennext.js.org/cloudflare)
 - [OpenNext GitHub Repository](https://github.com/serverless-stack/open-next)
 - [Cloudflare Pages Documentation](https://developers.cloudflare.com/pages/)
-- [Next.js Deployment Documentation](https://nextjs.org/docs/deployment)
-
-## Notes
-
-- The `turbopack.root` configuration in `next.config.ts` will still be needed
-- The `TURBOPACK=0` environment variable should still be set
-- Build caching and other optimizations remain the same
-- The migration primarily affects the adapter package and build output location
-

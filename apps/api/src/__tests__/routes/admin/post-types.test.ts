@@ -28,7 +28,7 @@ describe('Admin API - Post Types', () => {
       });
 
       (mockDb.query as any).postTypes = {
-        findMany: jest.fn().mockResolvedValue([mockPostType]),
+        findMany: jest.fn<() => Promise<typeof mockPostType[]>>().mockResolvedValue([mockPostType]),
       };
 
       const context = createAuthenticatedContext(regularUser, {

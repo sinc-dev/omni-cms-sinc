@@ -31,7 +31,7 @@ describe('Admin API - Media', () => {
       });
 
       (mockDb.query as any).media = {
-        findMany: jest.fn().mockResolvedValue([mockMedia]),
+        findMany: jest.fn<() => Promise<typeof mockMedia[]>>().mockResolvedValue([mockMedia]),
       };
 
       const context = createAuthenticatedContext(regularUser, {

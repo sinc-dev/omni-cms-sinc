@@ -64,6 +64,11 @@ npx wrangler pages deploy .vercel/output/static
 
 **⚠️ CRITICAL**: This MUST be set in the dashboard. The `pnpm dlx vercel build` command inside `@cloudflare/next-on-pages` runs in an isolated environment and doesn't inherit NODE_OPTIONS from the build script. The dashboard configuration is the only reliable way to ensure it reaches the vercel build process.
 
+**⚠️ SEGFAULT FIX**: If you see "SIGSEGV (Segmentation fault)" errors, this is a known bug in Vercel CLI 48.x. Try:
+- Set `VERCEL_CLI_VERSION=47.0.0` in Build environment variables, OR
+- Downgrade `@cloudflare/next-on-pages` to `1.12.0`
+- See `apps/web/SEGFAULT_FIX.md` for full details
+
 ## 📋 Remaining Steps (After Dashboard Configuration)
 
 ### 4. Apply Database Migrations

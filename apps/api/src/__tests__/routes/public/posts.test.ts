@@ -27,11 +27,11 @@ describe('Public API - Posts', () => {
       });
 
       (mockDb.query as any).organizations = {
-        findFirst: jest.fn().mockResolvedValue(testOrg),
+        findFirst: jest.fn<() => Promise<typeof testOrg | null>>().mockResolvedValue(testOrg),
       };
 
       (mockDb.query as any).posts = {
-        findMany: jest.fn().mockResolvedValue([mockPublishedPost]),
+        findMany: jest.fn<() => Promise<typeof mockPublishedPost[]>>().mockResolvedValue([mockPublishedPost]),
       };
 
       const context = createMockContext({
@@ -50,7 +50,7 @@ describe('Public API - Posts', () => {
       });
 
       (mockDb.query as any).organizations = {
-        findFirst: jest.fn().mockResolvedValue(null),
+        findFirst: jest.fn<() => Promise<typeof testOrg | null>>().mockResolvedValue(null),
       };
 
       const context = createMockContext({

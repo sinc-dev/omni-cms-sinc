@@ -1,6 +1,6 @@
 import type { CloudflareBindings } from '../../types';
 import { Miniflare } from 'miniflare';
-import type { D1Database, R2Bucket } from '@cloudflare/workers-types';
+import type { D1Database, D1DatabaseSession, R2Bucket, R2Object, R2ObjectBody, R2PutOptions, R2ListOptions, R2Objects, R2GetOptions, R2MultipartUpload } from '@cloudflare/workers-types';
 
 /**
  * Creates mock Cloudflare bindings for testing
@@ -36,7 +36,7 @@ export async function createMockR2(): Promise<R2Bucket> {
     }`,
     r2Buckets: ['R2_BUCKET'],
   });
-  return await mf.getR2Bucket('R2_BUCKET');
+  return await mf.getR2Bucket('R2_BUCKET') as unknown as R2Bucket;
 }
 
 /**
@@ -77,8 +77,9 @@ export function createSimpleMockD1(): D1Database {
 
   return {
     prepare: (query: string) => {
-      return {
-        bind: (...values: any[]) => ({
+      const createPreparedStatement = () => {
+        const stmt = {
+          bind: (...values: any[]) => stmt,
           first: async () => {
             // Simple mock - return null for now
             // In real tests, this should be customized per test
@@ -86,16 +87,36 @@ export function createSimpleMockD1(): D1Database {
           },
           run: async () => ({} as any),
           all: async () => ({ results: [] } as any),
-          raw: async () => [],
-        }),
-        first: async () => null,
-        run: async () => ({} as any),
-        all: async () => ({ results: [] } as any),
-        raw: async () => [],
+          raw: async () => [[]] as [string[], ...any[]],
+        };
+        return stmt;
       };
+      return createPreparedStatement();
     },
     batch: async () => [],
     exec: async () => ({} as any),
+    withSession: (constraintOrBookmark?: string) => {
+      // Simple mock - return a session instance
+      const createPreparedStatement = () => {
+        const stmt = {
+          bind: (...values: any[]) => stmt,
+          first: async () => null,
+          run: async () => ({} as any),
+          all: async () => ({ results: [] } as any),
+          raw: async () => [[]] as [string[], ...any[]],
+        };
+        return stmt;
+      };
+      const session: D1DatabaseSession = {
+        prepare: (query: string) => createPreparedStatement(),
+        batch: async () => [],
+        getBookmark: () => '',
+      } as D1DatabaseSession;
+      return session;
+    },
+    dump: async () => {
+      return new Uint8Array(0).buffer;
+    },
   } as D1Database;
 }
 
@@ -105,57 +126,88 @@ export function createSimpleMockD1(): D1Database {
 export function createSimpleMockR2(): R2Bucket {
   const files: Map<string, ArrayBuffer> = new Map();
 
+  const createR2Object = (key: string, data: ArrayBuffer): R2Object => {
+    const obj: R2Object = {
+      key,
+      size: data.byteLength,
+      etag: 'mock-etag',
+      uploaded: new Date(),
+      checksums: {
+        toJSON: () => ({}),
+      },
+      httpEtag: 'mock-etag',
+      version: 'mock-version',
+      storageClass: 'Standard',
+      httpMetadata: {},
+      customMetadata: {},
+      writeHttpMetadata: ((headers: Headers) => {
+        // Mock implementation - Headers type mismatch between Miniflare and Cloudflare types is acceptable for mocks
+      }) as any,
+    } as R2Object;
+    return obj;
+  };
+
   return {
     head: async (key: string) => {
       if (files.has(key)) {
-        return {
-          key,
-          size: files.get(key)!.byteLength,
-          etag: 'mock-etag',
-          uploaded: new Date(),
-          checksums: {},
-          httpEtag: 'mock-etag',
-        } as R2Object;
+        return createR2Object(key, files.get(key)!);
       }
       return null;
     },
-    get: async (key: string) => {
+    get: async (key: string, options?: R2GetOptions) => {
       const data = files.get(key);
       if (!data) return null;
-      return {
-        key,
-        body: data,
+      
+      const obj = createR2Object(key, data);
+      const arr = new Uint8Array(data);
+      const body: R2ObjectBody = {
+        ...obj,
+        body: data as any, // Type assertion needed for mock
         bodyUsed: false,
-        size: data.byteLength,
-        etag: 'mock-etag',
-        uploaded: new Date(),
-        checksums: {},
-        httpEtag: 'mock-etag',
-        range: undefined,
-      } as R2ObjectBody;
+        arrayBuffer: async () => data,
+        bytes: async () => arr,
+        text: async () => new TextDecoder().decode(data),
+        json: async () => JSON.parse(new TextDecoder().decode(data)),
+        blob: async () => new Blob([data]),
+        writeHttpMetadata: (headers: Headers) => {
+          // Mock implementation
+        },
+      };
+      return body;
     },
-    put: async (key: string, value: ReadableStream | ArrayBuffer | ArrayBufferView | string | null | Blob) => {
-      const buffer = value instanceof ArrayBuffer 
-        ? value 
-        : value instanceof ReadableStream
-        ? await new Response(value).arrayBuffer()
-        : typeof value === 'string'
-        ? new TextEncoder().encode(value)
-        : new Uint8Array(value as ArrayBufferView);
+    put: async (key: string, value: ReadableStream | ArrayBuffer | ArrayBufferView | string | null | Blob, options?: R2PutOptions) => {
+      let buffer: ArrayBuffer;
+      
+      if (value instanceof ArrayBuffer) {
+        buffer = value;
+      } else if (value instanceof ReadableStream) {
+        buffer = await new Response(value).arrayBuffer();
+      } else if (typeof value === 'string') {
+        const encoded = new TextEncoder().encode(value);
+        const newBuffer = new ArrayBuffer(encoded.length);
+        new Uint8Array(newBuffer).set(encoded);
+        buffer = newBuffer;
+      } else if (value instanceof Blob) {
+        buffer = await value.arrayBuffer();
+      } else if (value === null) {
+        buffer = new ArrayBuffer(0);
+      } else {
+        // ArrayBufferView - convert to ArrayBuffer
+        const view = value as ArrayBufferView;
+        const arr = new Uint8Array(view.buffer, view.byteOffset, view.byteLength);
+        // Create a new ArrayBuffer from the view
+        const newBuffer = new ArrayBuffer(arr.length);
+        new Uint8Array(newBuffer).set(arr);
+        buffer = newBuffer;
+      }
       
       files.set(key, buffer);
-      return {
-        key,
-        version: 'mock-version',
-        etag: 'mock-etag',
-        httpEtag: 'mock-etag',
-        checksums: {},
-      } as R2PutOptions;
+      return createR2Object(key, buffer);
     },
     delete: async (keys: string | string[]) => {
       const keysArray = Array.isArray(keys) ? keys : [keys];
       keysArray.forEach(key => files.delete(key));
-      return {} as void;
+      return;
     },
     list: async (options?: R2ListOptions) => {
       const results: R2Object[] = [];
@@ -163,14 +215,7 @@ export function createSimpleMockR2(): R2Bucket {
       
       for (const [key, data] of files.entries()) {
         if (key.startsWith(prefix)) {
-          results.push({
-            key,
-            size: data.byteLength,
-            etag: 'mock-etag',
-            uploaded: new Date(),
-            checksums: {},
-            httpEtag: 'mock-etag',
-          } as R2Object);
+          results.push(createR2Object(key, data));
         }
       }
       
@@ -179,7 +224,25 @@ export function createSimpleMockR2(): R2Bucket {
         truncated: false,
         cursor: '',
         delimitedPrefixes: [],
-      } as R2Objects;
+      };
+    },
+    createMultipartUpload: async () => {
+      return {
+        key: '',
+        uploadId: '',
+        uploadPart: async () => ({ partNumber: 1, etag: '' }),
+        abort: async () => {},
+        complete: async () => createR2Object('', new ArrayBuffer(0)),
+      } as R2MultipartUpload;
+    },
+    resumeMultipartUpload: (uploadId: string) => {
+      return {
+        key: '',
+        uploadId,
+        uploadPart: async () => ({ partNumber: 1, etag: '' }),
+        abort: async () => {},
+        complete: async () => createR2Object('', new ArrayBuffer(0)),
+      } as R2MultipartUpload;
     },
   } as R2Bucket;
 }

@@ -93,7 +93,7 @@ export class ErrorBoundary extends Component<Props, State> {
               {process.env.NODE_ENV === 'development' && this.state.error && (
                 <details className="rounded-md bg-muted p-3 text-xs">
                   <summary className="cursor-pointer font-medium mb-2">Error Details (Development Only)</summary>
-                  <pre className="mt-2 whitespace-pre-wrap break-words text-xs">
+                  <pre className="mt-2 whitespace-pre-wrap wrap-break-word text-xs">
                     {this.state.error.toString()}
                     {this.state.error.stack && `\n\n${this.state.error.stack}`}
                   </pre>

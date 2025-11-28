@@ -17,6 +17,7 @@ describe('Admin API - Posts', () => {
     description: 'Blog posts',
     isHierarchical: false,
     icon: null,
+    settings: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -31,9 +32,19 @@ describe('Admin API - Posts', () => {
     content: '<p>Test content</p>',
     excerpt: 'Test excerpt',
     status: 'draft',
+    workflowStatus: 'draft',
     featuredImageId: null,
     parentId: null,
     publishedAt: null,
+    scheduledPublishAt: null,
+    metaTitle: null,
+    metaDescription: null,
+    metaKeywords: null,
+    ogImageId: null,
+    canonicalUrl: null,
+    structuredData: null,
+    viewCount: 0,
+    shareCount: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -46,7 +57,7 @@ describe('Admin API - Posts', () => {
       });
 
       (mockDb.query as any).posts = {
-        findMany: jest.fn().mockResolvedValue([mockPost]),
+        findMany: jest.fn<() => Promise<typeof mockPost[]>>().mockResolvedValue([mockPost]),
       };
 
       const context = createAuthenticatedContext(regularUser, {
@@ -123,15 +134,25 @@ describe('Admin API - Posts', () => {
 
       (mockDb.insert as any) = jest.fn().mockReturnValue({
         values: jest.fn().mockReturnValue({
-          returning: jest.fn().mockResolvedValue([{
+          returning: jest.fn<() => Promise<Array<typeof mockPost & { id: string }>>>().mockResolvedValue([{
             id: 'post_new_123',
             organizationId: testOrg.id,
             authorId: regularUser.id,
             ...newPostData,
             excerpt: null,
+            workflowStatus: 'draft',
             featuredImageId: null,
             parentId: null,
             publishedAt: null,
+            scheduledPublishAt: null,
+            metaTitle: null,
+            metaDescription: null,
+            metaKeywords: null,
+            ogImageId: null,
+            canonicalUrl: null,
+            structuredData: null,
+            viewCount: 0,
+            shareCount: 0,
             createdAt: new Date(),
             updatedAt: new Date(),
           }]),

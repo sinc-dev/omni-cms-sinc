@@ -79,7 +79,7 @@ export function mockDbQuery<T>(result: T | T[] | null) {
 /**
  * Creates a mock database client with query methods
  */
-export function createMockDb(fixtures?: TestFixtures): Partial<DbClient> {
+export function createMockDb(fixtures?: TestFixtures): any {
   const testFixtures = fixtures || createTestFixtures();
 
   return {
@@ -111,30 +111,30 @@ export function createMockDb(fixtures?: TestFixtures): Partial<DbClient> {
       },
       // Add more query mocks as needed
       posts: {
-        findFirst: async () => null,
-        findMany: async () => [],
+        findFirst: async () => null as any,
+        findMany: async () => [] as any[],
       },
       postTypes: {
-        findFirst: async () => null,
-        findMany: async () => [],
+        findFirst: async () => null as any,
+        findMany: async () => [] as any[],
       },
       taxonomies: {
-        findFirst: async () => null,
-        findMany: async () => [],
+        findFirst: async () => null as any,
+        findMany: async () => [] as any[],
       },
       media: {
-        findFirst: async () => null,
-        findMany: async () => [],
+        findFirst: async () => null as any,
+        findMany: async () => [] as any[],
       },
       apiKeys: {
-        findFirst: async () => null,
-        findMany: async () => [],
+        findFirst: async () => null as any,
+        findMany: async () => [] as any[],
       },
       usersOrganizations: {
-        findFirst: async () => null,
-        findMany: async () => [],
+        findFirst: async () => null as any,
+        findMany: async () => [] as any[],
       },
-    } as any,
+    },
     insert: (table: any) => ({
       values: (values: any) => ({
         returning: async () => [values],
@@ -152,7 +152,7 @@ export function createMockDb(fixtures?: TestFixtures): Partial<DbClient> {
         returning: async () => [],
       }),
     }),
-  } as Partial<DbClient>;
+  };
 }
 
 /**

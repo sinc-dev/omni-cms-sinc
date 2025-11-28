@@ -172,19 +172,53 @@ try {
   // The dashboard configuration is the most reliable way to ensure it's available.
   const isWindows = process.platform === 'win32';
   // Use export to ensure the variable persists through child processes
+  // Also set VERCEL_CLI_VERSION to avoid segfaults
+  // Use local version from node_modules (pinned to 1.12.0) instead of downloading latest
   const command = isWindows
-    ? `set NODE_OPTIONS=${env.NODE_OPTIONS} && set VERCEL_NODE_OPTIONS=${env.NODE_OPTIONS} && npx @cloudflare/next-on-pages@1`
-    : `export NODE_OPTIONS="${env.NODE_OPTIONS}" && export VERCEL_NODE_OPTIONS="${env.NODE_OPTIONS}" && npx @cloudflare/next-on-pages@1`;
+    ? `set NODE_OPTIONS=${env.NODE_OPTIONS} && set VERCEL_NODE_OPTIONS=${env.NODE_OPTIONS} && set VERCEL_CLI_VERSION=${env.VERCEL_CLI_VERSION} && npx @cloudflare/next-on-pages`
+    : `export NODE_OPTIONS="${env.NODE_OPTIONS}" && export VERCEL_NODE_OPTIONS="${env.NODE_OPTIONS}" && export VERCEL_CLI_VERSION="${env.VERCEL_CLI_VERSION}" && npx @cloudflare/next-on-pages`;
   
   console.log(`   ⚠️  NOTE: If build still fails with memory errors, you MUST set NODE_OPTIONS in Cloudflare Pages dashboard:`);
   console.log(`      Settings → Environment Variables → Build section → Add NODE_OPTIONS = ${env.NODE_OPTIONS}`);
+  console.log(`\n   ⚠️  KNOWN ISSUE: If you see "SIGSEGV (Segmentation fault)" error:`);
+  console.log(`      This is a known bug in vercel CLI. Try:`);
+  console.log(`      1. Set VERCEL_CLI_VERSION=47.0.0 in Build environment variables`);
+  console.log(`      2. Or downgrade @cloudflare/next-on-pages to an older version`);
+  console.log(`      3. Or consider migrating to OpenNext adapter (requires Next.js 15)\n`);
   
-  execSync(command, { 
-    shell: true, // Use shell to ensure NODE_OPTIONS is set in the command
-    stdio: 'inherit',
-    cwd: projectRoot,
-    env: env, // Still pass env for other variables
-  });
+  // Try to set VERCEL_CLI_VERSION if available to pin a specific version
+  // This might help avoid segfaults in newer versions
+  // Default to 47.0.0 if not set, as 48.x has known segfault issues
+  if (process.env.VERCEL_CLI_VERSION) {
+    env.VERCEL_CLI_VERSION = process.env.VERCEL_CLI_VERSION;
+    console.log(`   Using pinned Vercel CLI version: ${env.VERCEL_CLI_VERSION}`);
+  } else {
+    // Set default to avoid segfaults in newer Vercel CLI versions
+    env.VERCEL_CLI_VERSION = '47.0.0';
+    console.log(`   Using default Vercel CLI version: ${env.VERCEL_CLI_VERSION} (to avoid segfaults)`);
+  }
+  
+  try {
+    execSync(command, { 
+      shell: true, // Use shell to ensure NODE_OPTIONS is set in the command
+      stdio: 'inherit',
+      cwd: projectRoot,
+      env: env, // Still pass env for other variables
+      timeout: 600000, // 10 minute timeout
+    });
+  } catch (error) {
+    // Check if it's a segmentation fault
+    if (error.message && (error.message.includes('SIGSEGV') || error.message.includes('Segmentation fault'))) {
+      console.error('\n✗ BUILD FAILED: Segmentation fault in vercel build');
+      console.error('   This is a known bug in vercel CLI, not a problem with your code.');
+      console.error('\n   SOLUTIONS:');
+      console.error('   1. Set VERCEL_CLI_VERSION=47.0.0 in Cloudflare Pages Build environment variables');
+      console.error('   2. Try downgrading @cloudflare/next-on-pages: pnpm add -D @cloudflare/next-on-pages@1.12.0');
+      console.error('   3. Consider migrating to OpenNext (requires Next.js 15): https://opennext.js.org/cloudflare');
+      console.error('   4. Report the issue: https://github.com/cloudflare/next-on-pages/issues\n');
+    }
+    throw error;
+  }
   
   // Log memory after vercel build
   logMemoryUsage('After @cloudflare/next-on-pages (vercel build)');

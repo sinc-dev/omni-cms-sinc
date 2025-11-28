@@ -4,11 +4,12 @@
 
 import { Miniflare } from 'miniflare';
 import { readFileSync, readdirSync, existsSync } from 'fs';
-import { join, resolve } from 'path';
+import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import type { D1Database } from '@cloudflare/workers-types';
 
-const __dirname = fileURLToPath(new URL('.', import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Result of creating integration D1 setup
@@ -35,8 +36,8 @@ export async function createIntegrationD1(): Promise<IntegrationD1Setup> {
     modules: true,
     d1Databases: ['DB'],
     // Use a separate database file for tests (isolated from dev database)
-    d1Persist: true,
-    d1PersistPath: './.wrangler/test-state/d1',
+    // Persist D1 data to a test-specific directory
+    d1Persist: './.wrangler/test-state',
   });
 
   const d1 = await mf.getD1Database('DB');
@@ -77,11 +78,30 @@ async function runMigrations(db: D1Database): Promise<void> {
     for (const statement of statements) {
       if (statement) {
         try {
-          await db.exec(statement);
-        } catch (error: any) {
-          // Ignore errors for tables that already exist (e.g., if migrations already ran)
-          if (!error?.message?.includes('already exists')) {
-            console.warn(`Migration error in ${file}:`, error.message);
+          const result = await db.exec(statement);
+          // Check if exec returned an error (it might not throw)
+          if (result && typeof result === 'object' && 'error' in result) {
+            const errorMsg = String(result.error || 'Unknown error');
+            // Ignore errors for tables that already exist
+            if (!errorMsg.includes('already exists') && !errorMsg.includes('duplicate')) {
+              console.warn(`Migration warning in ${file}:`, errorMsg);
+            }
+          }
+        } catch (error: unknown) {
+          // Handle different error formats
+          const errorMsg = error instanceof Error 
+            ? error.message 
+            : typeof error === 'string' 
+            ? error 
+            : error && typeof error === 'object' && 'message' in error
+            ? String(error.message)
+            : String(error);
+          
+          // Ignore errors for tables that already exist or duplicates
+          if (!errorMsg.includes('already exists') && 
+              !errorMsg.includes('duplicate') &&
+              !errorMsg.includes('duration')) { // Ignore the "duration" error from D1 internals
+            console.warn(`Migration error in ${file}:`, errorMsg);
           }
         }
       }

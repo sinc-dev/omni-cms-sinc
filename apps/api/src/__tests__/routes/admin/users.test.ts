@@ -17,7 +17,7 @@ describe('Admin API - Users', () => {
       });
 
       (mockDb.query as any).usersOrganizations = {
-        findMany: jest.fn().mockResolvedValue([
+        findMany: jest.fn<() => Promise<Array<{ userId: string; organizationId: string; user: typeof regularUser; role: { id: string; name: string } }>>>().mockResolvedValue([
           {
             userId: regularUser.id,
             organizationId: testOrg.id,
