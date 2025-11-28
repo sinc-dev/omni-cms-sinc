@@ -66,3 +66,4 @@ Based on the analysis:
 - **~2,381 fields** should be mapped (real data)
 - **~271 fields** should be mapped (media placeholders)
 - **~24 fields** should be deleted separately (widget code)
+

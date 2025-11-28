@@ -16,9 +16,15 @@
 # next.js
 /.next/
 /out/
+**/.next/
+**/.open-next/
 
 # production
 /build
+
+# cloudflare / wrangler
+.wrangler/
+**/.wrangler/
 
 # misc
 .DS_Store
@@ -46,6 +52,7 @@ yarn-error.log*
 # vercel
 .vercel
 .vercel/output
+**/.vercel/output/
 
 # typescript
 *.tsbuildinfo

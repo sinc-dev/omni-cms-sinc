@@ -1,0 +1,82 @@
+id,name,slug,organization_id,org_slug,post_type_slug,usage_count
+268aa0e5d9ecc8ea391ef82e,Duration,duration,ND-k8iHHx70s5XaW28Mk2,paris-american-international-university,programs,44
+3910979d174162968d30a06f,Degree Level,degree_level,ND-k8iHHx70s5XaW28Mk2,paris-american-international-university,programs,44
+37a236e92e03d9bffd3c19ed,Course Credit,course_credit,ND-k8iHHx70s5XaW28Mk2,paris-american-international-university,programs,43
+efbfcfaae6a1ad82430c59a8,Language Options,language_options,ND-k8iHHx70s5XaW28Mk2,paris-american-international-university,programs,43
+f9ead5b88198b42bf99eba4f,Study Format,study_format,ND-k8iHHx70s5XaW28Mk2,paris-american-international-university,programs,43
+09abb148af252e2b99a73777,Price Eur,price_eur,ND-k8iHHx70s5XaW28Mk2,paris-american-international-university,programs,36
+d54e52ab6455f54f5bb0c434,Tuition Fee With Discount,tuition_fee_with_discount,ND-k8iHHx70s5XaW28Mk2,paris-american-international-university,programs,36
+915042207ea9f89be515dfc5,Course Description,course_description,ND-k8iHHx70s5XaW28Mk2,paris-american-international-university,programs,27
+96bece51d96c6072cc9b05ab,Number Of Lessons,number_of_lessons,ND-k8iHHx70s5XaW28Mk2,paris-american-international-university,programs,26
+35d1a3209e50ff543c4c2aae,Featured,featured,ND-k8iHHx70s5XaW28Mk2,paris-american-international-university,programs,25
+ad8e78d32cf87743554f12f2,Degree Level,degree_level,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,programs,4882
+d7373d9608f49c43b4001ba6,Associated University Name,associated_university_name,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,programs,4882
+e17f99dc589c6e5885dfc00d,Program Name,program_name,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,programs,4882
+e29073a2439406e7616a4bc5,Associated University Hubspot Id,associated_university_hubspot_id,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,programs,4882
+7109ad7b735c9e359872b591,Duration In Years,duration_in_years,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,programs,4861
+952eae92d8374bd2e527a561,Yearly Tuition Fee,yearly_tuition_fee,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,programs,4813
+ba09efb8086e5cd1d1594036,Tuition Currency,tuition_currency,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,programs,4813
+37e95442370772ac27ea9e42,Language,language,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,programs,4788
+56839c83b8a28a058d3d4fee,Entry Requirements,entry_requirements,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,programs,4767
+3a0a71b2c6050cf27b2166a8,Disciplines,disciplines,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,programs,4597
+255040528b64bbd31110f011,Avatar,avatar,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,reviews,126
+4d4514f03d1c78ff7b6353e0,Total Reviews,total_reviews,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,reviews,126
+83f281fb47b1dc671b75fabb,Rating,rating,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,reviews,126
+92f6de82254c754874edb5ee,Review Link,review_link,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,reviews,126
+adfc3e850289911f51fef0ff,Reviewer Name,reviewer_name,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,reviews,126
+099c80627729e6fb6ab651b9,Review Unique Identifier,review_unique_identifier,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,reviews,120
+dd68ee29710abcefaecb6bab,Relative Time Description,relative_time_description,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,reviews,113
+8ad4a2fd7903b53fd154e3c5,Review,review,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,reviews,91
+146f7d2e6b829a96a554e4cc,University Name,university_name,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,universities,114
+eb934610d42af6c28c0391b5,Address,address,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,universities,114
+ed38dd00ee38889e1bab11ca,Country,country,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,universities,114
+d52bedfe8b66d29292328199,Photos,photos,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,universities,107
+406c5a3d47b438b4c673b7cd,Logo,logo,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,universities,3
+a1ab7275395cfbfe51642402,University Background Image,university_background_image,IBfLssGjH23-f9uxjH5Ms,study-in-kazakhstan,universities,1
+638c8821cbbaa100ccde0891,Capacity,capacity,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,dormitories,24
+8754f1bb60588b6288fad189,Address,address,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,dormitories,24
+dfaff853d1f1aa97405eb75b,Langlong,langlong,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,dormitories,24
+a458843c0f8b14ef126d46b7,Price Range Eur,price_range_eur,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,dormitories,23
+e006d5823353b48a692fd886,Gallery,gallery,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,dormitories,1
+08849b028a902ba36d309178,Sinc Special Tuition Fee,sinc_special_tuition_fee,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,programs,967
+760726f6cea5ccc0ddca5887,Program Name,program_name,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,programs,967
+8a3fa09aa08900205b2a9202,Degree Level,degree_level,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,programs,967
+f2b6758557a5f16edba695f2,Associated University Hubspot Id,associated_university_hubspot_id,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,programs,967
+f2ca25de093204af6891d10d,Associated University Name,associated_university_name,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,programs,967
+e4caa6a8145aaadea427b3b2,Language,language,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,programs,966
+84a454abd4ff59db7b493953,Tuition Currency,tuition_currency,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,programs,964
+0b893c5d4b2f90e38c58a52f,Study Format,study_format,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,programs,958
+f0acb74c44b2b623318a6d0c,Additional Information,additional_information,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,programs,942
+c0b0942b318c1e568a957fc8,Disciplines,disciplines,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,programs,933
+b404745f7056c78ebb76dcf5,Duration In Years,duration_in_years,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,programs,922
+7e99a683ce15da79a67778df,Yearly Tuition Fee,yearly_tuition_fee,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,programs,704
+dd427cdee4dfb15fc233e9ad,With Thesis Or Not,with_thesis_or_not,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,programs,268
+c1b9e54071676fd050c4a785,First Payment,first_payment,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,programs,124
+faba38a974e0341fe949788a,On Arrival Payment,on_arrival_payment,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,programs,97
+46424b53e3cc67828444dc6a,Reviewer Name,reviewer_name,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,reviews,126
+73f1d7520a08106191c0b346,Rating,rating,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,reviews,126
+a41c6813b765880218d9e6cf,Review Link,review_link,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,reviews,126
+d4d14b7a1710aebc356a19c2,Total Reviews,total_reviews,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,reviews,126
+f019b94b64e7864fb0325d2d,Avatar,avatar,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,reviews,126
+eb8cc67b77706b610bbfe6cd,Review Unique Identifier,review_unique_identifier,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,reviews,120
+5cbcdf85dacf99b85e90abdb,Relative Time Description,relative_time_description,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,reviews,113
+c37a06ab798842c8ae46a88e,Review,review,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,reviews,91
+44331570b51eda4ebffdd175,Country,country,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,13
+484b169103372935414abd86,Photos,photos,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,13
+687fa7352aaf5a3788ba89eb,University Name,university_name,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,13
+0f7a17c51bd0cab910f5e640,Number Of Reviews,number_of_reviews,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,12
+3178ceb59018d6be08bcf06c,Google Map Profile Link,google_map_profile_link,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,12
+84946cca1e51aef6c5c5689f,Google Map Rating,google_map_rating,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,12
+9605922aafa8063f1c3b669e,Google Map Gallery,google_map_gallery,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,12
+9f2b832d3203a148a7b1a36b,University Background Image,university_background_image,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,12
+b46c88cef3111494ae63c1b7,Photo1,photo1,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,12
+c1d0045d5060af552f81e4a1,Logo,logo,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,12
+2b7cb87363ab1147d1b5675f,Photo2,photo2,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,11
+a93b356bdee46d036fc13132,University Street Address,university_street_address,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,11
+bec1323b993d96ec35304a41,Photo3,photo3,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,11
+d09be0029039c3e35557ec44,University Phone Number,university_phone_number,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,11
+d5ca7cfff1ed187e1bd29d1e,Photo4,photo4,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,11
+fea49c47a4228edf8da5d6f6,Website,website,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,11
+8754f1bb60588b6288fad189,Address,address,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,3
+be1c3d9eefee12db12de6926,Phone,phone,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,2
+dd3afb5b684794d2790fec5b,Founding Year,founding_year,3Kyv3hvrybf_YohTZRgPV,study-in-north-cyprus,universities,1

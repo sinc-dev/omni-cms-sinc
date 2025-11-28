@@ -1,51 +1,194 @@
 /**
- * Regenerate Unknown Fields Mapping SQL from Current Database
+ * Regenerate Unknown Fields Mapping SQL from CSV Exports
  * 
- * This script queries the current database to get unknown fields and their values,
- * then generates SQL to map them to correct custom fields based on value patterns.
+ * This script reads CSV files exported from D1 database and generates SQL
+ * to map unknown fields to correct custom fields based on value patterns.
  * 
  * Strategy:
- * 1. Query database for all unknown fields with their values, post types, and organizations
- * 2. Query database for all valid custom fields by organization and post type
+ * 1. Read unknown fields from CSV (exported from D1)
+ * 2. Read valid custom fields from CSV (exported from D1)
  * 3. Match unknown fields to correct fields based on:
  *    - Value patterns (currency, degree levels, languages, durations, prices, etc.)
  *    - Post type context
  *    - Organization context
  * 4. Generate SQL to update post_field_values.custom_field_id
+ * 
+ * To use:
+ * 1. Run export-unknown-fields.sql in D1, save as unknown-fields-export.csv
+ * 2. Run export-valid-custom-fields.sql in D1, save as valid-custom-fields-export.csv
+ * 3. Place both CSV files in the scripts directory
+ * 4. Run this script: node regenerate-unknown-fields-mapping.js
  */
 
-import { execSync } from 'child_process';
 import fs from 'fs/promises';
+import { existsSync, writeFileSync, unlinkSync } from 'fs';
+import { execSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PROJECT_ROOT = path.join(__dirname, '..', '..');
+// Try multiple locations for CSV files
+const CSV_DIRS = [
+  path.join(__dirname, 'db-11-23-pm-28-11-2025'), // User's export directory
+  __dirname // Scripts directory
+];
+
+const UNKNOWN_FIELDS_CSV = findCSVFile('unknown-fields-export.csv');
+const VALID_FIELDS_CSV = findCSVFile('valid-custom-fields-export.csv');
 const OUTPUT_SQL = path.join(__dirname, 'map-unknown-fields-regenerated.sql');
 
 /**
- * Execute wrangler command and parse JSON output
+ * Find CSV file in multiple possible locations
  */
-function executeWranglerQuery(sql) {
-  try {
-    // Escape SQL for command line
-    const escapedSql = sql
-      .replace(/\\/g, '\\\\')
-      .replace(/"/g, '\\"')
-      .replace(/\n/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
+function findCSVFile(filename) {
+  for (const dir of CSV_DIRS) {
+    const filePath = path.join(dir, filename);
+    if (existsSync(filePath)) {
+      return filePath;
+    }
+  }
+  // Return default location (will show error if not found)
+  return path.join(__dirname, filename);
+}
+
+/**
+ * Parse CSV line (handles quoted values and escaped quotes)
+ */
+function parseCSVLine(line) {
+  const parts = [];
+  let current = '';
+  let inQuotes = false;
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    const nextChar = i + 1 < line.length ? line[i + 1] : null;
     
-    const command = `cd "${PROJECT_ROOT}" && npx wrangler d1 execute omni-cms --remote --command="${escapedSql}" --json`;
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        // Escaped quote (""), add single quote and skip next char
+        current += '"';
+        i++; // Skip next quote
+      } else {
+        // Toggle quote state
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      parts.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  parts.push(current);
+  
+  return parts;
+}
+
+/**
+ * Read CSV file and return array of objects
+ */
+async function readCSV(filePath) {
+  const content = await fs.readFile(filePath, 'utf-8');
+  const lines = content.split('\n').filter(line => line.trim());
+  
+  if (lines.length === 0) {
+    return [];
+  }
+  
+  // Parse header
+  const header = parseCSVLine(lines[0]);
+  
+  // Parse data rows
+  const data = [];
+  for (let i = 1; i < lines.length; i++) {
+    const values = parseCSVLine(lines[i]);
+    if (values.length !== header.length) {
+      continue; // Skip malformed rows
+    }
+    
+    const row = {};
+    for (let j = 0; j < header.length; j++) {
+      row[header[j].trim()] = values[j]?.trim() || '';
+    }
+    data.push(row);
+  }
+  
+  return data;
+}
+
+/**
+ * Get all unknown fields with their values and context from CSV
+ */
+async function getUnknownFields() {
+  console.log('Reading unknown fields from CSV...');
+  
+  try {
+    const data = await readCSV(UNKNOWN_FIELDS_CSV);
+    return data;
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      throw new Error(`CSV file not found: ${UNKNOWN_FIELDS_CSV}\nPlease run export-unknown-fields.sql in D1 and save the output as unknown-fields-export.csv`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Get all valid custom fields by organization and post type from CSV
+ */
+async function getValidCustomFields() {
+  console.log('Reading valid custom fields from CSV...');
+  
+  try {
+    const data = await readCSV(VALID_FIELDS_CSV);
+    return data;
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      throw new Error(`CSV file not found: ${VALID_FIELDS_CSV}\nPlease run export-valid-custom-fields.sql in D1 and save the output as valid-custom-fields-export.csv`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Get all custom fields from database (including those not in CSV)
+ * This helps find fields like 'disciplines' that exist but may not be currently used
+ */
+async function getAllCustomFieldsFromDB() {
+  console.log('Querying database for all custom fields...');
+  
+  // Export SQL to get all custom fields with their org and post type context
+  const exportSql = `
+    SELECT 
+      cf.id,
+      cf.name,
+      cf.slug,
+      cf.organization_id,
+      o.slug as org_slug,
+      pt.slug as post_type_slug
+    FROM custom_fields cf
+    INNER JOIN organizations o ON cf.organization_id = o.id
+    LEFT JOIN post_type_fields ptf ON cf.id = ptf.custom_field_id
+    LEFT JOIN post_types pt ON ptf.post_type_id = pt.id
+    WHERE cf.name != 'Unknown Field' AND cf.slug NOT LIKE 'unknown-field-%'
+    GROUP BY cf.id, cf.name, cf.slug, cf.organization_id, o.slug, pt.slug
+  `;
+  
+  // Write to temp file and execute
+  const tempFile = path.join(__dirname, 'temp-all-fields.sql');
+  writeFileSync(tempFile, exportSql, 'utf-8');
+  
+  try {
+    const { execSync } = await import('child_process');
+    const PROJECT_ROOT = path.join(__dirname, '..', '..');
+    const command = `cd "${PROJECT_ROOT}" && npx wrangler d1 execute omni-cms --remote --file=data-migration/scripts/temp-all-fields.sql --json`;
     const output = execSync(command, { encoding: 'utf-8', stdio: 'pipe', maxBuffer: 10 * 1024 * 1024 });
     
-    // Parse JSON output (wrangler outputs JSON, might have other lines)
+    // Parse JSON
     const lines = output.trim().split('\n');
     let jsonStr = '';
-    
-    // Find the JSON line (starts with [ or {)
     for (const line of lines) {
       const trimmed = line.trim();
       if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
@@ -55,82 +198,26 @@ function executeWranglerQuery(sql) {
     }
     
     if (!jsonStr) {
-      console.error('Wrangler output:', output.substring(0, 500));
-      throw new Error('No JSON output found in wrangler response');
+      console.warn('   ⚠ Could not parse database response, using CSV only');
+      return [];
     }
     
     const result = JSON.parse(jsonStr);
-    if (Array.isArray(result) && result[0] && result[0].results) {
-      return result[0].results;
-    }
-    if (result.results) {
-      return result.results;
-    }
-    return [];
+    const fields = Array.isArray(result) && result[0]?.results ? result[0].results : [];
+    
+    // Clean up
+    try {
+      unlinkSync(tempFile);
+    } catch (e) {}
+    
+    return fields;
   } catch (error) {
-    console.error(`Error executing query: ${error.message}`);
-    if (error.stdout) console.error('Stdout:', error.stdout.toString().substring(0, 500));
-    if (error.stderr) console.error('Stderr:', error.stderr.toString().substring(0, 500));
-    throw error;
+    console.warn('   ⚠ Could not query database for all fields, using CSV only:', error.message);
+    try {
+      unlinkSync(tempFile);
+    } catch (e) {}
+    return [];
   }
-}
-
-/**
- * Get all unknown fields with their values and context
- */
-async function getUnknownFields() {
-  console.log('Querying database for unknown fields...');
-  
-  const sql = `
-    SELECT 
-      pfv.id as value_id,
-      pfv.post_id,
-      pfv.custom_field_id as unknown_field_id,
-      pfv.value,
-      p.id as post_id,
-      o.slug as org_slug,
-      o.id as org_id,
-      pt.slug as post_type_slug,
-      pt.id as post_type_id,
-      cf.slug as unknown_field_slug
-    FROM post_field_values pfv
-    INNER JOIN custom_fields cf ON pfv.custom_field_id = cf.id
-    INNER JOIN posts p ON pfv.post_id = p.id
-    INNER JOIN organizations o ON p.organization_id = o.id
-    INNER JOIN post_types pt ON p.post_type_id = pt.id
-    WHERE cf.name = 'Unknown Field' OR cf.slug LIKE 'unknown-field-%'
-    ORDER BY o.slug, pt.slug, p.id
-  `;
-  
-  return executeWranglerQuery(sql);
-}
-
-/**
- * Get all valid custom fields by organization and post type
- */
-async function getValidCustomFields() {
-  console.log('Querying database for valid custom fields...');
-  
-  const sql = `
-    SELECT 
-      cf.id,
-      cf.name,
-      cf.slug,
-      cf.organization_id,
-      o.slug as org_slug,
-      pt.slug as post_type_slug,
-      COUNT(pfv.id) as usage_count
-    FROM custom_fields cf
-    INNER JOIN post_field_values pfv ON cf.id = pfv.custom_field_id
-    INNER JOIN posts p ON pfv.post_id = p.id
-    INNER JOIN organizations o ON p.organization_id = o.id
-    INNER JOIN post_types pt ON p.post_type_id = pt.id
-    WHERE cf.name != 'Unknown Field' AND cf.slug NOT LIKE 'unknown-field-%'
-    GROUP BY cf.id, cf.name, cf.slug, cf.organization_id, o.slug, pt.slug
-    ORDER BY o.slug, pt.slug, usage_count DESC
-  `;
-  
-  return executeWranglerQuery(sql);
 }
 
 /**
@@ -141,9 +228,9 @@ function matchFieldByValue(value, validFields, orgSlug, postTypeSlug) {
   
   const normalizedValue = value.trim();
   
-  // Filter valid fields for this org and post type
+  // Filter valid fields for this org and post type (also include 'any' post type fields)
   const relevantFields = validFields.filter(f => 
-    f.org_slug === orgSlug && f.post_type_slug === postTypeSlug
+    f.org_slug === orgSlug && (f.post_type_slug === postTypeSlug || f.post_type_slug === 'any')
   );
   
   // Currency patterns
@@ -173,8 +260,10 @@ function matchFieldByValue(value, validFields, orgSlug, postTypeSlug) {
     if (field) return field;
   }
   
-  // Duration patterns (numbers or ranges)
-  if (/^(\d+|\d+\s*-\s*\d+)$/.test(normalizedValue)) {
+  // Duration patterns (numbers or ranges, including decimals and text descriptions)
+  if (/^(\d+\.?\d*|\d+\.?\d*\s*-\s*\d+\.?\d*)$/.test(normalizedValue) || 
+      /^\d+\.?\d*\s*\(.*year|years|month|months/i.test(normalizedValue) ||
+      (/year|years|month|months/i.test(normalizedValue) && /^\d+\.?\d*/.test(normalizedValue))) {
     const field = relevantFields.find(f => 
       f.slug === 'duration_in_years' || 
       f.name.toLowerCase().includes('duration')
@@ -207,9 +296,12 @@ function matchFieldByValue(value, validFields, orgSlug, postTypeSlug) {
     }
     // For programs, could be featured image
     if (postTypeSlug === 'programs') {
+      // Check for 'featured' field (Paris American uses this)
       const field = relevantFields.find(f => 
+        f.slug === 'featured' ||
         f.slug === 'featured_image' || 
         f.slug === 'program_image' ||
+        f.name.toLowerCase().includes('featured') ||
         f.name.toLowerCase().includes('image')
       );
       if (field) return field;
@@ -234,13 +326,29 @@ function matchFieldByValue(value, validFields, orgSlug, postTypeSlug) {
     if (field) return field;
   }
   
-  // Disciplines/subjects (common academic fields)
+  // Disciplines/subjects (broader matching)
   const commonDisciplines = [
     'Social Sciences', 'Law', 'Nursing', 'Psychology', 'Engineering', 
     'Medicine', 'Business', 'Economics', 'International Relations', 
-    'Education', 'Arts', 'Science', 'Technology', 'Pharmacy'
+    'Education', 'Arts', 'Science', 'Technology', 'Pharmacy',
+    'Physics', 'Chemistry', 'Mathematics', 'Accounting', 'Finance',
+    'Management', 'Administration', 'Design', 'Foundation', 'Programme'
   ];
-  if (commonDisciplines.some(d => normalizedValue.includes(d))) {
+  
+  // Check if value looks like a discipline/subject
+  const looksLikeDiscipline = commonDisciplines.some(d => 
+    normalizedValue.toLowerCase().includes(d.toLowerCase())
+  ) || (
+    // Single word or short phrase that's not a number, date, or common field value
+    normalizedValue.length > 3 && 
+    normalizedValue.length < 50 &&
+    !/^\d+\.?\d*$/.test(normalizedValue) && // Not a number
+    !/ago|month|year|day/i.test(normalizedValue) && // Not a date
+    !/^(USD|EUR|GBP|KZT|TRY|RUB|English|Kazakh|Russian)$/i.test(normalizedValue) && // Not currency/language
+    /^[A-Za-z\s\-&]+$/.test(normalizedValue) // Only letters, spaces, hyphens, ampersands
+  );
+  
+  if (looksLikeDiscipline) {
     const field = relevantFields.find(f => 
       f.slug === 'disciplines' || 
       f.name.toLowerCase().includes('discipline') ||
@@ -417,8 +525,30 @@ async function main() {
     const unknownFields = await getUnknownFields();
     console.log(`   ✓ Found ${unknownFields.length} unknown field values\n`);
     
-    const validFields = await getValidCustomFields();
-    console.log(`   ✓ Found ${validFields.length} valid custom field entries\n`);
+    const validFieldsFromCSV = await getValidCustomFields();
+    console.log(`   ✓ Found ${validFieldsFromCSV.length} valid custom field entries from CSV\n`);
+    
+    // Also get all fields from database (includes fields not in CSV)
+    const allFieldsFromDB = await getAllCustomFieldsFromDB();
+    console.log(`   ✓ Found ${allFieldsFromDB.length} custom fields from database\n`);
+    
+    // Merge fields, prioritizing CSV (has usage context) but adding DB fields
+    const validFieldsMap = new Map();
+    for (const field of validFieldsFromCSV) {
+      const key = `${field.org_slug}:${field.post_type_slug}:${field.id}`;
+      validFieldsMap.set(key, field);
+    }
+    // Add DB fields that aren't in CSV (for fields like disciplines that exist but aren't used yet)
+    for (const field of allFieldsFromDB) {
+      const key = `${field.org_slug}:${field.post_type_slug || 'any'}:${field.id}`;
+      if (!validFieldsMap.has(key)) {
+        // Add with 'any' post type so it can match
+        validFieldsMap.set(key, { ...field, post_type_slug: field.post_type_slug || 'any' });
+      }
+    }
+    
+    const validFields = Array.from(validFieldsMap.values());
+    console.log(`   ✓ Total unique fields available: ${validFields.length}\n`);
     
     // Create mappings
     console.log('Analyzing and matching unknown fields...');
@@ -458,10 +588,11 @@ async function main() {
       console.log('Sample unmatched values:');
       const samples = unmatched.slice(0, 10);
       for (const sample of samples) {
-        const valuePreview = sample.value.length > 100 
-          ? sample.value.substring(0, 100) + '...' 
-          : sample.value;
-        console.log(`   - ${sample.org_slug}/${sample.post_type_slug}: ${valuePreview}`);
+        const value = sample.value || '(null)';
+        const valuePreview = typeof value === 'string' && value.length > 100 
+          ? value.substring(0, 100) + '...' 
+          : String(value);
+        console.log(`   - ${sample.org_slug || 'unknown'}/${sample.post_type_slug || 'unknown'}: ${valuePreview}`);
       }
       console.log('');
     }
@@ -478,7 +609,7 @@ async function main() {
     console.log('');
     console.log('Next steps:');
     console.log(`1. Review ${OUTPUT_SQL}`);
-    console.log('2. Run: cd "' + PROJECT_ROOT + '" && npx wrangler d1 execute omni-cms --remote --file=data-migration/scripts/map-unknown-fields-regenerated.sql --yes');
+    console.log(`2. Run: cd "${path.join(__dirname, '..', '..')}" && npx wrangler d1 execute omni-cms --remote --file=data-migration/scripts/map-unknown-fields-regenerated.sql --yes`);
     console.log('3. Verify results with check-remaining-unknown-fields.sql');
     
   } catch (error) {
@@ -489,3 +620,4 @@ async function main() {
 }
 
 main();
+
