@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import * as RechartsPrimitive from "recharts"
 
 import { cn } from "@/lib/utils"
 
@@ -42,12 +41,18 @@ function ChartContainer({
   ...props
 }: React.ComponentProps<"div"> & {
   config: ChartConfig
-  children: React.ComponentProps<
-    typeof RechartsPrimitive.ResponsiveContainer
-  >["children"]
+  children: React.ReactNode
 }) {
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
+  const [RechartsLib, setRechartsLib] = React.useState<any>(null)
+
+  React.useEffect(() => {
+    // Dynamically import recharts only on client-side
+    import("recharts").then((mod) => {
+      setRechartsLib(mod)
+    })
+  }, [])
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -61,9 +66,15 @@ function ChartContainer({
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
-        <RechartsPrimitive.ResponsiveContainer>
-          {children}
-        </RechartsPrimitive.ResponsiveContainer>
+        {RechartsLib ? (
+          <RechartsLib.ResponsiveContainer>
+            {children}
+          </RechartsLib.ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-sm text-muted-foreground">Loading chart...</div>
+          </div>
+        )}
       </div>
     </ChartContext.Provider>
   )
@@ -102,7 +113,20 @@ ${colorConfig
   )
 }
 
-const ChartTooltip = RechartsPrimitive.Tooltip
+// ChartTooltip will be set dynamically when recharts loads
+// For now, export a placeholder that works with dynamic import
+export const ChartTooltip = React.forwardRef((props: any, ref: any) => {
+  const [RechartsLib, setRechartsLib] = React.useState<any>(null)
+
+  React.useEffect(() => {
+    import("recharts").then((mod) => {
+      setRechartsLib(mod)
+    })
+  }, [])
+
+  if (!RechartsLib) return null
+  return <RechartsLib.Tooltip {...props} ref={ref} />
+}) as any
 
 function ChartTooltipContent({
   active,
@@ -118,14 +142,21 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey,
-}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-  React.ComponentProps<"div"> & {
-    hideLabel?: boolean
-    hideIndicator?: boolean
-    indicator?: "line" | "dot" | "dashed"
-    nameKey?: string
-    labelKey?: string
-  }) {
+}: {
+  active?: boolean
+  payload?: any[]
+  className?: string
+  indicator?: "line" | "dot" | "dashed"
+  hideLabel?: boolean
+  hideIndicator?: boolean
+  label?: any
+  labelFormatter?: (value: any, payload: any[]) => React.ReactNode
+  labelClassName?: string
+  formatter?: (value: any, name: any, item: any, index: number, payload: any) => React.ReactNode
+  color?: string
+  nameKey?: string
+  labelKey?: string
+} & React.ComponentProps<"div">) {
   const { config } = useChart()
 
   const tooltipLabel = React.useMemo(() => {
@@ -250,7 +281,19 @@ function ChartTooltipContent({
   )
 }
 
-const ChartLegend = RechartsPrimitive.Legend
+// ChartLegend will be set dynamically when recharts loads
+export const ChartLegend = React.forwardRef((props: any, ref: any) => {
+  const [RechartsLib, setRechartsLib] = React.useState<any>(null)
+
+  React.useEffect(() => {
+    import("recharts").then((mod) => {
+      setRechartsLib(mod)
+    })
+  }, [])
+
+  if (!RechartsLib) return null
+  return <RechartsLib.Legend {...props} ref={ref} />
+}) as any
 
 function ChartLegendContent({
   className,
@@ -258,11 +301,12 @@ function ChartLegendContent({
   payload,
   verticalAlign = "bottom",
   nameKey,
-}: React.ComponentProps<"div"> &
-  Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
-    hideIcon?: boolean
-    nameKey?: string
-  }) {
+}: React.ComponentProps<"div"> & {
+  payload?: any[]
+  verticalAlign?: "top" | "bottom"
+  hideIcon?: boolean
+  nameKey?: string
+}) {
   const { config } = useChart()
 
   if (!payload?.length) {

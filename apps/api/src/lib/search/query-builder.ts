@@ -1,9 +1,10 @@
 import { eq, and, or, desc, asc, sql, SQL } from 'drizzle-orm';
 import type { DbClient } from '@/db/client';
-import { posts, postFieldValues, customFields, postTypeFields } from '@/db/schema';
+import { posts, postFieldValues, customFields, postTypeFields, media } from '@/db/schema';
 import type { SortConfig } from '@/lib/validations/search';
 import { FilterBuilder } from './filter-builder';
 import type { FilterGroup } from '@/lib/validations/search';
+import { getMediaVariantUrls } from '../../lib/media/urls';
 
 export interface QueryBuilderOptions {
   organizationId: string;
@@ -307,15 +308,47 @@ export class QueryBuilder {
                 const fieldValue = filteredFieldValues.find(fv => fv.customFieldId === customField.id);
                 if (fieldValue && fieldValue.value !== null && fieldValue.value !== undefined) {
                   // Parse value based on field type
+                  let parsedValue: any = fieldValue.value;
                   try {
-                    if (['number', 'boolean', 'select', 'multi_select', 'json'].includes(customField.fieldType)) {
-                      customFieldsData[fieldSlug] = JSON.parse(fieldValue.value as string);
-                    } else {
-                      customFieldsData[fieldSlug] = fieldValue.value;
+                    // All non-text field types are stored as JSON strings
+                    if (['number', 'boolean', 'select', 'multi_select', 'json', 'media', 'relation'].includes(customField.fieldType)) {
+                      parsedValue = JSON.parse(fieldValue.value as string);
                     }
                   } catch {
-                    customFieldsData[fieldSlug] = fieldValue.value;
+                    // Keep original value if parsing fails
                   }
+
+                  // Resolve media-type custom fields to full media objects
+                  if (customField.fieldType === 'media' && parsedValue) {
+                    try {
+                      const mediaIds = Array.isArray(parsedValue) ? parsedValue : [parsedValue];
+                      const resolvedMedia = await Promise.all(
+                        mediaIds.map(async (mediaId: string) => {
+                          if (!mediaId || typeof mediaId !== 'string') return null;
+                          const mediaItem = await this.db.query.media.findFirst({
+                            where: (m, { eq }) => eq(m.id, mediaId),
+                          });
+                          if (!mediaItem) return null;
+                          // Note: getMediaVariantUrls needs env which we don't have access to here
+                          // Return basic media info - URLs will need to be constructed client-side or via another endpoint
+                          return {
+                            id: mediaItem.id,
+                            fileKey: mediaItem.fileKey,
+                            filename: mediaItem.filename,
+                            mimeType: mediaItem.mimeType,
+                            altText: mediaItem.altText,
+                            caption: mediaItem.caption,
+                          };
+                        })
+                      );
+                      const validMedia = resolvedMedia.filter(Boolean);
+                      parsedValue = Array.isArray(parsedValue) ? validMedia : (validMedia[0] || null);
+                    } catch (error) {
+                      console.error(`Error resolving media for custom field ${fieldSlug}:`, error);
+                    }
+                  }
+
+                  customFieldsData[fieldSlug] = parsedValue;
                 }
               }
             }
@@ -369,15 +402,47 @@ export class QueryBuilder {
                 const fieldValue = filteredFieldValues.find(fv => fv.customFieldId === customField.id);
                 if (fieldValue && fieldValue.value !== null && fieldValue.value !== undefined) {
                   // Parse value based on field type
+                  let parsedValue: any = fieldValue.value;
                   try {
-                    if (['number', 'boolean', 'select', 'multi_select', 'json'].includes(customField.fieldType)) {
-                      customFieldsData[customField.slug] = JSON.parse(fieldValue.value as string);
-                    } else {
-                      customFieldsData[customField.slug] = fieldValue.value;
+                    // All non-text field types are stored as JSON strings
+                    if (['number', 'boolean', 'select', 'multi_select', 'json', 'media', 'relation'].includes(customField.fieldType)) {
+                      parsedValue = JSON.parse(fieldValue.value as string);
                     }
                   } catch {
-                    customFieldsData[customField.slug] = fieldValue.value;
+                    // Keep original value if parsing fails
                   }
+
+                  // Resolve media-type custom fields to full media objects
+                  if (customField.fieldType === 'media' && parsedValue) {
+                    try {
+                      const mediaIds = Array.isArray(parsedValue) ? parsedValue : [parsedValue];
+                      const resolvedMedia = await Promise.all(
+                        mediaIds.map(async (mediaId: string) => {
+                          if (!mediaId || typeof mediaId !== 'string') return null;
+                          const mediaItem = await this.db.query.media.findFirst({
+                            where: (m, { eq }) => eq(m.id, mediaId),
+                          });
+                          if (!mediaItem) return null;
+                          // Note: getMediaVariantUrls needs env which we don't have access to here
+                          // Return basic media info - URLs will need to be constructed client-side or via another endpoint
+                          return {
+                            id: mediaItem.id,
+                            fileKey: mediaItem.fileKey,
+                            filename: mediaItem.filename,
+                            mimeType: mediaItem.mimeType,
+                            altText: mediaItem.altText,
+                            caption: mediaItem.caption,
+                          };
+                        })
+                      );
+                      const validMedia = resolvedMedia.filter(Boolean);
+                      parsedValue = Array.isArray(parsedValue) ? validMedia : (validMedia[0] || null);
+                    } catch (error) {
+                      console.error(`Error resolving media for custom field ${customField.slug}:`, error);
+                    }
+                  }
+
+                  customFieldsData[customField.slug] = parsedValue;
                 }
               }
 

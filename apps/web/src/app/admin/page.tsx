@@ -1,8 +1,16 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Image, Users, Tags, Loader2, Clock } from 'lucide-react';
+// Optimized: Direct icon imports to reduce bundle size
+import FileText from 'lucide-react/dist/esm/icons/file-text';
+import Image from 'lucide-react/dist/esm/icons/image';
+import Users from 'lucide-react/dist/esm/icons/users';
+import Tags from 'lucide-react/dist/esm/icons/tags';
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
+import Clock from 'lucide-react/dist/esm/icons/clock';
 import Link from 'next/link';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';

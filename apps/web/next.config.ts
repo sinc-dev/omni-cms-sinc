@@ -20,15 +20,16 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   experimental: {
     serverSourceMaps: false,
-    // Reduce memory usage during build
-    outputFileTracingExcludes: {
-      // Exclude unnecessary files from output tracing
-      '*': [
-        'node_modules/@swc/core*',
-        'node_modules/webpack*',
-        'node_modules/next/dist/compiled/webpack*',
-      ],
-    },
+  },
+  
+  // Reduce memory usage during build - exclude unnecessary files from output tracing
+  // Note: This is at root level, not under experimental (Next.js 16 requirement)
+  outputFileTracingExcludes: {
+    '*': [
+      'node_modules/@swc/core*',
+      'node_modules/webpack*',
+      'node_modules/next/dist/compiled/webpack*',
+    ],
   },
 
   // 2. Note: Don't use 'standalone' output for Cloudflare Pages

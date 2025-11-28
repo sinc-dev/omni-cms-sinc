@@ -1,11 +1,18 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Network, ExternalLink, List, GitBranch } from 'lucide-react';
+// Optimized: Direct icon imports to reduce bundle size
+import Search from 'lucide-react/dist/esm/icons/search';
+import Network from 'lucide-react/dist/esm/icons/network';
+import ExternalLink from 'lucide-react/dist/esm/icons/external-link';
+import List from 'lucide-react/dist/esm/icons/list';
+import GitBranch from 'lucide-react/dist/esm/icons/git-branch';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useSchema } from '@/lib/context/schema-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';

@@ -12,7 +12,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2, Upload, FileText, AlertCircle, CheckCircle2 } from 'lucide-react';
+// Optimized: Direct icon imports to reduce bundle size
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
+import Upload from 'lucide-react/dist/esm/icons/upload';
+import FileText from 'lucide-react/dist/esm/icons/file-text';
+import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
+import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 import { cn } from '@/lib/utils';
 import { apiClient } from '@/lib/api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';

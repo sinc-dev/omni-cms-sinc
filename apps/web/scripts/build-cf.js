@@ -125,7 +125,12 @@ try {
     .join(' ');
   
   // Set to cleaned existing value or default to 4GB, ensuring no duplicates
+  // Note: Cloudflare Pages may have a ~4GB limit, so we use 4096MB (4GB exactly)
   env.NODE_OPTIONS = cleanedOptions || '--max-old-space-size=4096';
+  
+  // Also set for the vercel build child process specifically
+  // The @cloudflare/next-on-pages tool runs 'pnpm dlx vercel build' which may need explicit env vars
+  env.VERCEL_NODE_OPTIONS = env.NODE_OPTIONS;
   
   // Remove any root directory related env vars that might cause path duplication
   delete env.VERCEL_ROOT;
@@ -136,10 +141,13 @@ try {
   // Log memory before vercel build (the memory-intensive step)
   logMemoryUsage('Before @cloudflare/next-on-pages (vercel build)');
   
+  // Execute @cloudflare/next-on-pages with explicit environment variables
+  // The NODE_OPTIONS is set in env object above, which should propagate to child processes
+  // The @cloudflare/next-on-pages tool runs 'pnpm dlx vercel build' internally
   execSync('npx @cloudflare/next-on-pages@1', { 
     stdio: 'inherit',
     cwd: projectRoot,
-    env: env
+    env: env,
   });
   
   // Log memory after vercel build

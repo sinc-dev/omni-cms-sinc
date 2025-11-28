@@ -485,8 +485,20 @@ app.get(
             ? postTypeFieldsMap.get(post.postTypeId) || new Set<string>()
             : new Set<string>();
 
+          if (allowedCustomFieldIds.size === 0 && post.postTypeId) {
+            console.log(`[DEBUG] No custom fields attached to post type ${post.postTypeId} for post ${post.id}`);
+          }
+
+          if (fieldValuesData.length === 0) {
+            console.log(`[DEBUG] No field values found for post ${post.id} (${post.slug})`);
+          }
+
           // Filter to only include values for custom fields attached to this post type
           const filteredFieldValues = fieldValuesData.filter(fv => allowedCustomFieldIds.has(fv.customFieldId));
+
+          if (filteredFieldValues.length === 0 && fieldValuesData.length > 0) {
+            console.log(`[DEBUG] Field values filtered out for post ${post.id} - allowed custom field IDs: ${Array.from(allowedCustomFieldIds).join(', ')}`);
+          }
 
           const customFieldsData = await Promise.all(
             filteredFieldValues.map(async (fv) => {
@@ -502,9 +514,86 @@ app.get(
 
               let parsedValue: unknown = fv.value;
               try {
-                parsedValue = JSON.parse(fv.value || '{}');
+                // All non-text field types are stored as JSON strings
+                if (['number', 'boolean', 'select', 'multi_select', 'json', 'media', 'relation'].includes(field.fieldType)) {
+                  parsedValue = JSON.parse(fv.value || '{}');
+                }
               } catch {
                 // Keep as string if not valid JSON
+              }
+
+              // Resolve media-type custom fields to full media objects
+              if (field.fieldType === 'media' && parsedValue !== null && parsedValue !== undefined && parsedValue !== '') {
+                try {
+                  // Handle empty array case
+                  if (Array.isArray(parsedValue) && parsedValue.length === 0) {
+                    parsedValue = [];
+                  } else {
+                    // Media field value can be a single ID (string) or array of IDs
+                    const mediaIds = Array.isArray(parsedValue) ? parsedValue : [parsedValue];
+                    const resolvedMedia = await Promise.all(
+                      mediaIds.map(async (mediaId: string) => {
+                        if (!mediaId || typeof mediaId !== 'string' || mediaId.trim() === '') return null;
+                        const mediaItem = await db.query.media.findFirst({
+                          where: (m, { eq }) => eq(m.id, mediaId),
+                        });
+                        if (!mediaItem) {
+                          console.warn(`[DEBUG] Media item not found for ID: ${mediaId} in custom field ${field.slug}`);
+                          return null;
+                        }
+                        const urls = getMediaVariantUrls(mediaItem, c.env);
+                        return {
+                          id: mediaItem.id,
+                          ...urls,
+                          altText: mediaItem.altText,
+                          caption: mediaItem.caption,
+                        };
+                      })
+                    );
+                    // Filter out null values and return single object or array
+                    const validMedia = resolvedMedia.filter(Boolean);
+                    parsedValue = Array.isArray(parsedValue) ? validMedia : (validMedia[0] || null);
+                  }
+                } catch (error) {
+                  console.error(`Error resolving media for custom field ${field.slug}:`, error);
+                  // Keep original value if resolution fails
+                }
+              }
+
+              // Resolve relation-type custom fields (post references)
+              if (field.fieldType === 'relation' && parsedValue) {
+                try {
+                  const postIds = Array.isArray(parsedValue) ? parsedValue : [parsedValue];
+                  const resolvedPosts = await Promise.all(
+                    postIds.map(async (postId: string) => {
+                      if (!postId || typeof postId !== 'string') return null;
+                      const relatedPost = await db.query.posts.findFirst({
+                        where: (p, { eq, and: andFn }) => andFn(
+                          eq(p.id, postId),
+                          eq(p.status, 'published')
+                        ),
+                        columns: {
+                          id: true,
+                          title: true,
+                          slug: true,
+                          excerpt: true,
+                          publishedAt: true,
+                        },
+                      });
+                      return relatedPost ? {
+                        id: relatedPost.id,
+                        title: relatedPost.title,
+                        slug: relatedPost.slug,
+                        excerpt: relatedPost.excerpt,
+                        publishedAt: relatedPost.publishedAt ? new Date(relatedPost.publishedAt).toISOString() : null,
+                      } : null;
+                    })
+                  );
+                  const validPosts = resolvedPosts.filter(Boolean);
+                  parsedValue = Array.isArray(parsedValue) ? validPosts : (validPosts[0] || null);
+                } catch (error) {
+                  console.error(`Error resolving relation for custom field ${field.slug}:`, error);
+                }
               }
 
               return {
@@ -538,6 +627,10 @@ app.get(
             }
           });
           result.customFields = customFieldsBySlug;
+          
+          if (Object.keys(customFieldsBySlug).length > 0) {
+            console.log(`[DEBUG] Successfully resolved ${Object.keys(customFieldsBySlug).length} custom fields for post ${post.id}`);
+          }
         }
 
         // Fetch featured image if requested

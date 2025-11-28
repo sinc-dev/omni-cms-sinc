@@ -16,7 +16,8 @@ import { MediaPicker } from './media-picker';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';
-import { Loader2 } from 'lucide-react';
+// Optimized: Direct icon import to reduce bundle size
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 
 interface ImageDialogProps {
   open: boolean;

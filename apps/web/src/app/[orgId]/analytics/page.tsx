@@ -6,12 +6,11 @@ import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  TrendingUp,
-  Eye,
-  Users,
-  Clock,
-} from 'lucide-react';
+// Optimized: Direct icon imports to reduce bundle size
+import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import Eye from 'lucide-react/dist/esm/icons/eye';
+import Users from 'lucide-react/dist/esm/icons/users';
+import Clock from 'lucide-react/dist/esm/icons/clock';
 import { useOrganization } from '@/lib/context/organization-context';
 import { useApiClient } from '@/lib/hooks/use-api-client';
 import { useErrorHandler } from '@/lib/hooks/use-error-handler';

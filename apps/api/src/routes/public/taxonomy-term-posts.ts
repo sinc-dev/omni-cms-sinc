@@ -354,11 +354,86 @@ app.get(
                 // Parse value based on field type
                 let parsedValue: any = fv.value;
                 try {
-                  if (['number', 'boolean', 'select', 'multi_select', 'json'].includes(customField.fieldType)) {
+                  // All non-text field types are stored as JSON strings
+                  if (['number', 'boolean', 'select', 'multi_select', 'json', 'media', 'relation'].includes(customField.fieldType)) {
                     parsedValue = JSON.parse(fv.value as string);
                   }
                 } catch {
                   // Keep original value if parsing fails
+                }
+
+                // Resolve media-type custom fields to full media objects
+                if (customField.fieldType === 'media' && parsedValue !== null && parsedValue !== undefined && parsedValue !== '') {
+                  try {
+                    // Handle empty array case
+                    if (Array.isArray(parsedValue) && parsedValue.length === 0) {
+                      parsedValue = [];
+                    } else {
+                      // Media field value can be a single ID (string) or array of IDs
+                      const mediaIds = Array.isArray(parsedValue) ? parsedValue : [parsedValue];
+                      const resolvedMedia = await Promise.all(
+                        mediaIds.map(async (mediaId: string) => {
+                          if (!mediaId || typeof mediaId !== 'string' || mediaId.trim() === '') return null;
+                          const mediaItem = await db.query.media.findFirst({
+                            where: (m, { eq }) => eq(m.id, mediaId),
+                          });
+                          if (!mediaItem) {
+                            console.warn(`[DEBUG] Media item not found for ID: ${mediaId} in custom field ${customField.slug}`);
+                            return null;
+                          }
+                          const urls = getMediaVariantUrls(mediaItem, c.env);
+                          return {
+                            id: mediaItem.id,
+                            ...urls,
+                            altText: mediaItem.altText,
+                            caption: mediaItem.caption,
+                          };
+                        })
+                      );
+                      // Filter out null values and return single object or array
+                      const validMedia = resolvedMedia.filter(Boolean);
+                      parsedValue = Array.isArray(parsedValue) ? validMedia : (validMedia[0] || null);
+                    }
+                  } catch (error) {
+                    console.error(`Error resolving media for custom field ${customField.slug}:`, error);
+                    // Keep original value if resolution fails
+                  }
+                }
+
+                // Resolve relation-type custom fields (post references)
+                if (customField.fieldType === 'relation' && parsedValue) {
+                  try {
+                    const postIds = Array.isArray(parsedValue) ? parsedValue : [parsedValue];
+                    const resolvedPosts = await Promise.all(
+                      postIds.map(async (postId: string) => {
+                        if (!postId || typeof postId !== 'string') return null;
+                        const relatedPost = await db.query.posts.findFirst({
+                          where: (p, { eq, and: andFn }) => andFn(
+                            eq(p.id, postId),
+                            eq(p.status, 'published')
+                          ),
+                          columns: {
+                            id: true,
+                            title: true,
+                            slug: true,
+                            excerpt: true,
+                            publishedAt: true,
+                          },
+                        });
+                        return relatedPost ? {
+                          id: relatedPost.id,
+                          title: relatedPost.title,
+                          slug: relatedPost.slug,
+                          excerpt: relatedPost.excerpt,
+                          publishedAt: relatedPost.publishedAt ? new Date(relatedPost.publishedAt).toISOString() : null,
+                        } : null;
+                      })
+                    );
+                    const validPosts = resolvedPosts.filter(Boolean);
+                    parsedValue = Array.isArray(parsedValue) ? validPosts : (validPosts[0] || null);
+                  } catch (error) {
+                    console.error(`Error resolving relation for custom field ${customField.slug}:`, error);
+                  }
                 }
 
                 return {

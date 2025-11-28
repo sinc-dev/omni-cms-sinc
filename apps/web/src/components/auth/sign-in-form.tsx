@@ -6,7 +6,8 @@ import { ProviderButton } from './provider-button';
 import { OTPSignIn } from './otp-sign-in';
 import { getCloudflareAccessLoginUrlWithCleanup, getRedirectUrl, storeRedirectUrl } from '@/lib/auth/cloudflare-access-client';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+// Optimized: Direct icon import to reduce bundle size
+import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
 import Link from 'next/link';
 
 type AuthMethod = 'providers' | 'otp';

@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
 
+export const dynamic = 'force-dynamic';
+
 import { OrgSearchPageClient } from './search-page-client';
 
 export default function SearchPage() {

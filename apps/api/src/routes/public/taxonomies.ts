@@ -44,7 +44,29 @@ app.get(
     });
 
     if (!taxonomy) {
-      return c.json(Errors.notFound('Taxonomy'), 404);
+      // Provide helpful error message with available taxonomies
+      const availableTaxonomies = await db.query.taxonomies.findMany({
+        where: (t, { eq }) => eq(t.organizationId, organization.id),
+        columns: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      });
+      
+      return c.json({
+        success: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: `Taxonomy "${taxonomySlug}" not found for organization "${orgSlug}"`,
+          details: {
+            availableTaxonomies: availableTaxonomies.map(t => ({
+              name: t.name,
+              slug: t.slug,
+            })),
+          },
+        },
+      }, 404);
     }
 
     // Fetch all terms for this taxonomy
