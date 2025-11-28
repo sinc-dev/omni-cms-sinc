@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "NODE_OPTIONS='--max-old-space-size=4096' NEXT_PRIVATE_WORKERS=2 next build",
-    "build:cf": "NODE_OPTIONS=--max-old-space-size=4096 NEXT_PRIVATE_WORKERS=2 next build && NODE_OPTIONS=--max-old-space-size=4096 node scripts/build-cf.js",
+    "build:cf": "NODE_OPTIONS=--max-old-space-size=3584 NEXT_PRIVATE_WORKERS=2 next build && NODE_OPTIONS=--max-old-space-size=3584 node scripts/build-cf.js",
     "build:webpack": "NODE_OPTIONS='--max-old-space-size=4096' NEXT_PRIVATE_WORKERS=4 next build --webpack && node scripts/build-cf.js",
     "build:simulate": "node scripts/simulate-cloudflare-build.js",
     "build:debug": "BUILD_DEBUG=true NODE_OPTIONS='--max-old-space-size=4096' NEXT_PRIVATE_WORKERS=4 next build && BUILD_DEBUG=true node scripts/build-cf.js",

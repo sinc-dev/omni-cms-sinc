@@ -19,7 +19,9 @@ bucket_name = "omni-cms-media"
 # Cloudflare Dashboard → Pages → Settings → Environment Variables
 # 
 # Build Environment Variables (set in Cloudflare Pages dashboard):
-# - NODE_OPTIONS = "--max-old-space-size=4096" (prevents out-of-memory errors during build)
+# - NODE_OPTIONS = "--max-old-space-size=3584" (prevents out-of-memory errors during build)
+#   NOTE: This MUST be set in the dashboard Build environment variables section.
+#   The pnpm dlx vercel build process doesn't inherit NODE_OPTIONS from wrangler.toml or build scripts.
 #
 # Required runtime variables:
 # - R2_ACCOUNT_ID

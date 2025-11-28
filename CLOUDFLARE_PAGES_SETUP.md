@@ -68,16 +68,19 @@ echo "Build completed successfully"
 2. Click **Add variable** in the Build section
 3. Set:
    - **Variable name**: `NODE_OPTIONS`
-   - **Value**: `--max-old-space-size=4096`
+   - **Value**: `--max-old-space-size=3584` (or `4096` if you have more headroom)
 4. Click **Save**
 
 **Why this is needed:**
-- The `@cloudflare/next-on-pages` tool runs `vercel build` internally
-- `vercel build` is memory-intensive and needs the increased heap size
+- The `@cloudflare/next-on-pages` tool runs `pnpm dlx vercel build` internally
+- `pnpm dlx` creates an isolated environment that doesn't inherit NODE_OPTIONS from parent processes
+- `vercel build` is extremely memory-intensive and needs the increased heap size
 - Build environment variables are separate from runtime variables
-- Without this, builds will fail with out-of-memory errors
+- **Without this, builds WILL fail with out-of-memory errors** - this is NOT optional
 
 **Note**: This is different from runtime environment variables. Build variables are only available during the build process.
+
+**⚠️ CRITICAL**: Even though the build script tries to set NODE_OPTIONS, the `pnpm dlx` command inside `@cloudflare/next-on-pages` runs in an isolated environment. Setting it in the Cloudflare Pages dashboard Build environment variables is the ONLY reliable way to ensure it reaches the `vercel build` process.
 
 **Add these variables:**
 

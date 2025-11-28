@@ -58,9 +58,11 @@ npx wrangler pages deploy .vercel/output/static
 **Location**: Settings → Environment Variables → **Build** section
 
 **Required:**
-- `NODE_OPTIONS` = `--max-old-space-size=4096`
+- `NODE_OPTIONS` = `--max-old-space-size=3584` (or `4096` if you have more headroom)
 
 **Why**: Prevents "JavaScript heap out of memory" errors during the build process. The `vercel build` step (run by `@cloudflare/next-on-pages`) requires increased memory allocation.
+
+**⚠️ CRITICAL**: This MUST be set in the dashboard. The `pnpm dlx vercel build` command inside `@cloudflare/next-on-pages` runs in an isolated environment and doesn't inherit NODE_OPTIONS from the build script. The dashboard configuration is the only reliable way to ensure it reaches the vercel build process.
 
 ## 📋 Remaining Steps (After Dashboard Configuration)
 

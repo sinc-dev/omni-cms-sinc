@@ -125,8 +125,9 @@ try {
     .join(' ');
   
   // Set to cleaned existing value or default to 4GB, ensuring no duplicates
-  // Note: Cloudflare Pages may have a ~4GB limit, so we use 4096MB (4GB exactly)
-  env.NODE_OPTIONS = cleanedOptions || '--max-old-space-size=4096';
+  // Note: Using 3584MB (3.5GB) to leave headroom for the system and other processes
+  // Cloudflare Pages build environment may have memory constraints
+  env.NODE_OPTIONS = cleanedOptions || '--max-old-space-size=3584';
   
   // Also set for the vercel build child process specifically
   // The @cloudflare/next-on-pages tool runs 'pnpm dlx vercel build' which may need explicit env vars
@@ -149,10 +150,18 @@ try {
   // This is necessary because pnpm dlx creates an isolated environment that doesn't
   // inherit NODE_OPTIONS from parent processes. By setting it in the shell command itself,
   // we ensure it's available to the vercel build process.
+  //
+  // IMPORTANT: Even with this, the NODE_OPTIONS MUST be set in Cloudflare Pages dashboard
+  // Build environment variables for it to reliably reach the pnpm dlx vercel build process.
+  // The dashboard configuration is the most reliable way to ensure it's available.
   const isWindows = process.platform === 'win32';
+  // Use export to ensure the variable persists through child processes
   const command = isWindows
-    ? `set NODE_OPTIONS=${env.NODE_OPTIONS} && npx @cloudflare/next-on-pages@1`
-    : `NODE_OPTIONS="${env.NODE_OPTIONS}" npx @cloudflare/next-on-pages@1`;
+    ? `set NODE_OPTIONS=${env.NODE_OPTIONS} && set VERCEL_NODE_OPTIONS=${env.NODE_OPTIONS} && npx @cloudflare/next-on-pages@1`
+    : `export NODE_OPTIONS="${env.NODE_OPTIONS}" && export VERCEL_NODE_OPTIONS="${env.NODE_OPTIONS}" && npx @cloudflare/next-on-pages@1`;
+  
+  console.log(`   ⚠️  NOTE: If build still fails with memory errors, you MUST set NODE_OPTIONS in Cloudflare Pages dashboard:`);
+  console.log(`      Settings → Environment Variables → Build section → Add NODE_OPTIONS = ${env.NODE_OPTIONS}`);
   
   execSync(command, { 
     shell: true, // Use shell to ensure NODE_OPTIONS is set in the command
