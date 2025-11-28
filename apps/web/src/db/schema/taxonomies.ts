@@ -1,5 +1,5 @@
-import { sqliteTable, text, integer, index, uniqueIndex, type SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core';
-import { relations, type Relations } from 'drizzle-orm';
+import { sqliteTable, text, integer, index, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { relations } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { organizations } from './organizations';
 import { posts } from './posts';
@@ -44,7 +44,7 @@ export const taxonomyTerms = sqliteTable(
     name: text('name').notNull(),
     slug: text('slug').notNull(),
     description: text('description'),
-    parentId: text('parent_id').references((): any => taxonomyTerms.id),
+    parentId: text('parent_id').references(() => taxonomyTerms.id),
     createdAt: integer('created_at', { mode: 'timestamp' })
       .notNull()
       .$defaultFn(() => new Date()),

@@ -15,8 +15,8 @@ export function createMockAuthRequest(
   const request = new Request(fullUrl, options);
   
   // Inject database and user into request (as withAuth does)
-  (request as any).db = db;
-  (request as any).user = user;
+  (request as Request & { db?: DbClient; user?: User }).db = db;
+  (request as Request & { db?: DbClient; user?: User }).user = user;
   
   return request;
 }

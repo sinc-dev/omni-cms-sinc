@@ -1,7 +1,6 @@
 import { eq, and } from 'drizzle-orm';
 import type { DbClient } from '@/db/client';
 import { usersOrganizations, users } from '@/db/schema';
-import type { User } from '@/db/schema';
 import { isSuperAdmin } from './middleware';
 
 export type Permission = string; // Format: "resource:action" e.g., "posts:create"

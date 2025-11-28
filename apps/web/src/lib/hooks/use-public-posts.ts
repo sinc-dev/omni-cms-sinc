@@ -156,9 +156,9 @@ export function usePublicPost(orgSlug: string, slug: string, enabled = true) {
 
     setTimeout(() => {
       setIsLoading(true);
+      setIsError(false);
+      setError(null);
     }, 0);
-    setIsError(false);
-    setError(null);
 
     publicApiClient
       .getPost(orgSlug, slug)

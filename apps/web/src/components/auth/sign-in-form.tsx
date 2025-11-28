@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ProviderButton } from './provider-button';
 import { OTPSignIn } from './otp-sign-in';
@@ -20,7 +20,9 @@ export function SignInForm() {
   useEffect(() => {
     // Get redirect URL from query params
     const redirect = getRedirectUrl(searchParams);
-    setRedirectUrl(redirect);
+    startTransition(() => {
+      setRedirectUrl(redirect);
+    });
     storeRedirectUrl(redirect);
   }, [searchParams]);
 
@@ -107,7 +109,7 @@ export function SignInForm() {
       </div>
 
       <div className="text-center text-sm text-muted-foreground">
-        Don't have an account?{' '}
+        Don&apos;t have an account?{' '}
         <Link href={`/sign-up${searchParams.toString() ? `?${searchParams.toString()}` : ''}`} className="text-primary hover:underline">
           Sign up
         </Link>

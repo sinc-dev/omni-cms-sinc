@@ -181,7 +181,7 @@ export class FilterBuilder {
     operator: Filter['operator'],
     value: Filter['value']
   ): SQL<unknown> | null {
-    const column = (posts as any)[property];
+    const column = (posts as Record<string, SQL>)[property];
     if (!column) {
       return null; // Property doesn't exist
     }
@@ -189,35 +189,35 @@ export class FilterBuilder {
     switch (operator) {
       case 'eq':
         if (value === null) return isNull(column);
-        return eq(column, value as any);
+        return eq(column, value as string | number | boolean);
       
       case 'ne':
         if (value === null) return isNotNull(column);
-        return ne(column, value as any);
+        return ne(column, value as string | number | boolean);
       
       case 'gt':
         if (typeof value !== 'number' && typeof value !== 'string') return null;
-        return gt(column, value as any);
+        return gt(column, value as string | number);
       
       case 'gte':
         if (typeof value !== 'number' && typeof value !== 'string') return null;
-        return gte(column, value as any);
+        return gte(column, value as string | number);
       
       case 'lt':
         if (typeof value !== 'number' && typeof value !== 'string') return null;
-        return lt(column, value as any);
+        return lt(column, value as string | number);
       
       case 'lte':
         if (typeof value !== 'number' && typeof value !== 'string') return null;
-        return lte(column, value as any);
+        return lte(column, value as string | number);
       
       case 'in':
         if (!Array.isArray(value) || value.length === 0) return null;
-        return inArray(column, value as any[]);
+        return inArray(column, value as (string | number)[]);
       
       case 'not_in':
         if (!Array.isArray(value) || value.length === 0) return null;
-        return notInArray(column, value as any[]);
+        return notInArray(column, value as (string | number)[]);
       
       case 'contains':
         if (typeof value !== 'string') return null;
@@ -243,7 +243,7 @@ export class FilterBuilder {
       
       case 'between':
         if (!Array.isArray(value) || value.length !== 2) return null;
-        return between(column, value[0] as any, value[1] as any);
+        return between(column, value[0] as string | number, value[1] as string | number);
       
       case 'date_eq':
       case 'date_gt':

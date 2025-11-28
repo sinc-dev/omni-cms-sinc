@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, startTransition } from 'react';
 import Link from 'next/link';
 
 import { AuthLayout } from '@/components/auth/auth-layout';
@@ -21,7 +21,9 @@ export function SignUpPageClient() {
 
   useEffect(() => {
     const redirect = getRedirectUrl(searchParams);
-    setRedirectUrl(redirect);
+    startTransition(() => {
+      setRedirectUrl(redirect);
+    });
     storeRedirectUrl(redirect);
   }, [searchParams]);
 
@@ -49,7 +51,7 @@ export function SignUpPageClient() {
           <Info className="h-4 w-4" />
           <AlertDescription>
             Cloudflare Access may require an invitation from your administrator.
-            If you don't have access, please contact your administrator.
+            If you don&apos;t have access, please contact your administrator.
           </AlertDescription>
         </Alert>
 

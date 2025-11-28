@@ -1,0 +1,88 @@
+id,organization_id,name,slug,field_type,settings,created_at,updated_at
+638c8821cbbaa100ccde0891,3Kyv3hvrybf_YohTZRgPV,Capacity,capacity,text,,1764008941,1764008941
+e006d5823353b48a692fd886,3Kyv3hvrybf_YohTZRgPV,Gallery,gallery,text,,1764008941,1764008941
+dfaff853d1f1aa97405eb75b,3Kyv3hvrybf_YohTZRgPV,Langlong,langlong,text,,1764008941,1764008941
+a458843c0f8b14ef126d46b7,3Kyv3hvrybf_YohTZRgPV,Price Range Eur,price_range_eur,text,,1764008941,1764008941
+8754f1bb60588b6288fad189,3Kyv3hvrybf_YohTZRgPV,Address,address,text,,1764008941,1764008941
+f2b6758557a5f16edba695f2,3Kyv3hvrybf_YohTZRgPV,Associated University Hubspot Id,associated_university_hubspot_id,text,,1764008941,1764008941
+f2ca25de093204af6891d10d,3Kyv3hvrybf_YohTZRgPV,Associated University Name,associated_university_name,text,,1764008941,1764008941
+760726f6cea5ccc0ddca5887,3Kyv3hvrybf_YohTZRgPV,Program Name,program_name,text,,1764008941,1764008941
+2d4c63729b4b7818e5a90de2,3Kyv3hvrybf_YohTZRgPV,About-program,about-program,text,,1764008941,1764008941
+a66b4c3fce2b022795f6a5df,3Kyv3hvrybf_YohTZRgPV,Program-outcomes,program-outcomes,text,,1764008941,1764008941
+6dacef6016ec9b2466bd5906,3Kyv3hvrybf_YohTZRgPV,Career-opportunities,career-opportunities,text,,1764008941,1764008941
+8a3fa09aa08900205b2a9202,3Kyv3hvrybf_YohTZRgPV,Degree Level,degree_level,text,,1764008941,1764008941
+b404745f7056c78ebb76dcf5,3Kyv3hvrybf_YohTZRgPV,Duration In Years,duration_in_years,text,,1764008941,1764008941
+e4caa6a8145aaadea427b3b2,3Kyv3hvrybf_YohTZRgPV,Language,language,text,,1764008941,1764008941
+08849b028a902ba36d309178,3Kyv3hvrybf_YohTZRgPV,Sinc Special Tuition Fee,sinc_special_tuition_fee,text,,1764008941,1764008941
+7e99a683ce15da79a67778df,3Kyv3hvrybf_YohTZRgPV,Yearly Tuition Fee,yearly_tuition_fee,text,,1764008941,1764008941
+84a454abd4ff59db7b493953,3Kyv3hvrybf_YohTZRgPV,Tuition Currency,tuition_currency,text,,1764008941,1764008941
+f0acb74c44b2b623318a6d0c,3Kyv3hvrybf_YohTZRgPV,Additional Information,additional_information,text,,1764008941,1764008941
+c0b0942b318c1e568a957fc8,3Kyv3hvrybf_YohTZRgPV,Disciplines,disciplines,text,,1764008941,1764008941
+0b893c5d4b2f90e38c58a52f,3Kyv3hvrybf_YohTZRgPV,Study Format,study_format,text,,1764008941,1764008941
+dd427cdee4dfb15fc233e9ad,3Kyv3hvrybf_YohTZRgPV,With Thesis Or Not,with_thesis_or_not,text,,1764008941,1764008941
+c1b9e54071676fd050c4a785,3Kyv3hvrybf_YohTZRgPV,First Payment,first_payment,text,,1764008941,1764008941
+faba38a974e0341fe949788a,3Kyv3hvrybf_YohTZRgPV,On Arrival Payment,on_arrival_payment,text,,1764008941,1764008941
+46424b53e3cc67828444dc6a,3Kyv3hvrybf_YohTZRgPV,Reviewer Name,reviewer_name,text,,1764008941,1764008941
+f019b94b64e7864fb0325d2d,3Kyv3hvrybf_YohTZRgPV,Avatar,avatar,text,,1764008941,1764008941
+c37a06ab798842c8ae46a88e,3Kyv3hvrybf_YohTZRgPV,Review,review,text,,1764008941,1764008941
+73f1d7520a08106191c0b346,3Kyv3hvrybf_YohTZRgPV,Rating,rating,text,,1764008941,1764008941
+d4d14b7a1710aebc356a19c2,3Kyv3hvrybf_YohTZRgPV,Total Reviews,total_reviews,text,,1764008941,1764008941
+5cbcdf85dacf99b85e90abdb,3Kyv3hvrybf_YohTZRgPV,Relative Time Description,relative_time_description,text,,1764008941,1764008941
+a41c6813b765880218d9e6cf,3Kyv3hvrybf_YohTZRgPV,Review Link,review_link,text,,1764008941,1764008941
+eb8cc67b77706b610bbfe6cd,3Kyv3hvrybf_YohTZRgPV,Review Unique Identifier,review_unique_identifier,text,,1764008941,1764008941
+687fa7352aaf5a3788ba89eb,3Kyv3hvrybf_YohTZRgPV,University Name,university_name,text,,1764008941,1764008941
+44331570b51eda4ebffdd175,3Kyv3hvrybf_YohTZRgPV,Country,country,text,,1764008941,1764008941
+c1d0045d5060af552f81e4a1,3Kyv3hvrybf_YohTZRgPV,Logo,logo,text,,1764008941,1764008941
+9f2b832d3203a148a7b1a36b,3Kyv3hvrybf_YohTZRgPV,University Background Image,university_background_image,text,,1764008941,1764008941
+484b169103372935414abd86,3Kyv3hvrybf_YohTZRgPV,Photos,photos,text,,1764008941,1764008941
+dd3afb5b684794d2790fec5b,3Kyv3hvrybf_YohTZRgPV,Founding Year,founding_year,text,,1764008941,1764008941
+be1c3d9eefee12db12de6926,3Kyv3hvrybf_YohTZRgPV,Phone,phone,text,,1764008941,1764008941
+b46c88cef3111494ae63c1b7,3Kyv3hvrybf_YohTZRgPV,Photo1,photo1,text,,1764008941,1764008941
+2b7cb87363ab1147d1b5675f,3Kyv3hvrybf_YohTZRgPV,Photo2,photo2,text,,1764008941,1764008941
+bec1323b993d96ec35304a41,3Kyv3hvrybf_YohTZRgPV,Photo3,photo3,text,,1764008941,1764008941
+d5ca7cfff1ed187e1bd29d1e,3Kyv3hvrybf_YohTZRgPV,Photo4,photo4,text,,1764008941,1764008941
+0f7a17c51bd0cab910f5e640,3Kyv3hvrybf_YohTZRgPV,Number Of Reviews,number_of_reviews,text,,1764008941,1764008941
+84946cca1e51aef6c5c5689f,3Kyv3hvrybf_YohTZRgPV,Google Map Rating,google_map_rating,text,,1764008941,1764008941
+9605922aafa8063f1c3b669e,3Kyv3hvrybf_YohTZRgPV,Google Map Gallery,google_map_gallery,text,,1764008941,1764008941
+3178ceb59018d6be08bcf06c,3Kyv3hvrybf_YohTZRgPV,Google Map Profile Link,google_map_profile_link,text,,1764008941,1764008941
+a93b356bdee46d036fc13132,3Kyv3hvrybf_YohTZRgPV,University Street Address,university_street_address,text,,1764008941,1764008941
+d09be0029039c3e35557ec44,3Kyv3hvrybf_YohTZRgPV,University Phone Number,university_phone_number,text,,1764008941,1764008941
+fea49c47a4228edf8da5d6f6,3Kyv3hvrybf_YohTZRgPV,Website,website,text,,1764008941,1764008941
+e29073a2439406e7616a4bc5,IBfLssGjH23-f9uxjH5Ms,Associated University Hubspot Id,associated_university_hubspot_id,text,,1764008947,1764008947
+d7373d9608f49c43b4001ba6,IBfLssGjH23-f9uxjH5Ms,Associated University Name,associated_university_name,text,,1764008947,1764008947
+e17f99dc589c6e5885dfc00d,IBfLssGjH23-f9uxjH5Ms,Program Name,program_name,text,,1764008947,1764008947
+ad8e78d32cf87743554f12f2,IBfLssGjH23-f9uxjH5Ms,Degree Level,degree_level,text,,1764008947,1764008947
+3a0a71b2c6050cf27b2166a8,IBfLssGjH23-f9uxjH5Ms,Disciplines,disciplines,text,,1764008947,1764008947
+7109ad7b735c9e359872b591,IBfLssGjH23-f9uxjH5Ms,Duration In Years,duration_in_years,text,,1764008947,1764008947
+37e95442370772ac27ea9e42,IBfLssGjH23-f9uxjH5Ms,Language,language,text,,1764008947,1764008947
+952eae92d8374bd2e527a561,IBfLssGjH23-f9uxjH5Ms,Yearly Tuition Fee,yearly_tuition_fee,text,,1764008947,1764008947
+ba09efb8086e5cd1d1594036,IBfLssGjH23-f9uxjH5Ms,Tuition Currency,tuition_currency,text,,1764008947,1764008947
+56839c83b8a28a058d3d4fee,IBfLssGjH23-f9uxjH5Ms,Entry Requirements,entry_requirements,text,,1764008947,1764008947
+adfc3e850289911f51fef0ff,IBfLssGjH23-f9uxjH5Ms,Reviewer Name,reviewer_name,text,,1764008947,1764008947
+255040528b64bbd31110f011,IBfLssGjH23-f9uxjH5Ms,Avatar,avatar,text,,1764008947,1764008947
+8ad4a2fd7903b53fd154e3c5,IBfLssGjH23-f9uxjH5Ms,Review,review,text,,1764008947,1764008947
+83f281fb47b1dc671b75fabb,IBfLssGjH23-f9uxjH5Ms,Rating,rating,text,,1764008947,1764008947
+4d4514f03d1c78ff7b6353e0,IBfLssGjH23-f9uxjH5Ms,Total Reviews,total_reviews,text,,1764008947,1764008947
+dd68ee29710abcefaecb6bab,IBfLssGjH23-f9uxjH5Ms,Relative Time Description,relative_time_description,text,,1764008947,1764008947
+92f6de82254c754874edb5ee,IBfLssGjH23-f9uxjH5Ms,Review Link,review_link,text,,1764008947,1764008947
+099c80627729e6fb6ab651b9,IBfLssGjH23-f9uxjH5Ms,Review Unique Identifier,review_unique_identifier,text,,1764008947,1764008947
+146f7d2e6b829a96a554e4cc,IBfLssGjH23-f9uxjH5Ms,University Name,university_name,text,,1764008947,1764008947
+eb934610d42af6c28c0391b5,IBfLssGjH23-f9uxjH5Ms,Address,address,text,,1764008947,1764008947
+ed38dd00ee38889e1bab11ca,IBfLssGjH23-f9uxjH5Ms,Country,country,text,,1764008947,1764008947
+406c5a3d47b438b4c673b7cd,IBfLssGjH23-f9uxjH5Ms,Logo,logo,text,,1764008947,1764008947
+a1ab7275395cfbfe51642402,IBfLssGjH23-f9uxjH5Ms,University Background Image,university_background_image,text,,1764008947,1764008947
+d52bedfe8b66d29292328199,IBfLssGjH23-f9uxjH5Ms,Photos,photos,text,,1764008947,1764008947
+e3dec6538b65700fdfc92306,ND-k8iHHx70s5XaW28Mk2,Image,image,text,,1764009070,1764009070
+09abb148af252e2b99a73777,ND-k8iHHx70s5XaW28Mk2,Price Eur,price_eur,text,,1764009070,1764009070
+d54e52ab6455f54f5bb0c434,ND-k8iHHx70s5XaW28Mk2,Tuition Fee With Discount,tuition_fee_with_discount,text,,1764009070,1764009070
+ab389bb8329103790d733f11,ND-k8iHHx70s5XaW28Mk2,Course Outcomes,course_outcomes,text,,1764009070,1764009070
+f78e0c257607c4be917e7852,ND-k8iHHx70s5XaW28Mk2,Course Curriculum,course_curriculum,text,,1764009070,1764009070
+37a236e92e03d9bffd3c19ed,ND-k8iHHx70s5XaW28Mk2,Course Credit,course_credit,text,,1764009070,1764009070
+efbfcfaae6a1ad82430c59a8,ND-k8iHHx70s5XaW28Mk2,Language Options,language_options,text,,1764009070,1764009070
+268aa0e5d9ecc8ea391ef82e,ND-k8iHHx70s5XaW28Mk2,Duration,duration,text,,1764009070,1764009070
+3910979d174162968d30a06f,ND-k8iHHx70s5XaW28Mk2,Degree Level,degree_level,text,,1764009070,1764009070
+f9ead5b88198b42bf99eba4f,ND-k8iHHx70s5XaW28Mk2,Study Format,study_format,text,,1764009070,1764009070
+915042207ea9f89be515dfc5,ND-k8iHHx70s5XaW28Mk2,Course Description,course_description,text,,1764009070,1764009070
+96bece51d96c6072cc9b05ab,ND-k8iHHx70s5XaW28Mk2,Number Of Lessons,number_of_lessons,text,,1764009070,1764009070
+35d1a3209e50ff543c4c2aae,ND-k8iHHx70s5XaW28Mk2,Featured,featured,text,,1764009070,1764009070
+7dd1cc6e39da54527e64c423,ND-k8iHHx70s5XaW28Mk2,Career Opportunities,career_opportunities,text,,1764009070,1764009070

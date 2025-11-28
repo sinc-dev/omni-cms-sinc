@@ -1,4 +1,5 @@
 import { drizzle } from 'drizzle-orm/d1';
+import type { D1Database } from '@cloudflare/workers-types';
 import * as schema from './schema';
 
 // This will be used in API routes with Cloudflare D1 binding
@@ -18,9 +19,9 @@ export type DbClient = ReturnType<typeof getDb>;
  * Safely gets the database client from Cloudflare bindings
  * Returns null if binding is not available instead of throwing
  */
-export function tryGetDb(env?: any): DbClient | null {
+export function tryGetDb(env?: { DB?: D1Database }): DbClient | null {
   try {
-    const d1 = env?.DB || (globalThis as any).DB;
+    const d1 = env?.DB || (globalThis as { DB?: D1Database }).DB;
     if (!d1) {
       return null;
     }

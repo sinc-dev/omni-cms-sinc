@@ -1,269 +1,101 @@
-# API Endpoint Test Report
+# Study in Kazakhstan API Endpoint Test Report
 
-## Test Date
-Generated: Manual testing required
+## Test Script
+
+Run the Python script to test all endpoints:
+
+```bash
+python run_tests.py
+```
+
+Or test individual endpoints using curl:
 
 ## Endpoints to Test
 
-### ✅/❌ Status Legend
-- ✅ WORKING - Endpoint returns 200 with success=true
-- ⚠️ PARTIAL - Endpoint returns 200 but success=false or unexpected format
-- ❌ FAILED - Endpoint returns error status code or throws exception
-
----
-
-## 1. Get All Universities
-
-**Endpoint:**
-```
-GET /api/public/v1/study-in-kazakhstan/posts?post_type=universities&per_page=2
-```
-
-**Test Command:**
+### 1. Get All Universities
 ```bash
 curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-kazakhstan/posts?post_type=universities&per_page=2" \
   -H "Authorization: Bearer omni_099c139e8f5dce0edfc59cc9926d0cd7" \
   -H "Content-Type: application/json"
 ```
 
-**Expected:**
-- Status: 200
-- Response: `{"success": true, "data": [...], "meta": {...}}`
+**Expected:** Returns list of universities with custom fields
 
-**Status:** ⏳ PENDING TEST
-
----
-
-## 2. Get All Programs
-
-**Endpoint:**
-```
-GET /api/public/v1/study-in-kazakhstan/posts?post_type=programs&per_page=2
-```
-
-**Test Command:**
-```bash
-curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-kazakhstan/posts?post_type=programs&per_page=2" \
-  -H "Authorization: Bearer omni_099c139e8f5dce0edfc59cc9926d0cd7" \
-  -H "Content-Type: application/json"
-```
-
-**Expected:**
-- Status: 200
-- Response: `{"success": true, "data": [...], "meta": {...}}`
-
-**Status:** ⏳ PENDING TEST
-
----
-
-## 3. Search Universities (Coventry)
-
-**Endpoint:**
-```
-GET /api/public/v1/study-in-kazakhstan/posts?post_type=universities&search=coventry&per_page=5
-```
-
-**Test Command:**
-```bash
-curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-kazakhstan/posts?post_type=universities&search=coventry&per_page=5" \
-  -H "Authorization: Bearer omni_099c139e8f5dce0edfc59cc9926d0cd7" \
-  -H "Content-Type: application/json"
-```
-
-**Expected:**
-- Status: 200
-- Response: `{"success": true, "data": [...], "meta": {...}}`
-- Should include Coventry University in results
-
-**Status:** ⏳ PENDING TEST
-
----
-
-## 4. Get Single University (Coventry)
-
-**Endpoint:**
-```
-GET /api/public/v1/study-in-kazakhstan/posts/coventry-university-kazakhstan
-```
-
-**Test Command:**
+### 2. Get Single University (Coventry)
 ```bash
 curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-kazakhstan/posts/coventry-university-kazakhstan" \
   -H "Authorization: Bearer omni_099c139e8f5dce0edfc59cc9926d0cd7" \
   -H "Content-Type: application/json"
 ```
 
-**Expected:**
-- Status: 200
-- Response: `{"success": true, "data": {...}}`
-- Should include all custom fields (background_image, logo, gallery, etc.)
+**Expected:** Returns single university with all custom fields including media
 
-**Status:** ⏳ PENDING TEST
-
----
-
-## 5. Get Programs by University
-
-**Endpoint:**
-```
-GET /api/public/v1/study-in-kazakhstan/posts?post_type=programs&related_to_slug=coventry-university-kazakhstan&relationship_type=university&per_page=5
+### 3. Get All Programs
+```bash
+curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-kazakhstan/posts?post_type=programs&per_page=2" \
+  -H "Authorization: Bearer omni_099c139e8f5dce0edfc59cc9926d0cd7" \
+  -H "Content-Type: application/json"
 ```
 
-**Test Command:**
+**Expected:** Returns list of programs with custom fields
+
+### 4. Get Programs by University
 ```bash
 curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-kazakhstan/posts?post_type=programs&related_to_slug=coventry-university-kazakhstan&relationship_type=university&per_page=5" \
   -H "Authorization: Bearer omni_099c139e8f5dce0edfc59cc9926d0cd7" \
   -H "Content-Type: application/json"
 ```
 
-**Expected:**
-- Status: 200
-- Response: `{"success": true, "data": [...], "meta": {...}}`
-- Should return programs related to Coventry University
+**Expected:** Returns programs related to Coventry University
 
-**Status:** ⏳ PENDING TEST
-
----
-
-## 6. Get Taxonomies (Disciplines)
-
-**Endpoint:**
-```
-GET /api/public/v1/study-in-kazakhstan/taxonomies/disciplines
-```
-
-**Test Command:**
+### 5. Get Taxonomies (disciplines)
 ```bash
 curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-kazakhstan/taxonomies/disciplines" \
   -H "Authorization: Bearer omni_099c139e8f5dce0edfc59cc9926d0cd7" \
   -H "Content-Type: application/json"
 ```
 
-**Expected:**
-- Status: 200
-- Response: `{"success": true, "data": {"taxonomy": {...}, "terms": [...]}}`
+**Expected:** Returns taxonomy terms for disciplines (may fail if taxonomy slug is different)
 
-**Note:** Taxonomy slug might be different (e.g., `program-disciplines`). Check schema first.
-
-**Status:** ⏳ PENDING TEST
-
----
-
-## 7. Get Organizations (Admin)
-
-**Endpoint:**
-```
-GET /api/admin/v1/organizations
-```
-
-**Test Command:**
+### 6. Get Taxonomies (program-disciplines)
 ```bash
-curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/admin/v1/organizations" \
+curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-kazakhstan/taxonomies/program-disciplines" \
   -H "Authorization: Bearer omni_099c139e8f5dce0edfc59cc9926d0cd7" \
   -H "Content-Type: application/json"
 ```
 
-**Expected:**
-- Status: 200
-- Response: `{"success": true, "data": [...]}`
-- Should include study-in-kazakhstan organization
+**Expected:** Returns taxonomy terms for program disciplines
 
-**Status:** ⏳ PENDING TEST
-
----
-
-## 8. Field Selection Test
-
-**Endpoint:**
-```
-GET /api/public/v1/study-in-kazakhstan/posts?post_type=universities&fields=id,title,slug,customFields&per_page=2
-```
-
-**Test Command:**
+### 7. Get Programs by Discipline
 ```bash
-curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-kazakhstan/posts?post_type=universities&fields=id,title,slug,customFields&per_page=2" \
+curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/public/v1/study-in-kazakhstan/taxonomies/disciplines/engineering/posts?post_type=programs&per_page=5" \
   -H "Authorization: Bearer omni_099c139e8f5dce0edfc59cc9926d0cd7" \
   -H "Content-Type: application/json"
 ```
 
-**Expected:**
-- Status: 200
-- Response: `{"success": true, "data": [...]}`
-- Should only include specified fields
+**Expected:** Returns programs in engineering discipline
 
-**Status:** ⏳ PENDING TEST
+## Known Issues (from ENDPOINTS-TO-FIX.md)
 
----
+1. **Custom Fields Empty:** All endpoints may return empty `customFields: {}`
+   - Possible causes:
+     - Custom fields not attached to post types
+     - Custom field values not populated
+     - Media fields not being resolved
 
-## 9. Get Schema (Admin)
+2. **Taxonomy Endpoints:** May fail if taxonomy slugs are incorrect
+   - Try `program-disciplines` instead of `disciplines`
+   - Check actual taxonomy slugs in database
 
-**Endpoint:**
-```
-GET /api/admin/v1/organizations/{orgId}/schema
-```
+## Python Test Script
 
-**Test Command:**
+The `run_tests.py` script will:
+- Test all 6 endpoints
+- Display HTTP status codes
+- Check for custom fields
+- Save results to `test_results.txt` and `test_results.json`
+
+Run it with:
 ```bash
-# First get org ID
-curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/admin/v1/organizations" \
-  -H "Authorization: Bearer omni_099c139e8f5dce0edfc59cc9926d0cd7"
-
-# Then get schema (replace {orgId} with actual ID)
-curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/admin/v1/organizations/{orgId}/schema" \
-  -H "Authorization: Bearer omni_099c139e8f5dce0edfc59cc9926d0cd7"
+python run_tests.py
 ```
-
-**Expected:**
-- Status: 200
-- Response: `{"success": true, "data": {"postTypes": [...], "taxonomies": [...]}}`
-
-**Status:** ⏳ PENDING TEST
-
----
-
-## 10. Get Post Type Schema (Admin)
-
-**Endpoint:**
-```
-GET /api/admin/v1/organizations/{orgId}/schema/post-types/{postTypeId}
-```
-
-**Test Command:**
-```bash
-# Replace {orgId} and {postTypeId} with actual IDs from schema
-curl -X GET "https://omni-cms-api.joseph-9a2.workers.dev/api/admin/v1/organizations/{orgId}/schema/post-types/{postTypeId}" \
-  -H "Authorization: Bearer omni_099c139e8f5dce0edfc59cc9926d0cd7"
-```
-
-**Expected:**
-- Status: 200
-- Response: `{"success": true, "data": {"properties": {...}}}`
-
-**Status:** ⏳ PENDING TEST
-
----
-
-## Testing Instructions
-
-1. **Run each test command** in your terminal
-2. **Check the HTTP status code** (should be 200 for success)
-3. **Verify the response format** matches expected structure
-4. **Check for custom fields** in university/program responses
-5. **Update status** in this document (✅ WORKING, ⚠️ PARTIAL, ❌ FAILED)
-
-## Common Issues to Check
-
-1. **404 Not Found** - Organization slug might be incorrect
-2. **401 Unauthorized** - API key might be invalid
-3. **500 Internal Server Error** - Backend issue
-4. **success: false** - Check error message in response
-5. **Missing custom fields** - Fields might not be attached to post type or not populated
-
-## Next Steps
-
-After testing:
-1. Update status for each endpoint
-2. Document any errors found
-3. Fix issues in backend code
-4. Re-test fixed endpoints
-

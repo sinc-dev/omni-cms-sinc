@@ -53,11 +53,29 @@ For each unique custom field slug:
    - `field_type`: Inferred from value type
    - `settings`: Additional configuration
 
-### Step 3: Link Fields to Post Types
+### Step 3: Link Fields to Post Types ✅ IMPLEMENTED
+
+**Script:** `scripts/attach-custom-fields-to-post-types.js`
 
 For each post type:
-1. Link custom fields via `post_type_fields`
-2. Store the mapping: `{ fieldSlug: customFieldId }`
+1. Analyze which custom fields are used by examining transformed data
+2. Link custom fields via `post_type_fields` using API endpoint
+3. Attach fields in alphabetical order
+4. Skip fields that are already attached (idempotent)
+
+**API Endpoint:**
+```
+POST /api/admin/v1/organizations/:orgId/post-types/:postTypeId/fields
+```
+
+**Body:**
+```json
+{
+  "custom_field_id": "field-uuid",
+  "is_required": false,
+  "order": 1
+}
+```
 
 ### Step 4: Transform Custom Fields for Import
 
@@ -123,12 +141,22 @@ After media upload:
 }
 ```
 
-## Next Steps
+## Implementation Status
 
 1. ✅ Custom fields extracted and stored with WordPress slugs
-2. ⏳ Create script to analyze custom fields across all post types
-3. ⏳ Create custom field definitions in Omni-CMS
-4. ⏳ Link fields to post types
-5. ⏳ Update import script to map slugs → IDs
-6. ⏳ Update media references in custom fields after media upload
+2. ✅ Create script to analyze custom fields across all post types
+3. ✅ Create custom field definitions in Omni-CMS (`import-custom-fields.js`)
+4. ✅ Link fields to post types (`attach-custom-fields-to-post-types.js`)
+5. ✅ Update import script to map slugs → IDs (`import-posts.js`)
+6. ✅ Update media references in custom fields after media upload (`update-media-references.js`)
+
+## Next Steps (All Complete!)
+
+All steps have been implemented. The import process now:
+- Creates custom field definitions
+- Attaches them to post types automatically
+- Maps field slugs to IDs when importing posts
+- Updates media references after upload
+
+See `IMPLEMENTATION_STATUS.md` for detailed status.
 

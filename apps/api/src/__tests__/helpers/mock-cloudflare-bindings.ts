@@ -4,8 +4,9 @@ import type { D1Database, D1DatabaseSession, R2Bucket, R2Object, R2ObjectBody, R
 
 /**
  * Creates mock Cloudflare bindings for testing
+ * Note: Using type assertion to work around multiple @cloudflare/workers-types versions
  */
-export interface MockCloudflareBindings extends CloudflareBindings {
+export interface MockCloudflareBindings extends Omit<CloudflareBindings, 'R2_BUCKET'> {
   DB: D1Database;
   R2_BUCKET: R2Bucket;
 }
@@ -48,7 +49,8 @@ export function createMockBindings(
 ): MockCloudflareBindings {
   // Use simple mocks by default - faster and no Miniflare runtime needed
   const DB = overrides?.DB || createSimpleMockD1();
-  const R2_BUCKET = overrides?.R2_BUCKET || createSimpleMockR2();
+  // Use double type assertion to work around multiple @cloudflare/workers-types versions
+  const R2_BUCKET = (overrides?.R2_BUCKET || createSimpleMockR2()) as unknown as R2Bucket;
 
   return {
     DB,
@@ -142,7 +144,7 @@ export function createSimpleMockR2(): R2Bucket {
       customMetadata: {},
       writeHttpMetadata: ((headers: Headers) => {
         // Mock implementation - Headers type mismatch between Miniflare and Cloudflare types is acceptable for mocks
-      }) as any,
+      }) as unknown as (headers: Headers) => void,
     } as R2Object;
     return obj;
   };
@@ -168,10 +170,10 @@ export function createSimpleMockR2(): R2Bucket {
         bytes: async () => arr,
         text: async () => new TextDecoder().decode(data),
         json: async () => JSON.parse(new TextDecoder().decode(data)),
-        blob: async () => new Blob([data]),
-        writeHttpMetadata: (headers: Headers) => {
+        blob: async () => new Blob([data]) as unknown as Blob,
+        writeHttpMetadata: ((headers: Headers) => {
           // Mock implementation
-        },
+        }) as unknown as (headers: Headers) => void,
       };
       return body;
     },

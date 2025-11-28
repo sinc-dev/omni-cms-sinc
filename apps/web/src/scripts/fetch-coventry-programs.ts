@@ -107,16 +107,17 @@ function executeQuery(sql: string): WranglerResult {
     const jsonString = jsonOutput.substring(0, lastBrace + 1);
     
     return JSON.parse(jsonString) as WranglerResult;
-  } catch (error: any) {
-    console.error('❌ Error executing query:', error.message);
-    if (error.stdout) {
-      console.error('Stdout:', error.stdout.toString());
+  } catch (error: unknown) {
+    const err = error as { message?: string; stdout?: Buffer; stderr?: Buffer; output?: Buffer };
+    console.error('❌ Error executing query:', err.message || 'Unknown error');
+    if (err.stdout) {
+      console.error('Stdout:', err.stdout.toString());
     }
-    if (error.stderr) {
-      console.error('Stderr:', error.stderr.toString());
+    if (err.stderr) {
+      console.error('Stderr:', err.stderr.toString());
     }
-    if (error.output) {
-      console.error('Output:', error.output.toString());
+    if (err.output) {
+      console.error('Output:', err.output.toString());
     }
     throw error;
   }
@@ -230,14 +231,14 @@ async function main() {
   }
 
   console.log(`   Found ${universities.length} Coventry University entry/entries:`);
-  universities.forEach((uni: any) => {
+  universities.forEach((uni: { title: string; organization_slug: string }) => {
     console.log(`   - ${uni.title} (${uni.organization_slug})`);
   });
 
   // Step 3: Find programs related to Coventry University
   console.log('\n📋 Step 3: Finding programs related to Coventry University...');
   
-  const universityIds = universities.map((u: any) => `'${u.id}'`).join(',');
+  const universityIds = universities.map((u: { id: string }) => `'${u.id}'`).join(',');
   
   const programsQuery = `
     SELECT 

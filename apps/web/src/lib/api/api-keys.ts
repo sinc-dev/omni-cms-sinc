@@ -1,6 +1,9 @@
 // API key generation, hashing, and validation utilities
 // Uses Web Crypto API for Cloudflare Workers/Pages compatibility
 
+import type { DbClient } from '@/db/client';
+import { eq } from 'drizzle-orm';
+
 /**
  * Generates a new API key
  * Format: omni_<random 32 chars>
@@ -125,11 +128,11 @@ export function parseScopes(scopesJson: string | null): string[] {
  * @returns True if key is unique (doesn't exist)
  */
 export async function isApiKeyUnique(
-  db: any,
+  db: DbClient,
   hashedKey: string
 ): Promise<boolean> {
   const existing = await db.query.apiKeys.findFirst({
-    where: (keys: any, { eq }: any) => eq(keys.key, hashedKey),
+    where: (keys, { eq: eqFn }) => eqFn(keys.key, hashedKey),
   });
   return !existing;
 }

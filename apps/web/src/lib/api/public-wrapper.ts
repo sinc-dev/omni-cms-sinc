@@ -140,7 +140,7 @@ export function withPublic(
   ) => {
     try {
       // Get D1 database from Cloudflare binding
-      const db = (request as any).db as DbClient;
+      const db = (request as Request & { db?: DbClient }).db as DbClient;
       
       if (!db) {
         return Errors.serverError('Database not configured');

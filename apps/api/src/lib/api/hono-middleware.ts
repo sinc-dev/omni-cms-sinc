@@ -25,7 +25,8 @@ export async function authMiddleware(
   next: Next
 ) {
   const db = getDb(c.env.DB);
-        const user = await getAuthenticatedUser(c.req.raw, db, c.env);
+  // Type assertion needed due to schema type differences between API and web schemas
+  const user = await getAuthenticatedUser(c.req.raw, db as unknown as Parameters<typeof getAuthenticatedUser>[1], c.env);
   
   c.set('user', user);
   c.set('db', db);
@@ -52,7 +53,9 @@ export async function orgAccessMiddleware(
     return c.json(Errors.unauthorized(), 401);
   }
   
-  const hasAccess = await userHasAccessToOrganization(db, user, orgId);
+  // Type assertion needed due to schema type differences between API and web schemas
+  // Both schemas have the same organizations and usersOrganizations tables that this function uses
+  const hasAccess = await userHasAccessToOrganization(db as unknown as Parameters<typeof userHasAccessToOrganization>[0], user, orgId);
   if (!hasAccess) {
     return c.json(Errors.forbidden());
   }
@@ -81,8 +84,9 @@ export function permissionMiddleware(requiredPermission: Permission) {
       return c.json(Errors.unauthorized(), 401);
     }
     
+    // Type assertion needed due to schema type differences between API and web schemas
     const hasPermission = await checkPermission(
-      db,
+      db as unknown as Parameters<typeof checkPermission>[0],
       user.id,
       orgId,
       requiredPermission

@@ -2,7 +2,7 @@
  * Import All Data to Omni-CMS
  * 
  * Main import script that orchestrates the entire import process
- * Follows the correct order: post types → taxonomies → terms → custom fields → media → posts → relationships → update media references
+ * Follows the correct order: post types → taxonomies → terms → custom fields → attach fields to post types → media → posts → relationships → update media references
  */
 
 import fs from 'fs/promises';
@@ -13,6 +13,7 @@ import { importPostTypes } from './import-post-types.js';
 import { importTaxonomies } from './import-taxonomies.js';
 import { importTaxonomyTerms } from './import-taxonomy-terms.js';
 import { importCustomFields } from './import-custom-fields.js';
+import { attachCustomFieldsToPostTypes } from './attach-custom-fields-to-post-types.js';
 import { importMedia } from './import-media.js';
 import { importPosts } from './import-posts.js';
 import { importRelationships } from './import-relationships.js';
@@ -88,6 +89,11 @@ async function importOrganization(orgSlug, baseUrl, apiKey) {
     console.log('5. Importing custom fields...');
     const customFieldMap = await importCustomFields(baseUrl, orgId, orgSlug);
     console.log(`   ✓ Imported ${customFieldMap.size} custom fields\n`);
+
+    // Step 4.5: Attach Custom Fields to Post Types
+    console.log('5.5. Attaching custom fields to post types...');
+    const attachmentResult = await attachCustomFieldsToPostTypes(baseUrl, orgId, orgSlug);
+    console.log(`   ✓ Attached ${attachmentResult.attached} fields, skipped ${attachmentResult.skipped}\n`);
 
     // Step 5: Upload Media (or load existing mappings)
     let mediaMap = new Map();

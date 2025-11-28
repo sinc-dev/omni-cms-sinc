@@ -324,7 +324,7 @@ function UsersPageContent() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
-                {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                { }
                 <select
                   id="role"
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -571,7 +571,7 @@ function UsersPageContent() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="edit-role">Role</Label>
-              {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+              { }
               <select
                 id="edit-role"
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"

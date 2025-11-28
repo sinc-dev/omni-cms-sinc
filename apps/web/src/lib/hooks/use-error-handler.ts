@@ -62,7 +62,7 @@ export function useErrorHandler() {
    * Wrap an async function with error handling
    */
   const withErrorHandling = useCallback(
-    <T extends (...args: any[]) => Promise<any>>(
+    <T extends (...args: unknown[]) => Promise<unknown>>(
       fn: T,
       options?: { showToast?: boolean; title?: string }
     ) => {

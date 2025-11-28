@@ -9,7 +9,7 @@ import { eq, and } from 'drizzle-orm';
 import { posts } from '@/db/schema/posts';
 
 export interface SearchResult {
-  results: any[];
+  results: Array<Record<string, unknown>>;
   entityType: string;
   pagination: {
     limit: number;
@@ -53,7 +53,7 @@ export class SearchOrchestrator {
         if (this.apiKeyScopes) {
           if (hasScope(this.apiKeyScopes, 'posts:read:published')) {
             // Only return published posts
-            filteredResults = filteredResults.filter((post: any) => post.status === 'published');
+            filteredResults = filteredResults.filter((post: Record<string, unknown>) => post.status === 'published');
           } else if (!hasScope(this.apiKeyScopes, 'posts:read')) {
             // No read permission, return empty
             filteredResults = [];

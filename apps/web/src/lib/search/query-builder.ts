@@ -1,4 +1,5 @@
-import { eq, and, or, desc, asc, sql, SQL } from 'drizzle-orm';
+import { eq, and, or, desc, asc, sql } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
 import type { DbClient } from '@/db/client';
 import { posts, postFieldValues, customFields } from '@/db/schema';
 import type { SortConfig } from '@/lib/validations/search';
@@ -39,7 +40,7 @@ export class QueryBuilder {
   /**
    * Execute search query for posts
    */
-  async searchPosts(): Promise<QueryResult<any>> {
+  async searchPosts(): Promise<QueryResult<Record<string, unknown>>> {
     const conditions: SQL<unknown>[] = [
       eq(posts.organizationId, this.options.organizationId),
     ];
@@ -71,7 +72,7 @@ export class QueryBuilder {
         // Add cursor condition based on sort
         const sortConfig = this.options.sorts?.[0];
         if (sortConfig) {
-          const sortColumn = (posts as any)[sortConfig.property];
+          const sortColumn = (posts as Record<string, SQL>)[sortConfig.property];
           if (sortColumn) {
             if (sortConfig.direction === 'desc') {
               conditions.push(
@@ -127,7 +128,7 @@ export class QueryBuilder {
       nextCursor = this.encodeCursor({
         entityType: 'posts',
         lastId: lastItem.id,
-        sortValue: sortConfig ? (lastItem as any)[sortConfig.property] : undefined,
+        sortValue: sortConfig ? (lastItem as Record<string, unknown>)[sortConfig.property] as string | number | undefined : undefined,
         sortProperty: sortConfig?.property,
       });
     }
@@ -172,7 +173,7 @@ export class QueryBuilder {
         continue;
       }
 
-      const column = (posts as any)[prop];
+      const column = (posts as Record<string, SQL>)[prop];
       if (column) {
         selectFields[prop] = column;
       }
@@ -195,7 +196,7 @@ export class QueryBuilder {
     }
 
     return this.options.sorts.map(sort => {
-      const column = (posts as any)[sort.property];
+      const column = (posts as Record<string, SQL>)[sort.property];
       if (!column) {
         return desc(posts.createdAt); // Fallback
       }
@@ -206,12 +207,12 @@ export class QueryBuilder {
   /**
    * Enhance results with relations and custom fields
    */
-  private async enhanceResults(results: any[]): Promise<any[]> {
+  private async enhanceResults(results: Array<Record<string, unknown>>): Promise<Array<Record<string, unknown>>> {
     if (results.length === 0) return results;
 
     const enhanced = await Promise.all(
       results.map(async (item) => {
-        const enhanced: any = { ...item };
+        const enhanced: Record<string, unknown> = { ...item };
 
         // Fetch relations if properties are requested
         if (this.options.properties) {
@@ -318,7 +319,7 @@ export class QueryBuilder {
   /**
    * Encode cursor
    */
-  private encodeCursor(data: { entityType: string; lastId: string; sortValue?: any; sortProperty?: string }): string {
+  private encodeCursor(data: { entityType: string; lastId: string; sortValue?: string | number; sortProperty?: string }): string {
     const json = JSON.stringify(data);
     return Buffer.from(json).toString('base64');
   }
@@ -326,7 +327,7 @@ export class QueryBuilder {
   /**
    * Decode cursor
    */
-  private decodeCursor(cursor: string): { entityType: string; lastId: string; sortValue?: any; sortProperty?: string } | null {
+  private decodeCursor(cursor: string): { entityType: string; lastId: string; sortValue?: string | number; sortProperty?: string } | null {
     try {
       const json = Buffer.from(cursor, 'base64').toString('utf-8');
       return JSON.parse(json);

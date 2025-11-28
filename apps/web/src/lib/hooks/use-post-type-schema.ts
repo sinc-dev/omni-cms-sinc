@@ -67,7 +67,10 @@ export function usePostTypeSchema(postTypeId: string | null): UsePostTypeSchemaR
     try {
       setLoading(true);
       setError(null);
-      const response = await (api as any).getPostTypeSchema(postTypeId) as { success: boolean; data: PostTypeSchema };
+      const response = await (api as { getPostTypeSchema?: (id: string) => Promise<{ success: boolean; data: PostTypeSchema }> }).getPostTypeSchema?.(postTypeId);
+      if (!response) {
+        throw new Error('getPostTypeSchema method not available');
+      }
       if (response.success) {
         setSchema(response.data);
       } else {

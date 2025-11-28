@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -19,9 +19,16 @@ interface MediaPickerProps {
   onChange: (mediaId: string | null) => void;
 }
 
+interface MediaItem {
+  id: string;
+  filename: string;
+  url?: string;
+  urls?: { url?: string; thumbnailUrl?: string };
+}
+
 export function MediaPicker({ value, onChange }: MediaPickerProps) {
   const [open, setOpen] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState<any>(null);
+  const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const api = useApiClient();
@@ -37,30 +44,38 @@ export function MediaPicker({ value, onChange }: MediaPickerProps) {
         setError(null);
       }, 0);
       api.getMediaById(value)
-        .then((response: any) => {
-          if (response.success) {
+        .then((response: { success: boolean; data?: MediaItem }) => {
+          if (response.success && response.data) {
             setSelectedMedia(response.data);
           } else {
             const errorMsg = 'Failed to load media';
-            setError(errorMsg);
+            startTransition(() => {
+              setError(errorMsg);
+            });
             handleError(errorMsg, { title: 'Failed to Load Media' });
           }
         })
         .catch((error: unknown) => {
           const errorMsg = error instanceof Error ? error.message : 'Failed to load media';
-          setError(errorMsg);
+          startTransition(() => {
+            setError(errorMsg);
+          });
           handleError(error, { title: 'Failed to Load Media' });
         })
         .finally(() => {
-          setLoading(false);
+          startTransition(() => {
+            setLoading(false);
+          });
         });
     } else {
-      setSelectedMedia(null);
-      setError(null);
+      startTransition(() => {
+        setSelectedMedia(null);
+        setError(null);
+      });
     }
   }, [value, organization, api, handleError]);
 
-  const handleSelect = (media: any) => {
+  const handleSelect = (media: MediaItem) => {
     setSelectedMedia(media);
     onChange(media.id);
     setOpen(false);

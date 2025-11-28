@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect, useState, useRef } from 'react';
+import { ReactNode, useEffect, useState, useRef, startTransition } from 'react';
 import { useParams, useRouter, usePathname } from 'next/navigation';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { Header } from '@/components/layout/header';
@@ -39,13 +39,17 @@ export default function OrgLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Don't validate if on error pages
     if (pathname === '/unauthorized' || pathname === '/forbidden') {
-      setIsValidating(false);
+      startTransition(() => {
+        setIsValidating(false);
+      });
       return;
     }
 
     // Skip if already validated for this org
     if (hasValidatedRef.current && hasAccess) {
-      setIsValidating(false);
+      startTransition(() => {
+        setIsValidating(false);
+      });
       return;
     }
 

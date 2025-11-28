@@ -3,6 +3,8 @@
  * Helps diagnose missing bindings and environment variables
  */
 
+import type { D1Database, R2Bucket } from '@cloudflare/workers-types';
+
 export interface ConfigStatus {
   hasDatabase: boolean;
   hasR2Bucket: boolean;
@@ -12,22 +14,27 @@ export interface ConfigStatus {
   warnings: string[];
 }
 
+interface CloudflareEnv {
+  DB?: D1Database;
+  R2_BUCKET?: R2Bucket;
+}
+
 /**
  * Checks if required configuration is available
  * This is safe to call even if bindings aren't configured
  */
-export function checkConfiguration(env?: any): ConfigStatus {
+export function checkConfiguration(env?: CloudflareEnv): ConfigStatus {
   const errors: string[] = [];
   const warnings: string[] = [];
 
   // Check database binding
-  const hasDatabase = !!(env?.DB || (globalThis as any).DB);
+  const hasDatabase = !!(env?.DB || (globalThis as { DB?: D1Database }).DB);
   if (!hasDatabase) {
     errors.push('D1 database binding (DB) is not configured');
   }
 
   // Check R2 bucket binding
-  const hasR2Bucket = !!(env?.R2_BUCKET || (globalThis as any).R2_BUCKET);
+  const hasR2Bucket = !!(env?.R2_BUCKET || (globalThis as { R2_BUCKET?: R2Bucket }).R2_BUCKET);
   if (!hasR2Bucket) {
     warnings.push('R2 bucket binding (R2_BUCKET) is not configured');
   }

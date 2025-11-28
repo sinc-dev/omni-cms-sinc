@@ -11,11 +11,11 @@
  * - Provides clear error messages
  */
 
-/* eslint-disable @typescript-eslint/no-require-imports */
+ 
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-/* eslint-enable @typescript-eslint/no-require-imports */
+ 
 
 // Helper function to format bytes
 function formatBytes(bytes) {

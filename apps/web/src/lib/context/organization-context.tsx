@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback, startTransition } from 'react';
 import { useParams, usePathname } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
 import { ApiError } from '@/lib/api-client/errors';
@@ -46,13 +46,17 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
 
     // Skip if already fetched (unless forced refresh)
     if (hasFetchedRef.current && !force) {
-      setIsLoading(false);
+      startTransition(() => {
+        setIsLoading(false);
+      });
       return;
     }
 
     // Skip if on error pages
     if (pathname === '/unauthorized' || pathname === '/forbidden' || pathname === '/sign-in' || pathname === '/sign-up') {
-      setIsLoading(false);
+      startTransition(() => {
+        setIsLoading(false);
+      });
       return;
     }
 
@@ -68,7 +72,9 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     isFetchingRef.current = true;
 
     try {
-      setIsLoading(true);
+      startTransition(() => {
+        setIsLoading(true);
+      });
       const response = await apiClient.getOrganizations() as {
         success: boolean;
         data: Organization[];
@@ -102,7 +108,9 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       }
     } finally {
       if (!abortController.signal.aborted) {
-        setIsLoading(false);
+        startTransition(() => {
+          setIsLoading(false);
+        });
       }
       isFetchingRef.current = false;
     }
@@ -133,15 +141,21 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     if (orgIdFromUrl && organizations.length > 0) {
       const org = organizations.find((o) => o.id === orgIdFromUrl);
       if (org && org.id !== organization?.id) {
-        setOrganizationState(org);
+        startTransition(() => {
+          setOrganizationState(org);
+        });
         localStorage.setItem(STORAGE_KEY, org.id);
       } else if (!org) {
         // URL has orgId but user doesn't have access - will be handled by layout
-        setOrganizationState(null);
+        startTransition(() => {
+          setOrganizationState(null);
+        });
       }
     } else if (!orgIdFromUrl && pathname?.startsWith('/select-organization')) {
       // On select-organization page, clear org
-      setOrganizationState(null);
+      startTransition(() => {
+        setOrganizationState(null);
+      });
     }
   }, [orgIdFromUrl, organizations, organization, pathname]);
 
@@ -152,7 +166,9 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       if (storedOrgId) {
         const org = organizations.find((o) => o.id === storedOrgId);
         if (org) {
-          setOrganizationState(org);
+          startTransition(() => {
+            setOrganizationState(org);
+          });
         }
       }
     }

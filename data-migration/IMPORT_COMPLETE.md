@@ -29,6 +29,12 @@
 - ✅ Creates custom field definitions
 - ✅ Saves mapping for later use
 
+### 5.5. **Attach Custom Fields to Post Types** (`scripts/attach-custom-fields-to-post-types.js`) ✅ NEW
+- ✅ Analyzes which fields are used by which post types
+- ✅ Attaches custom fields to post types via API
+- ✅ Handles duplicates gracefully (idempotent)
+- ✅ Provides detailed progress reporting
+
 ### 6. **Import Media** (`scripts/import-media.js`)
 - ✅ Downloads media files from WordPress URLs
 - ✅ Uploads to R2 via Omni-CMS API
@@ -62,9 +68,11 @@
 2. **Taxonomies** - Create taxonomy definitions
 3. **Taxonomy Terms** - Create terms with hierarchies
 4. **Custom Fields** - Create custom field definitions
-5. **Media** - Upload media files to R2
-6. **Posts** - Import all posts with relationships
-7. **Relationships** - Create post-to-post relationships
+5. **Attach Custom Fields to Post Types** - Link fields to post types ✅ NEW
+6. **Media** - Upload media files to R2
+7. **Posts** - Import all posts with relationships
+8. **Relationships** - Create post-to-post relationships
+9. **Update Media References** - Replace placeholders with real media IDs
 
 ## Usage
 

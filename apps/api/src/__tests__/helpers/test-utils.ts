@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 import type { MockHonoContext } from './mock-hono-context';
 import type { SuccessResponse, PaginatedResponse, ErrorResponse } from '../../lib/api/hono-response';
 

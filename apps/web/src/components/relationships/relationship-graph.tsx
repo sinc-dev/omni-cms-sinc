@@ -40,7 +40,23 @@ interface RelationshipGraphProps {
   posts: Post[];
 }
 
-export function RelationshipGraph({ relationships, posts }: RelationshipGraphProps) {
+interface GraphNode {
+  id: string;
+  name: string;
+  group: number;
+  postType: string;
+  x?: number;
+  y?: number;
+}
+
+interface GraphLink {
+  source: string;
+  target: string;
+  value: number;
+  relationshipType: string;
+}
+
+export function RelationshipGraph({ relationships }: RelationshipGraphProps) {
   const graphData = useMemo(() => {
     // Create a map of all unique posts involved in relationships
     const nodeMap = new Map<string, { id: string; name: string; group: number; postType: string }>();
@@ -98,8 +114,8 @@ export function RelationshipGraph({ relationships, posts }: RelationshipGraphPro
         <div className="h-[600px] w-full">
           <ForceGraph2D
             graphData={graphData}
-            nodeLabel={(node: any) => `${node.name}\n(${node.postType})`}
-            nodeColor={(node: any) => {
+            nodeLabel={(node: GraphNode) => `${node.name}\n(${node.postType})`}
+            nodeColor={(node: GraphNode) => {
               const colors = [
                 '#3b82f6', // blue
                 '#10b981', // green
@@ -109,12 +125,12 @@ export function RelationshipGraph({ relationships, posts }: RelationshipGraphPro
               ];
               return colors[node.group - 1] || '#6b7280';
             }}
-            linkLabel={(link: any) => link.relationshipType}
+            linkLabel={(link: GraphLink) => link.relationshipType}
             linkColor={() => '#94a3b8'}
             linkWidth={2}
-            nodeVal={(node: any) => 5}
+            nodeVal={(node: GraphNode) => 5}
             nodeCanvasObjectMode={() => 'after'}
-            nodeCanvasObject={(node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
+            nodeCanvasObject={(node: GraphNode, ctx: CanvasRenderingContext2D, globalScale: number) => {
               const label = node.name;
               const fontSize = 12 / globalScale;
               ctx.font = `${fontSize}px Sans-Serif`;
@@ -123,10 +139,10 @@ export function RelationshipGraph({ relationships, posts }: RelationshipGraphPro
               ctx.fillStyle = '#1f2937';
               ctx.fillText(label, node.x || 0, (node.y || 0) + 8);
             }}
-            onNodeClick={(node: any) => {
+            onNodeClick={(node: GraphNode) => {
               window.open(`/admin/posts/${node.id}`, '_blank');
             }}
-            onLinkClick={(link: any) => {
+            onLinkClick={(link: GraphLink) => {
               console.log('Link clicked:', link);
             }}
             cooldownTicks={100}

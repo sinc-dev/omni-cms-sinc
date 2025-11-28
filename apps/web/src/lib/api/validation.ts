@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { Errors } from './response';
-import { eq, and, like, desc, gte, lte, asc, SQL, sql } from 'drizzle-orm';
+import { like, desc, asc } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
 
 /**
  * Validates request body against a Zod schema
@@ -59,8 +60,8 @@ export function parseDateParam(value: string | null): Date | null {
 /**
  * Builds a search condition for a text field using LIKE
  */
-export function buildSearchCondition<T>(
-  field: any,
+export function buildSearchCondition<T extends SQL>(
+  field: T,
   search: string | null | undefined
 ): T[] {
   if (!search) return [];
@@ -71,15 +72,15 @@ export function buildSearchCondition<T>(
  * Parses sort parameter into drizzle orderBy array
  * Format: "field_asc" or "field_desc" (default: "createdAt_desc")
  */
-export function parseSortParam<T>(
+export function parseSortParam(
   sort: string | null | undefined,
   fields: {
-    createdAt: any;
-    [key: string]: any;
+    createdAt: SQL;
+    [key: string]: SQL;
   },
   defaultField: keyof typeof fields = 'createdAt',
   defaultOrder: 'asc' | 'desc' = 'desc'
-): any[] {
+): SQL[] {
   if (!sort) {
     return defaultOrder === 'desc'
       ? [desc(fields[defaultField])]

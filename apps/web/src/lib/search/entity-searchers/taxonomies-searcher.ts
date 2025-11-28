@@ -1,12 +1,20 @@
 import { eq, and, or, desc, asc, sql, like } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
 import type { DbClient } from '@/db/client';
 import { taxonomies, taxonomyTerms } from '@/db/schema/taxonomies';
 import type { FilterGroup, SortConfig } from '@/lib/validations/search';
 import { FilterBuilder } from '../filter-builder';
 import { createCursor, decodeCursor } from '../cursor-pagination';
 
+export interface TaxonomyItem {
+  id: string;
+  name: string;
+  slug: string;
+  [key: string]: unknown;
+}
+
 export interface TaxonomiesSearchResult {
-  data: any[];
+  data: TaxonomyItem[];
   nextCursor?: string;
   hasMore: boolean;
 }
@@ -31,7 +39,7 @@ export class TaxonomiesSearcher {
     limit: number;
     after?: string;
   }): Promise<TaxonomiesSearchResult> {
-    const conditions: any[] = [
+    const conditions: SQL[] = [
       eq(taxonomies.organizationId, this.organizationId),
     ];
 
@@ -60,7 +68,7 @@ export class TaxonomiesSearcher {
       if (cursorData && cursorData.entityType === 'taxonomies') {
         const sortConfig = options.sorts?.[0];
         if (sortConfig) {
-          const sortColumn = (taxonomies as any)[sortConfig.property];
+          const sortColumn = (taxonomies as Record<string, SQL>)[sortConfig.property];
           if (sortColumn) {
             if (sortConfig.direction === 'desc') {
               conditions.push(
@@ -93,7 +101,7 @@ export class TaxonomiesSearcher {
     // Build order by
     const orderBy = options.sorts && options.sorts.length > 0
       ? options.sorts.map(sort => {
-          const column = (taxonomies as any)[sort.property];
+          const column = (taxonomies as Record<string, SQL>)[sort.property];
           if (!column) return desc(taxonomies.createdAt);
           return sort.direction === 'asc' ? asc(column) : desc(column);
         })
@@ -104,7 +112,7 @@ export class TaxonomiesSearcher {
     if (options.properties && options.properties.length > 0) {
       for (const prop of options.properties) {
         if (prop.includes('.')) continue;
-        const column = (taxonomies as any)[prop];
+        const column = (taxonomies as Record<string, SQL>)[prop];
         if (column) {
           selectFields[prop] = column;
         }
@@ -142,7 +150,7 @@ export class TaxonomiesSearcher {
       nextCursor = createCursor(
         'taxonomies',
         lastItem.id,
-        sortConfig ? (lastItem as any)[sortConfig.property] : undefined,
+        sortConfig ? (lastItem as Record<string, unknown>)[sortConfig.property] as string | number | undefined : undefined,
         sortConfig?.property
       );
     }

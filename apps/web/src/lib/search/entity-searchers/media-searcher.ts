@@ -1,12 +1,22 @@
 import { eq, and, or, desc, asc, sql, like } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
 import type { DbClient } from '@/db/client';
 import { media } from '@/db/schema/media';
 import type { FilterGroup, SortConfig } from '@/lib/validations/search';
 import { FilterBuilder } from '../filter-builder';
 import { createCursor, decodeCursor } from '../cursor-pagination';
 
+export interface MediaItem {
+  id: string;
+  filename: string;
+  mimeType: string;
+  fileSize: number;
+  url?: string;
+  [key: string]: unknown;
+}
+
 export interface MediaSearchResult {
-  data: any[];
+  data: MediaItem[];
   nextCursor?: string;
   hasMore: boolean;
 }
@@ -31,7 +41,7 @@ export class MediaSearcher {
     limit: number;
     after?: string;
   }): Promise<MediaSearchResult> {
-    const conditions: any[] = [
+    const conditions: SQL[] = [
       eq(media.organizationId, this.organizationId),
     ];
 
@@ -61,7 +71,7 @@ export class MediaSearcher {
       if (cursorData && cursorData.entityType === 'media') {
         const sortConfig = options.sorts?.[0];
         if (sortConfig) {
-          const sortColumn = (media as any)[sortConfig.property];
+          const sortColumn = (media as Record<string, SQL>)[sortConfig.property];
           if (sortColumn) {
             if (sortConfig.direction === 'desc') {
               conditions.push(
@@ -94,18 +104,18 @@ export class MediaSearcher {
     // Build order by
     const orderBy = options.sorts && options.sorts.length > 0
       ? options.sorts.map(sort => {
-          const column = (media as any)[sort.property];
+          const column = (media as Record<string, SQL>)[sort.property];
           if (!column) return desc(media.createdAt);
           return sort.direction === 'asc' ? asc(column) : desc(column);
         })
       : [desc(media.createdAt)];
 
     // Select properties
-    const selectFields: Record<string, any> = {};
+    const selectFields: Record<string, SQL> = {};
     if (options.properties && options.properties.length > 0) {
       for (const prop of options.properties) {
         if (prop.includes('.')) continue;
-        const column = (media as any)[prop];
+        const column = (media as Record<string, SQL>)[prop];
         if (column) {
           selectFields[prop] = column;
         }
@@ -147,7 +157,7 @@ export class MediaSearcher {
       nextCursor = createCursor(
         'media',
         lastItem.id,
-        sortConfig ? (lastItem as any)[sortConfig.property] : undefined,
+        sortConfig ? (lastItem as Record<string, unknown>)[sortConfig.property] as string | number | undefined : undefined,
         sortConfig?.property
       );
     }

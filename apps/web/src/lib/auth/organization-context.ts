@@ -72,10 +72,16 @@ export async function userHasAccessToOrganization(
  * @param user - The user
  * @returns Array of organizations with user's role
  */
+interface Role {
+  id: string;
+  name: string;
+  permissions: string;
+}
+
 export async function getUserOrganizations(
   db: DbClient,
   user: User
-): Promise<Array<{ organization: Organization; role: any }>> {
+): Promise<Array<{ organization: Organization; role: Role }>> {
   // Super admins have access to all organizations
   if (isSuperAdmin(user)) {
     const allOrgs = await db.query.organizations.findMany();

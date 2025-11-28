@@ -26,7 +26,7 @@ export const posts = sqliteTable(
     excerpt: text('excerpt'),
     status: text('status').notNull().default('draft'), // draft, published, archived
     workflowStatus: text('workflow_status').default('draft'), // draft, pending_review, approved, rejected
-    parentId: text('parent_id').references((): any => posts.id),
+    parentId: text('parent_id').references(() => posts.id),
     featuredImageId: text('featured_image_id'), // Will reference media table
     publishedAt: integer('published_at', { mode: 'timestamp' }),
     scheduledPublishAt: integer('scheduled_publish_at', { mode: 'timestamp' }), // For scheduled publishing

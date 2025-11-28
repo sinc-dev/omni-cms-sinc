@@ -19,16 +19,30 @@ if (!fs.existsSync(path.join(projectRoot, '.next'))) {
   process.exit(1);
 }
 
-// Verify opennext.config.ts exists, create if missing
-const configPath = path.join(projectRoot, 'opennext.config.ts');
+// Verify open-next.config.ts exists, create if missing (CLI expects hyphenated name)
+const configPath = path.join(projectRoot, 'open-next.config.ts');
 if (!fs.existsSync(configPath)) {
-  console.warn('⚠ opennext.config.ts not found, creating default config...');
+  console.warn('⚠ open-next.config.ts not found, creating default config...');
   const defaultConfig = `import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 
 export default defineCloudflareConfig();
 `;
   fs.writeFileSync(configPath, defaultConfig, 'utf8');
-  console.log('✓ Created opennext.config.ts');
+  console.log('✓ Created open-next.config.ts');
+} else {
+  console.log('✓ Found open-next.config.ts');
+}
+
+// Verify config file is readable
+try {
+  const configContent = fs.readFileSync(configPath, 'utf8');
+  if (!configContent.trim()) {
+    throw new Error('Config file is empty');
+  }
+  console.log('✓ Config file is valid');
+} catch (error) {
+  console.error(`✗ Error reading config file: ${error.message}`);
+  process.exit(1);
 }
 
 console.log('⚡ Running OpenNext Cloudflare adapter...');

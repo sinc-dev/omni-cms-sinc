@@ -35,7 +35,7 @@ export function withAuth(
       // Get D1 database from Cloudflare binding
       // Note: This needs to be adapted based on how Cloudflare bindings work in Next.js
       // For now, we'll assume it's available in the request context
-      const db = (request as any).db as DbClient;
+      const db = (request as Request & { db?: DbClient }).db as DbClient;
       
       if (!db) {
         return Errors.serverError('Database not configured');

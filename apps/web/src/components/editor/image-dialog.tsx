@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -37,19 +37,23 @@ export function ImageDialog({ open, onOpenChange, onInsert }: ImageDialogProps) 
   // Reset form when dialog opens/closes
   useEffect(() => {
     if (open) {
-      setUrl('');
-      setAltText('');
-      setSelectedMediaId(null);
-      setUrlError(null);
+      startTransition(() => {
+        setUrl('');
+        setAltText('');
+        setSelectedMediaId(null);
+        setUrlError(null);
+      });
     }
   }, [open]);
 
   // Load media URL when media ID is selected
   useEffect(() => {
     if (selectedMediaId && organization) {
-      setLoadingMedia(true);
+      startTransition(() => {
+        setLoadingMedia(true);
+      });
       api.getMediaById(selectedMediaId)
-        .then((response: any) => {
+        .then((response: { success: boolean; data?: { urls?: { url?: string; thumbnailUrl?: string }; url?: string } }) => {
           if (response.success && response.data) {
             // Use the media URL - check for various possible URL fields
             const mediaUrl = 

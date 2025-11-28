@@ -12,11 +12,11 @@ import { ComponentType } from 'react';
  * Creates a dynamically imported icon component
  * This reduces bundle size by only loading icons when needed
  */
-export function createIconLoader(iconName: string): ComponentType<any> {
+export function createIconLoader(iconName: string): ComponentType<{ className?: string; size?: number }> {
   return dynamic(
     () =>
       import('lucide-react').then((mod) => {
-        const Icon = (mod as any)[iconName];
+        const Icon = (mod as Record<string, ComponentType<{ className?: string; size?: number }>>)[iconName];
         return Icon || (() => null);
       }),
     { ssr: false }

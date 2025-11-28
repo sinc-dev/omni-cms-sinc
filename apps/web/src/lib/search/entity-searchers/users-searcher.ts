@@ -1,12 +1,20 @@
 import { eq, and, or, desc, asc, sql, like } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
 import type { DbClient } from '@/db/client';
 import { users } from '@/db/schema/users';
 import type { FilterGroup, SortConfig } from '@/lib/validations/search';
 import { FilterBuilder } from '../filter-builder';
 import { createCursor, decodeCursor } from '../cursor-pagination';
 
+export interface UserItem {
+  id: string;
+  email: string;
+  name: string;
+  [key: string]: unknown;
+}
+
 export interface UsersSearchResult {
-  data: any[];
+  data: UserItem[];
   nextCursor?: string;
   hasMore: boolean;
 }
@@ -31,7 +39,7 @@ export class UsersSearcher {
     limit: number;
     after?: string;
   }): Promise<UsersSearchResult> {
-    const conditions: any[] = [];
+    const conditions: SQL[] = [];
 
     // Note: Users are global, not organization-scoped
     // But we can filter by organization membership if needed
@@ -61,7 +69,7 @@ export class UsersSearcher {
       if (cursorData && cursorData.entityType === 'users') {
         const sortConfig = options.sorts?.[0];
         if (sortConfig) {
-          const sortColumn = (users as any)[sortConfig.property];
+          const sortColumn = (users as Record<string, SQL>)[sortConfig.property];
           if (sortColumn) {
             if (sortConfig.direction === 'desc') {
               conditions.push(
@@ -94,7 +102,7 @@ export class UsersSearcher {
     // Build order by
     const orderBy = options.sorts && options.sorts.length > 0
       ? options.sorts.map(sort => {
-          const column = (users as any)[sort.property];
+          const column = (users as Record<string, SQL>)[sort.property];
           if (!column) return desc(users.createdAt);
           return sort.direction === 'asc' ? asc(column) : desc(column);
         })
@@ -105,7 +113,7 @@ export class UsersSearcher {
     if (options.properties && options.properties.length > 0) {
       for (const prop of options.properties) {
         if (prop.includes('.')) continue;
-        const column = (users as any)[prop];
+        const column = (users as Record<string, SQL>)[prop];
         if (column) {
           selectFields[prop] = column;
         }
@@ -145,7 +153,7 @@ export class UsersSearcher {
       nextCursor = createCursor(
         'users',
         lastItem.id,
-        sortConfig ? (lastItem as any)[sortConfig.property] : undefined,
+        sortConfig ? (lastItem as Record<string, unknown>)[sortConfig.property] as string | number | undefined : undefined,
         sortConfig?.property
       );
     }

@@ -36,6 +36,7 @@ export function usePresenceManager({
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
   const pollRef = useRef<NodeJS.Timeout | null>(null);
   const retryCountRef = useRef<number>(0);
+  const updatePresenceWithRetryRef = useRef<((postId: string, retries?: number) => Promise<void>) | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
 
   const updateConnectionStatus = useCallback((status: ConnectionStatus) => {
@@ -61,10 +62,8 @@ export function usePresenceManager({
         // Exponential backoff: wait before retrying
         const backoffDelay = Math.min(1000 * Math.pow(2, retryCountRef.current - retries), 30000);
         setTimeout(() => {
-          if (retryCountRef.current < retries * 2) {
-            // Use the ref to avoid closure issues
-            const currentRetries = retryCountRef.current;
-            updatePresenceWithRetry(postId, retries).catch(() => {
+          if (retryCountRef.current < retries * 2 && updatePresenceWithRetryRef.current) {
+            updatePresenceWithRetryRef.current(postId, retries).catch(() => {
               // Error already handled
             });
           }
@@ -74,6 +73,9 @@ export function usePresenceManager({
       }
     }
   }, [api, connectionStatus, updateConnectionStatus]);
+
+  // Store the function in a ref so it can be called recursively
+  updatePresenceWithRetryRef.current = updatePresenceWithRetry;
 
   const pollActiveUsers = useCallback(async () => {
     if (!api.getPresence || !postId) return;
