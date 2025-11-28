@@ -55,21 +55,37 @@ logMemoryUsage('Initial (after Next.js build)');
 // Step 1: Create symlinks (for @cloudflare/next-on-pages path resolution)
 // When Root Directory is /apps/web, vercel build looks for apps/web/apps/web/
 // We create symlinks to prevent path duplication
+// IMPORTANT: These symlinks are cleaned up after build to prevent recursive copying issues
 try {
+  // Check if symlinks already exist and remove them first
+  // This prevents issues if the script is run multiple times
+  const checkAndRemove = (path) => {
+    if (fs.existsSync(path)) {
+      const stat = fs.lstatSync(path); // Use lstat to detect symlinks
+      if (stat.isSymbolicLink()) {
+        fs.unlinkSync(path);
+        console.log(`✓ Removed existing symlink: ${path}`);
+      } else {
+        // If it's not a symlink, it's a real directory - don't remove it
+        console.warn(`⚠ ${path} exists but is not a symlink - skipping`);
+        return false;
+      }
+    }
+    return true;
+  };
+  
   // Create 'web' symlink pointing to current directory (for backward compatibility)
-  if (fs.existsSync('web')) {
-    fs.unlinkSync('web');
+  if (checkAndRemove('web')) {
+    fs.symlinkSync('.', 'web', 'dir');
+    console.log('✓ Created symlink: web -> .');
   }
-  fs.symlinkSync('.', 'web', 'dir');
-  console.log('✓ Created symlink: web -> .');
   
   // Create 'apps' symlink pointing to parent directory
   // This allows apps/web/apps/web to resolve to apps/web
-  if (fs.existsSync('apps')) {
-    fs.unlinkSync('apps');
+  if (checkAndRemove('apps')) {
+    fs.symlinkSync('..', 'apps', 'dir');
+    console.log('✓ Created symlink: apps -> ..');
   }
-  fs.symlinkSync('..', 'apps', 'dir');
-  console.log('✓ Created symlink: apps -> ..');
 } catch (error) {
   console.warn('⚠ Symlink creation failed (may already exist):', error.message);
 }
@@ -172,35 +188,82 @@ try {
   
   // Log memory after vercel build
   logMemoryUsage('After @cloudflare/next-on-pages (vercel build)');
+  
+  // Verify build output doesn't have recursive paths
+  const outputDir = path.join(projectRoot, '.vercel', 'output', 'static');
+  if (fs.existsSync(outputDir)) {
+    console.log('✓ Build output verified at:', outputDir);
+    // Check for any suspicious recursive paths
+    const checkRecursivePaths = (dir, depth = 0, maxDepth = 5) => {
+      if (depth > maxDepth) {
+        console.warn(`⚠ Deep directory structure detected at depth ${depth} - possible recursion?`);
+        return;
+      }
+      try {
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          if (entry.isDirectory()) {
+            // Check for suspicious patterns like apps/web/apps/web
+            if (entry.name === 'apps' || entry.name === 'web') {
+              const fullPath = path.join(dir, entry.name);
+              const stat = fs.lstatSync(fullPath);
+              if (stat.isSymbolicLink()) {
+                console.warn(`⚠ Symlink found in output: ${fullPath} - this might cause issues`);
+              }
+            }
+            checkRecursivePaths(path.join(dir, entry.name), depth + 1, maxDepth);
+          }
+        }
+      } catch (err) {
+        // Ignore permission errors
+      }
+    };
+    checkRecursivePaths(outputDir);
+  }
+  
   console.log('✓ Cloudflare Pages build complete');
 } catch (error) {
   console.error('✗ Build failed:', error.message);
-  // Clean up symlinks even on error
+  // Clean up symlinks even on error (CRITICAL to prevent leaving symlinks behind)
   try {
-    if (fs.existsSync('web')) {
-      fs.unlinkSync('web');
-      console.log('✓ Cleaned up symlink: web');
-    }
-    if (fs.existsSync('apps')) {
-      fs.unlinkSync('apps');
-      console.log('✓ Cleaned up symlink: apps');
-    }
+    const removeSymlink = (path) => {
+      if (fs.existsSync(path)) {
+        const stat = fs.lstatSync(path);
+        if (stat.isSymbolicLink()) {
+          fs.unlinkSync(path);
+          console.log(`✓ Cleaned up symlink: ${path}`);
+        }
+      }
+    };
+    removeSymlink('web');
+    removeSymlink('apps');
   } catch {
     // Ignore cleanup errors
   }
   process.exit(1);
 }
 
-// Step 4: Clean up symlinks
+// Step 4: Clean up symlinks (CRITICAL to prevent recursive copying)
+// These symlinks are only needed during the build process
+// They must be removed afterward to prevent vercel build from following them recursively
 try {
-  if (fs.existsSync('web')) {
-    fs.unlinkSync('web');
-    console.log('✓ Cleaned up symlink: web');
-  }
-  if (fs.existsSync('apps')) {
-    fs.unlinkSync('apps');
-    console.log('✓ Cleaned up symlink: apps');
-  }
+  const removeSymlink = (path) => {
+    if (fs.existsSync(path)) {
+      const stat = fs.lstatSync(path); // Use lstat to detect symlinks
+      if (stat.isSymbolicLink()) {
+        fs.unlinkSync(path);
+        console.log(`✓ Cleaned up symlink: ${path}`);
+        return true;
+      } else {
+        console.warn(`⚠ ${path} exists but is not a symlink - leaving it alone`);
+        return false;
+      }
+    }
+    return false;
+  };
+  
+  removeSymlink('web');
+  removeSymlink('apps');
 } catch (error) {
   console.warn('⚠ Failed to remove symlink:', error.message);
 }

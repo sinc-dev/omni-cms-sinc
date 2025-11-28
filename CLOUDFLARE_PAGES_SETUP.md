@@ -173,6 +173,23 @@ After fixing the deploy command and configuring bindings:
 - **Build output directory**: `.next` (auto-detected)
 - **Deploy command**: **REMOVE THIS** (leave empty)
 
+## Testing Builds Locally
+
+**Before deploying, always test the build locally:**
+
+```bash
+cd apps/web
+pnpm run build:simulate
+```
+
+This simulates the Cloudflare Pages build environment and catches errors early. See `apps/web/LOCAL_BUILD_TEST.md` for details.
+
+**Why test locally?**
+- Catch build errors before deploying
+- Verify memory usage is acceptable
+- Check for recursive copying issues (symlinks)
+- Save time and build minutes
+
 ## Notes
 
 - The `@cloudflare/next-on-pages` adapter has been added to the build process

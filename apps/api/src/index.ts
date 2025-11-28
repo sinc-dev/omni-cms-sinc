@@ -52,6 +52,7 @@ import adminPostRelationships from './routes/admin/post-relationships';
 import adminPostTypeFields from './routes/admin/post-type-fields';
 import adminSchemaDatabase from './routes/admin/schema-database';
 import adminProfile from './routes/admin/profile';
+import adminDiagnostics from './routes/admin/diagnostics';
 import publicPosts from './routes/public/posts';
 import publicPostDetail from './routes/public/post-detail';
 import publicPostShare from './routes/public/post-share';
@@ -163,6 +164,7 @@ app.route('/api/admin/v1/organizations', adminAnalytics);
 app.route('/api/admin/v1/organizations', adminPostRelationships);
 app.route('/api/admin/v1/organizations', adminPostTypeFields);
 app.route('/api/admin/v1/organizations', adminSchemaDatabase);
+app.route('/api/admin/v1/organizations', adminDiagnostics);
 app.route('/api/admin/v1', adminGraphQL);
 app.route('/api/admin/v1', adminRoles);
 app.route('/api/admin/v1', adminProfile);
@@ -188,7 +190,25 @@ app.notFound((c) => {
 // Error handler
 app.onError((err, c) => {
   console.error('Error:', err);
-  return c.json({ error: 'Internal Server Error' }, 500);
+  console.error('Error stack:', err.stack);
+  console.error('Request path:', c.req.path);
+  console.error('Request method:', c.req.method);
+  
+  // In development, return more error details
+  // Check for environment variable safely
+  const env = c.env as unknown as Record<string, string | undefined>;
+  const isDevelopment = env.ENVIRONMENT === 'development' || !env.ENVIRONMENT;
+  const errorMessage = isDevelopment 
+    ? err.message || 'Internal Server Error'
+    : 'Internal Server Error';
+  
+  return c.json({ 
+    error: errorMessage,
+    ...(isDevelopment && { 
+      stack: err.stack,
+      details: err instanceof Error ? err.toString() : String(err)
+    })
+  }, 500);
 });
 
 export default app;

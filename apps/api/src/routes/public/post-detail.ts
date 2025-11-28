@@ -13,113 +13,125 @@ app.get(
   '/:orgSlug/posts/:slug',
   publicMiddleware({ trackAnalytics: true }),
   async (c) => {
-    const context = getPublicContext(c);
-    const { db } = context;
-    const orgSlug = c.req.param('orgSlug');
-    const postSlug = c.req.param('slug');
-    const fieldsParam = c.req.query('fields') ?? undefined;
+    try {
+      const context = getPublicContext(c);
+      const { db } = context;
+      const orgSlug = c.req.param('orgSlug');
+      const postSlug = c.req.param('slug');
+      const fieldsParam = c.req.query('fields') ?? undefined;
 
-    if (!orgSlug || !postSlug) {
-      return c.json(Errors.badRequest('Organization slug and post slug required'), 400);
-    }
+      if (!orgSlug || !postSlug) {
+        return c.json(Errors.badRequest('Organization slug and post slug required'), 400);
+      }
 
-    // Parse fields parameter
-    const requestedFields = fieldsParam
-      ? fieldsParam.split(',').map(f => f.trim()).filter(Boolean)
-      : undefined;
+      // Parse fields parameter
+      const requestedFields = fieldsParam
+        ? fieldsParam.split(',').map(f => f.trim()).filter(Boolean)
+        : undefined;
 
-    // Categorize requested fields
-    const standardFields = new Set<string>();
-    const authorFields = new Set<string>();
-    const postTypeFieldsSet = new Set<string>();
-    const customFieldSlugs = new Set<string>();
-    let includeTaxonomies = false;
-    let includeFeaturedImage = false;
-    let includeRelatedPosts = false;
+      // Categorize requested fields
+      const standardFields = new Set<string>();
+      const authorFields = new Set<string>();
+      const postTypeFieldsSet = new Set<string>();
+      const customFieldSlugs = new Set<string>();
+      let includeTaxonomies = false;
+      let includeFeaturedImage = false;
+      let includeRelatedPosts = false;
 
-    if (requestedFields) {
-      for (const field of requestedFields) {
-        if (field.startsWith('customFields.')) {
-          const slug = field.replace('customFields.', '');
-          customFieldSlugs.add(slug);
-        } else if (field.startsWith('author.')) {
-          const subField = field.replace('author.', '');
-          authorFields.add(subField);
-        } else if (field.startsWith('postType.')) {
-          const subField = field.replace('postType.', '');
-          postTypeFieldsSet.add(subField);
-        } else if (field === 'taxonomies') {
-          includeTaxonomies = true;
-        } else if (field === 'featuredImage') {
-          includeFeaturedImage = true;
-        } else if (field === 'relatedPosts') {
-          includeRelatedPosts = true;
-        } else {
-          standardFields.add(field);
+      if (requestedFields) {
+        for (const field of requestedFields) {
+          if (field.startsWith('customFields.')) {
+            const slug = field.replace('customFields.', '');
+            customFieldSlugs.add(slug);
+          } else if (field.startsWith('author.')) {
+            const subField = field.replace('author.', '');
+            authorFields.add(subField);
+          } else if (field.startsWith('postType.')) {
+            const subField = field.replace('postType.', '');
+            postTypeFieldsSet.add(subField);
+          } else if (field === 'taxonomies') {
+            includeTaxonomies = true;
+          } else if (field === 'featuredImage') {
+            includeFeaturedImage = true;
+          } else if (field === 'relatedPosts') {
+            includeRelatedPosts = true;
+          } else {
+            standardFields.add(field);
+          }
         }
       }
-    }
 
-    // Find organization by slug
-    const organization = await db.query.organizations.findFirst({
-      where: (o, { eq }) => eq(o.slug, orgSlug),
-    });
+      // Find organization by slug
+      const organization = await db.query.organizations.findFirst({
+        where: (o, { eq }) => eq(o.slug, orgSlug),
+      });
 
-    if (!organization) {
-      return c.json(Errors.notFound('Organization'), 404);
-    }
+      if (!organization) {
+        return c.json(Errors.notFound('Organization'), 404);
+      }
 
-    // Find post by slug and organization, must be published
-    const post = await db.query.posts.findFirst({
-      where: (p, { eq, and: andFn }) => andFn(
-        eq(p.organizationId, organization.id),
-        eq(p.slug, postSlug),
-        eq(p.status, 'published')
-      ),
-      with: {
-        author: {
-          columns: {
-            id: true,
-            name: true,
-            email: true,
-            avatarUrl: true,
+      // Find post by slug and organization, must be published
+      const post = await db.query.posts.findFirst({
+        where: (p, { eq, and: andFn }) => andFn(
+          eq(p.organizationId, organization.id),
+          eq(p.slug, postSlug),
+          eq(p.status, 'published')
+        ),
+        with: {
+          author: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+              avatarUrl: true,
+            },
+          },
+          postType: {
+            columns: {
+              id: true,
+              name: true,
+              slug: true,
+            },
           },
         },
-        postType: {
-          columns: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
-      },
-    });
+      });
 
-    if (!post) {
-      return c.json(Errors.notFound('Post'), 404);
-    }
+      if (!post) {
+        return c.json(Errors.notFound('Post'), 404);
+      }
 
-    // Increment view count atomically (handles concurrent requests)
-    await db
-      .update(posts)
-      .set({
-        viewCount: sql`${posts.viewCount} + 1`,
-        updatedAt: new Date(),
-      })
-      .where(eq(posts.id, post.id));
+      // Validate required relations
+      if (!post.author) {
+        console.error(`[ERROR] Post ${post.id} (${post.slug}) has no author`);
+        return c.json(Errors.serverError('Post data is incomplete: missing author'), 500);
+      }
 
-    // Get custom fields attached to this post type (to filter field values)
-    const postTypeFieldsList = await db.query.postTypeFields.findMany({
-      where: (ptf, { eq }) => eq(ptf.postTypeId, post.postType.id),
-      orderBy: (ptf, { asc }) => [asc(ptf.order)],
-    });
+      if (!post.postType) {
+        console.error(`[ERROR] Post ${post.id} (${post.slug}) has no post type`);
+        return c.json(Errors.serverError('Post data is incomplete: missing post type'), 500);
+      }
 
-    if (postTypeFieldsList.length === 0) {
-      console.log(`[DEBUG] No custom fields attached to post type ${post.postType.id} (${post.postType.slug})`);
-    }
+      // Increment view count atomically (handles concurrent requests)
+      await db
+        .update(posts)
+        .set({
+          viewCount: sql`${posts.viewCount} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(posts.id, post.id));
 
-    const allowedCustomFieldIds = new Set(postTypeFieldsList.map(ptf => ptf.customFieldId));
-    const customFieldOrderMap = new Map(postTypeFieldsList.map(ptf => [ptf.customFieldId, ptf.order]));
+      // Get custom fields attached to this post type (to filter field values)
+      const postTypeFieldsList = await db.query.postTypeFields.findMany({
+        where: (ptf, { eq }) => eq(ptf.postTypeId, post.postType.id),
+        orderBy: (ptf, { asc }) => [asc(ptf.order)],
+      });
+
+      if (postTypeFieldsList.length === 0) {
+        console.log(`[DEBUG] No custom fields attached to post type ${post.postType.id} (${post.postType.slug})`);
+      }
+
+      const allowedCustomFieldIds = new Set(postTypeFieldsList.map(ptf => ptf.customFieldId));
+      const customFieldOrderMap = new Map(postTypeFieldsList.map(ptf => [ptf.customFieldId, ptf.order]));
 
     // Fetch taxonomies
     const postTaxonomiesData = await db.query.postTaxonomies.findMany({
@@ -456,15 +468,22 @@ app.get(
       }
     }
 
-    // Add related posts if requested or if no fields specified
-    if (!requestedFields || requestedFields.length === 0 || includeRelatedPosts || standardFields.size === 0) {
-      postWithRelations.relatedPosts = relatedPostsData.filter(Boolean);
-    }
+      // Add related posts if requested or if no fields specified
+      if (!requestedFields || requestedFields.length === 0 || includeRelatedPosts || standardFields.size === 0) {
+        postWithRelations.relatedPosts = relatedPostsData.filter(Boolean);
+      }
 
-    // Set caching headers (10 minutes for individual posts)
-    return c.json(successResponse(postWithRelations), 200, {
-      'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200',
-    });
+      // Set caching headers (10 minutes for individual posts)
+      return c.json(successResponse(postWithRelations), 200, {
+        'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200',
+      });
+    } catch (error) {
+      const orgSlug = c.req.param('orgSlug');
+      const postSlug = c.req.param('slug');
+      console.error(`[ERROR] Failed to fetch post ${postSlug} for organization ${orgSlug}:`, error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      return c.json(Errors.serverError(error instanceof Error ? error.message : 'Failed to fetch post'), 500);
+    }
   }
 );
 

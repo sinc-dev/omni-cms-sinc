@@ -159,18 +159,40 @@ app.get(
       });
 
       if (relatedPosts.length === 0) {
-        // Related post not found - return empty result
+        // Check if post exists but isn't published
+        const unpublishedPost = await db.query.posts.findFirst({
+          where: (p, { eq, and: andFn }) => andFn(
+            eq(p.organizationId, org.id),
+            eq(p.slug, relatedToSlug)
+          ),
+        });
+
+        console.log(`[DIAGNOSTIC] Post with slug "${relatedToSlug}" not found or not published.`, {
+          exists: !!unpublishedPost,
+          status: unpublishedPost?.status,
+          organizationId: org.id,
+        });
+
+        // Related post not found - return empty result with diagnostic info
         return c.json(paginatedResponse([], page, perPage, 0), 200, {
           'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+          'X-Diagnostic': unpublishedPost 
+            ? `Post exists but status is "${unpublishedPost.status}" (expected "published")`
+            : `No post found with slug "${relatedToSlug}" in organization "${orgSlug}"`,
         });
       }
 
       relatedPostIds = relatedPosts.map(p => p.id);
+      console.log(`[DIAGNOSTIC] Found ${relatedPosts.length} post(s) with slug "${relatedToSlug}":`, {
+        postIds: relatedPostIds,
+        postTitles: relatedPosts.map(p => p.title),
+      });
 
       // Find all posts that have a relationship to the related post(s)
       let relatedPostIds_filter: string[] = [];
       if (relationshipType) {
         // Filter by specific relationship type (e.g., 'university')
+        // First try: relationships where toPostId = university (correct direction)
         const relationships = await db.query.postRelationships.findMany({
           where: (pr, { eq, and: andFn, inArray }) => andFn(
             inArray(pr.toPostId, relatedPostIds),
@@ -178,20 +200,75 @@ app.get(
           ),
         });
         relatedPostIds_filter = relationships.map(r => r.fromPostId);
+
+        console.log(`[DIAGNOSTIC] Relationships with type "${relationshipType}" where toPostId in [${relatedPostIds.join(', ')}]:`, {
+          count: relationships.length,
+          fromPostIds: relatedPostIds_filter,
+        });
+
+        // If no relationships found, check reverse direction (in case relationships are stored backwards)
+        if (relationships.length === 0) {
+          const reverseRelationships = await db.query.postRelationships.findMany({
+            where: (pr, { eq, and: andFn, inArray }) => andFn(
+              inArray(pr.fromPostId, relatedPostIds),
+              eq(pr.relationshipType, relationshipType)
+            ),
+          });
+          
+          if (reverseRelationships.length > 0) {
+            console.log(`[DIAGNOSTIC] WARNING: Found ${reverseRelationships.length} relationships in REVERSE direction!`, {
+              toPostIds: reverseRelationships.map(r => r.toPostId),
+              note: 'Relationships appear to be stored backwards. Expected: fromPostId=program, toPostId=university',
+            });
+            // Use reverse direction as fallback
+            relatedPostIds_filter = reverseRelationships.map(r => r.toPostId);
+          } else {
+            // Check what relationship types actually exist
+            const allRelationshipTypes = await db.query.postRelationships.findMany({
+              where: (pr, { inArray, or }) => or(
+                inArray(pr.toPostId, relatedPostIds),
+                inArray(pr.fromPostId, relatedPostIds)
+              ),
+            });
+            const uniqueTypes = [...new Set(allRelationshipTypes.map(r => r.relationshipType))];
+            console.log(`[DIAGNOSTIC] No relationships found with type "${relationshipType}". Available types:`, uniqueTypes);
+          }
+        }
       } else {
         // Get all relationships regardless of type
         const relationships = await db.query.postRelationships.findMany({
           where: (pr, { inArray }) => inArray(pr.toPostId, relatedPostIds),
         });
         relatedPostIds_filter = relationships.map(r => r.fromPostId);
+        
+        console.log(`[DIAGNOSTIC] Found ${relationships.length} relationships (any type) where toPostId in [${relatedPostIds.join(', ')}]`);
+        
+        // Check reverse direction if no relationships found
+        if (relationships.length === 0) {
+          const reverseRelationships = await db.query.postRelationships.findMany({
+            where: (pr, { inArray }) => inArray(pr.fromPostId, relatedPostIds),
+          });
+          if (reverseRelationships.length > 0) {
+            console.log(`[DIAGNOSTIC] WARNING: Found ${reverseRelationships.length} relationships in REVERSE direction!`);
+            relatedPostIds_filter = reverseRelationships.map(r => r.toPostId);
+          }
+        }
       }
 
       if (relatedPostIds_filter.length > 0) {
+        console.log(`[DIAGNOSTIC] Filtering posts by IDs: [${relatedPostIds_filter.slice(0, 10).join(', ')}${relatedPostIds_filter.length > 10 ? '...' : ''}] (${relatedPostIds_filter.length} total)`);
         conditions.push(inArray(posts.id, relatedPostIds_filter));
       } else {
-        // No relationships found - return empty result
+        // No relationships found - return empty result with diagnostic info
+        const diagnosticMessage = relationshipType
+          ? `No relationships found with type "${relationshipType}" for post(s) with slug "${relatedToSlug}"`
+          : `No relationships found for post(s) with slug "${relatedToSlug}"`;
+        
+        console.log(`[DIAGNOSTIC] ${diagnosticMessage}`);
+        
         return c.json(paginatedResponse([], page, perPage, 0), 200, {
           'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+          'X-Diagnostic': diagnosticMessage,
         });
       }
     }

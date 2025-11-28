@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+coverage/
+*.config.js
+*.config.mjs
+wrangler.toml
+.wrangler/
+pnpm-lock.yaml
+package.json
+tsconfig.json
